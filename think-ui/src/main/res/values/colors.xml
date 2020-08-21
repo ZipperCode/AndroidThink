@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 描边颜色 -->
+    <color name="colorShapeStroke">#DADADA</color>
+
+    <!-- 导航选中和未选中字体颜色 -->
+    <color name="colorNavigationCheckedText">#000000</color>
+    <color name="colorNavigationUnCheckText">#F70505</color>
+</resources>
