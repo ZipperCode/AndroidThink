@@ -1,0 +1,37 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.think.business">
+
+    <application>
+
+        <!-- 易盾登录 begin -->
+        <activity
+            android:name="com.cmic.sso.wy.activity.LoginAuthActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="sensor"
+            android:theme="@style/Theme.ActivityDialogStyle"
+            tools:replace="android:screenOrientation,android:configChanges" />
+        <activity
+            android:name="com.sdk.mobile.manager.login.cucc.OauthActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTop"
+            android:screenOrientation="behind"
+            android:theme="@style/Theme.ActivityDialogStyle"
+            tools:replace="android:screenOrientation,android:theme" />
+
+        <activity
+            android:name="com.netease.nis.quicklogin.ui.YDQuickLoginActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTop"
+            android:screenOrientation="behind"
+            android:theme="@style/Theme.ActivityDialogStyle" />
+
+        <activity
+            android:name="com.netease.nis.quicklogin.ui.ProtocolDetailActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="behind"
+            tools:replace="android:screenOrientation,android:configChanges" />
+
+        <!-- 易盾登录 end -->
+    </application>
+</manifest>
