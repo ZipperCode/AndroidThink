@@ -1,0 +1,52 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation project(':think-core')
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    // 易盾一键登录
+    // 易盾一键登录
+    implementation(name: 'quicklogin_libary-external-release', ext: 'aar')
+    implementation(name: 'CTAccount_sdk_api_v3.7.0_all', ext: 'aar')
+    implementation(name: 'CMCCSSOSDK-WY-release', ext: 'aar')
+    implementation(name: 'Ui-factory_oauth_mobile_3.9.1.5', ext: 'aar')
+    implementation(name: 'monitorsdk-1.0.4', ext: 'aar')
+//    implementation files("libs/quicklogin_libary-external-release.aar")
+//    implementation files("libs/CTAccount_sdk_api_v3.7.0_all.aar")
+//    implementation files("libs/CMCCSSOSDK-WY-release.aar")
+//    implementation files("libs/Ui-factory_oauth_mobile_3.9.1.5.aar")
+//    implementation files("libs/monitorsdk-1.0.4.aar")
+
+    // qq登录
+    implementation files("libs/open_sdk_r2973327_lite.jar")
+    // 微信登录
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
+    implementation ('com.google.android.gms:play-services-auth:17.0.0' )
+    implementation 'com.facebook.android:facebook-login:[5,6)'
+
+}
