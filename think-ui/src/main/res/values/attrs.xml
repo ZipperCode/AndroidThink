@@ -7,5 +7,17 @@
         </attr>
         <attr name="radius" format="dimension"/>
     </declare-styleable>
+    <declare-styleable name="NavigationView">
+        <attr name="title_array" format="reference"/>
+        <attr name="icon_array" format="reference"/>
+    </declare-styleable>
 
+    <declare-styleable name="NavigationItemView">
+        <attr name="icon" format="reference"/>
+        <attr name="title" format="string|reference"/>
+        <attr name="text_color" format="color|reference"/>
+        <attr name="icon_size" format="dimension|reference"/>
+        <attr name="text_size" format="dimension|reference"/>
+        <attr name="text_color_state" format="reference"/>
+    </declare-styleable>
 </resources>
