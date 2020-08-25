@@ -2,6 +2,7 @@ package com.think.business.login;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -155,4 +156,14 @@ public class QQLoginHelper implements IUiListener {
         }
     }
 
+    /**
+     * 需要在Activity或者Fragment中进行回调
+     *
+     * @param requestCode 请求码
+     * @param resultCode  响应码
+     * @param data        数据
+     */
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Tencent.onActivityResultData(requestCode, resultCode, data, this);
+    }
 }

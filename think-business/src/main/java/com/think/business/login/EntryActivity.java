@@ -20,9 +20,9 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import java.lang.ref.WeakReference;
 
 /**
+ * 微信SDK 必须窗口，使用子类去实现这个窗口
  * @author zzp
  * @date 2020-1-13
- * 微信SDK 必须窗口
  */
 public abstract class EntryActivity extends Activity implements IWXAPIEventHandler {
 
@@ -62,7 +62,8 @@ public abstract class EntryActivity extends Activity implements IWXAPIEventHandl
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);//取消标题
+        //取消标题
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         iwxapi = WXAPIFactory.createWXAPI(this, WXLoginHelper.WX_APP_ID, false);
         handler = new MyHandler(this);
         try {

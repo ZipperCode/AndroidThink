@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
-public class ScreentUtils {
+public class ScreenUtils {
 
     public static int px2dp(Context context, float px) {
         return (int) (px / getDensity(context) + 0.5f);

@@ -6,9 +6,6 @@ import android.util.Log;
 import com.cmic.sso.wy.auth.AuthnHelper;
 import com.netease.nis.quicklogin.QuickLogin;
 import com.netease.nis.quicklogin.listener.QuickLoginTokenListener;
-import com.xinji.sdk.constant.ScreenType;
-import com.xinji.sdk.constant.XJConfig;
-import com.xinji.sdk.util.common.TelephoneUtil;
 
 import org.json.JSONObject;
 
@@ -27,6 +24,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class YDQuickLogin implements UIClickCallback {
 
     private static final String TAG = YDQuickLogin.class.getSimpleName();
+    /**
+     * 易盾BusinessId
+     */
+    private static final String YD_BUSINESS_ID = "";
     /**
      * 1分半的时间
      */
@@ -65,11 +66,9 @@ public class YDQuickLogin implements UIClickCallback {
 
     private YDQuickLogin(Context context) {
         this.mContext = context;
-        mQuickLogin = QuickLogin.getInstance(mContext.getApplicationContext(), XJConfig.YD_BUSINESS_ID);
+        mQuickLogin = QuickLogin.getInstance(mContext.getApplicationContext(), YD_BUSINESS_ID);
         mQuickLogin.setUnifyUiConfig(QuickLoginUiConfig
-                .getDialogUiConfig(TelephoneUtil.scanForActivity(mContext),
-                        this,
-                        landScope == ScreenType.SCREEN_LAND));
+                .getDialogUiConfig(context, this, true));
         mQuickLogin.setDebugMode(true);
         startTask();
     }
@@ -128,10 +127,6 @@ public class YDQuickLogin implements UIClickCallback {
             }
             timerIsRunning.compareAndSet(true, false);
         }
-        mQuickLogin.setUnifyUiConfig(QuickLoginUiConfig
-                .getDialogUiConfig(TelephoneUtil.scanForActivity(mContext),
-                        YDQuickLogin.this,
-                        landScope == ScreenType.SCREEN_LAND));
         doPrefetchAndLogin();
     }
 
@@ -181,7 +176,7 @@ public class YDQuickLogin implements UIClickCallback {
      * @param mobileNumber 手机掩码
      */
     public void mobileNumberVerify(final String mobileNumber) {
-        QuickLogin.getInstance(mContext, XJConfig.YD_BUSINESS_ID)
+        QuickLogin.getInstance(mContext, YD_BUSINESS_ID)
                 .getToken(mobileNumber, new QuickLoginTokenListener() {
                     @Override
                     public boolean onExtendMsg(JSONObject extendMsg) {

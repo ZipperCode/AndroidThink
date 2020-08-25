@@ -20,8 +20,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-}
 
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+}
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(':think-core')
@@ -29,7 +34,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    // 易盾一键登录
     // 易盾一键登录
     implementation(name: 'quicklogin_libary-external-release', ext: 'aar')
     implementation(name: 'CTAccount_sdk_api_v3.7.0_all', ext: 'aar')
@@ -50,3 +54,4 @@ dependencies {
     implementation 'com.facebook.android:facebook-login:[5,6)'
 
 }
+

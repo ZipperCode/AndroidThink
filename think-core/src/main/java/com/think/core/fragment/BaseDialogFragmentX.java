@@ -16,14 +16,13 @@ import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.think.core.R;
-import com.think.core.util.ScreentUtils;
+import com.think.core.util.ScreenUtils;
 import com.think.core.util.ToastHelper;
 
 import java.lang.ref.WeakReference;
@@ -126,7 +125,7 @@ public abstract class BaseDialogFragmentX extends DialogFragment implements
                 int screenWidth = displayMetrics.widthPixels;
                 int screenHeight = displayMetrics.heightPixels;
                 // 是否处于横屏
-                boolean isLandScope = ScreentUtils.getCurrentOrientation(requireActivity());
+                boolean isLandScope = ScreenUtils.getCurrentOrientation(requireActivity());
                 int dialogHeight = getDialogHeight(isLandScope);
                 int dialogWidth = getDialogWidth(isLandScope);
                 float heightScaleStand = isLandScope ? 0.6f : 0.5f;

@@ -15,7 +15,7 @@ import android.util.AttributeSet;
 
 import androidx.appcompat.widget.AppCompatImageView;
 
-import com.think.core.util.ScreentUtils;
+import com.think.core.util.ScreenUtils;
 
 /**
  * 圆形的ImageView
@@ -66,7 +66,7 @@ public class RoundImageView extends AppCompatImageView {
         this.paint.setAntiAlias(true);
         // 初始化变换矩阵
         this.matrix = new Matrix();
-        this.currentRound = ScreentUtils.dp2px(context,10);
+        this.currentRound = ScreenUtils.dp2px(context,10);
     }
 
     private void obtainStyledAttrs(Context context, AttributeSet attrs, int defStyleAttr) {

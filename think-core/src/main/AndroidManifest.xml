@@ -2,19 +2,36 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.think.core">
 
+    <!-- 访问网络状态 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- 访问网路 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 访问存储 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />;
+    <!-- 安装时，未知软件来源 -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <application
 
-    <application>
+        >
         <service
             android:name=".alive.MainService"
             android:enabled="true"
-            android:exported="false"
-            />
+            android:exported="false" />
         <service
             android:name=".alive.GuardService"
             android:enabled="true"
             android:exported="false"
-            android:process=":alive"/>
+            android:process=":alive" />
+        <!-- 用于文件共享使用 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="" />
+        </provider>
     </application>
 
 </manifest>

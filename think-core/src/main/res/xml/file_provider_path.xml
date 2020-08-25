@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><!-- 主要用于文件资源共享，通过file:// uri进行读取本应用共享数据 -->
+<paths>
+    <!-- 应用目录，类似于 Context.getFilesDir() -->
+    <files-path
+        name="app-files"
+        path="." />
+    <!-- 应用缓存目录，类似于 Context.getCacheDir() -->
+    <cache-path
+        name="app-cache"
+        path="." />
+    <!-- 手机存储根目录，类似于 Environment.getExternalStorageDirectory() -->
+    <external-path
+        name="sd"
+        path="." />
+    <!-- Context.getExternalFilesDir(null) -->
+    <external-files-path
+        name="sd-files"
+        path="." />
+    <!-- 应用在手机存储缓存目录，类似于 Context.getExternalCacheDir() -->
+    <external-cache-path
+        name="sd-cache"
+        path="." />
+    <!-- 应用在手机存储媒体目录，类似于 Context.getExternalMediaDirs()-->
+    <external-media-path
+        name="sd-media"
+        path="." />
+</paths>

@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.think.core.util.LogUtils;
-import com.think.core.util.ScreentUtils;
+import com.think.core.util.ScreenUtils;
 
 /**
  * 组合导航栏View
@@ -52,12 +52,12 @@ public class NavigationView extends LinearLayout implements  NavigationItemView.
         if(viewLayoutParams == null){
             viewLayoutParams = new LayoutParams(
                     LayoutParams.MATCH_PARENT,
-                    ScreentUtils.dp2px(getContext(),DEFAULT_TAB_HEIGHT));
+                    ScreenUtils.dp2px(getContext(),DEFAULT_TAB_HEIGHT));
         }
         int height = viewLayoutParams.height;
         LogUtils.debug("viewLayoutParams.height = " + viewLayoutParams.height);
-        if(height > ScreentUtils.dp2px(getContext(),MAX_TAB_HEIGHT)){
-            viewLayoutParams.height = ScreentUtils.dp2px(getContext(),DEFAULT_TAB_HEIGHT);
+        if(height > ScreenUtils.dp2px(getContext(),MAX_TAB_HEIGHT)){
+            viewLayoutParams.height = ScreenUtils.dp2px(getContext(),DEFAULT_TAB_HEIGHT);
         }
         LogUtils.debug("viewLayoutParams.height = " + viewLayoutParams.height);
         setLayoutParams(viewLayoutParams);

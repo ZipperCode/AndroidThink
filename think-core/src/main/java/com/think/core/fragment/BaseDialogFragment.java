@@ -22,7 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.think.core.R;
-import com.think.core.util.ScreentUtils;
+import com.think.core.util.ScreenUtils;
 import com.think.core.util.ToastHelper;
 
 import java.lang.ref.WeakReference;
@@ -125,7 +125,7 @@ public abstract class BaseDialogFragment extends DialogFragment implements
                 int screenWidth = displayMetrics.widthPixels;
                 int screenHeight = displayMetrics.heightPixels;
                 // 是否处于横屏
-                boolean isLandScope = ScreentUtils.getCurrentOrientation(getActivity());
+                boolean isLandScope = ScreenUtils.getCurrentOrientation(getActivity());
                 int dialogHeight = getDialogHeight(isLandScope);
                 int dialogWidth = getDialogWidth(isLandScope);
                 float heightScaleStand = isLandScope ? 0.6f : 0.5f;

@@ -1,22 +1,15 @@
 package com.think.business.login.yd;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.netease.nis.quicklogin.helper.UnifyUiConfig;
 import com.netease.nis.quicklogin.utils.LoginUiHelper;
-import com.xinji.sdk.constant.XJConfig;
-import com.xinji.sdk.resource.ReflectResource;
-import com.xinji.sdk.util.common.ScreenUtil;
-import com.xinji.sdk.util.common.ToastUtil;
-import com.xinji.sdk.widget.BannerLayout;
+import com.think.core.util.ScreenUtils;
 
 /**
  * Created by hzhuqi on 2019/12/31
@@ -42,7 +35,7 @@ public class QuickLoginUiConfig {
 
     private static int grayColor = Color.DKGRAY;
 
-    public static UnifyUiConfig getDialogUiConfig(final Activity context, final UIClickCallback callback, boolean isLandScope) {
+    public static UnifyUiConfig getDialogUiConfig(final Context context, final UIClickCallback callback, boolean isLandScope) {
         if (isLandScope) {
             return getLandScopeUniConfig(context, callback);
         }
@@ -89,8 +82,6 @@ public class QuickLoginUiConfig {
         TextView textView = getOtherTextView(context, BANNER_WIDTH + 40, 180);
 
         return builder
-                .addCustomView(getBannerView(context), "layout_banner",
-                        UnifyUiConfig.POSITION_IN_BODY, null)
                 .addCustomView(textView,
                         "tv_other", UnifyUiConfig.POSITION_IN_BODY, new LoginUiHelper.CustomViewListener() {
                             @Override
@@ -162,10 +153,10 @@ public class QuickLoginUiConfig {
         builder.setPrivacyTextStart("登录即同意")
                 // 协议1
                 .setProtocolText("用户协议")
-                .setProtocolLink(XJConfig.AGREEMENT_STATUS_URL)
+                .setProtocolLink("")
                 // 协议2
                 .setProtocol2Text("隐私政策")
-                .setProtocol2Link(XJConfig.AGREEMENT_STATUS_PRIVACY_POLICY_URL)
+                .setProtocol2Link("")
                 // 隐私栏文本颜色
 //                .setPrivacyTextColor(Color.DKGRAY)
                 .setPrivacyTextColor(Color.DKGRAY)
@@ -193,35 +184,6 @@ public class QuickLoginUiConfig {
                 .setProtocolPageNavColor(Color.WHITE);
     }
 
-    private static ImageView closeBtnView(Context context) {
-        ReflectResource resource = ReflectResource.getInstance(context);
-        // 关闭图片设置
-        ImageView closeBtn = new ImageView(context);
-        closeBtn.setImageResource(resource.getDrawableId("_xj_icon_close"));
-        closeBtn.setScaleType(ImageView.ScaleType.FIT_XY);
-        closeBtn.setBackgroundColor(Color.TRANSPARENT);
-        // 设置宽高
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(60, 60);
-        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT,
-                RelativeLayout.CENTER_VERTICAL);
-        layoutParams.topMargin = 30;
-        layoutParams.rightMargin = 50;
-        closeBtn.setLayoutParams(layoutParams);
-        return closeBtn;
-    }
-
-    private static BannerLayout getBannerView(Context context) {
-        BannerLayout bannerLayout = (BannerLayout) ReflectResource
-                .getInstance(context).getLayoutView("layout_banner");
-
-        RelativeLayout.LayoutParams bannerLayoutParam = new RelativeLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        bannerLayoutParam.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-        bannerLayoutParam.addRule(RelativeLayout.CENTER_VERTICAL);
-        bannerLayout.setLayoutParams(bannerLayoutParam);
-        return bannerLayout;
-    }
 
     private static void setLogo(UnifyUiConfig.Builder builder, int xOffset, int yTopOffset) {
         /* 设置logo */
@@ -235,58 +197,9 @@ public class QuickLoginUiConfig {
                 .setHideLogo(false);
     }
 
-    private static LinearLayout getOtherLayout(final Context context, int leftMargin, int topMargin) {
-        ReflectResource resource = ReflectResource.getInstance(context);
-        LinearLayout otherLayout = (LinearLayout) resource
-                .getLayoutView("layout_home_other_mode");
-
-        LinearLayout.LayoutParams layoutParamsOther = new LinearLayout
-                .LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-//        layoutParamsOther.gravity = Gravity.CENTER_VERTICAL | Gravity.LEFT | Gravity.BOTTOM;
-        layoutParamsOther.width = ScreenUtil.dip2px(context, 280);
-        layoutParamsOther.leftMargin = ScreenUtil.dip2px(context, leftMargin);
-        layoutParamsOther.topMargin = ScreenUtil.dip2px(context, topMargin);
-        otherLayout.setLayoutParams(layoutParamsOther);
-
-        LinearLayout quickLoginLayout = (LinearLayout) resource
-                .getWidgetView(otherLayout, "ll_quick_login");
-        LinearLayout customerLayout = (LinearLayout) resource
-                .getWidgetView(otherLayout, "ll_customer");
-
-        LinearLayout findPwdLayout = (LinearLayout) resource
-                .getWidgetView(otherLayout, "ll_find_pwd");
-
-        quickLoginLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 快速登录
-                ToastUtil.showToast("快速登录", context);
-            }
-        });
-
-        customerLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 联系客服
-                ToastUtil.showToast("联系客服", context);
-            }
-        });
-
-        findPwdLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 找回密码
-                ToastUtil.showToast("找回密码", context);
-            }
-        });
-        return findPwdLayout;
-    }
-
     private static TextView getOtherTextView(Context context, int xOffset, int yTopOffset) {
         TextView textView = new TextView(context);
         textView.setText("其他方式登录");
-        textView.setTextColor(ReflectResource.getInstance(context).getColor("weak_red"));
         textView.setTextSize(18);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -295,9 +208,9 @@ public class QuickLoginUiConfig {
 //        layoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
 //        layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
-        layoutParams.width = ScreenUtil.dip2px(context, 280);
-        layoutParams.topMargin = ScreenUtil.dip2px(context, yTopOffset);
-        layoutParams.leftMargin = ScreenUtil.dip2px(context, xOffset);
+        layoutParams.width = ScreenUtils.dp2px(context, 280);
+        layoutParams.topMargin = ScreenUtils.dp2px(context, yTopOffset);
+        layoutParams.leftMargin = ScreenUtils.dp2px(context, xOffset);
         textView.setLayoutParams(layoutParams);
         return textView;
     }
@@ -309,10 +222,10 @@ public class QuickLoginUiConfig {
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT
         );
-        textView.setWidth(ScreenUtil.dip2px(context, 20));
-        textView.setHeight(ScreenUtil.dip2px(context, 20));
-        layoutParams.topMargin = ScreenUtil.dip2px(context, yTopOffset);
-        layoutParams.leftMargin = ScreenUtil.dip2px(context, xOffset);
+        textView.setWidth(ScreenUtils.dp2px(context, 20));
+        textView.setHeight(ScreenUtils.dp2px(context, 20));
+        layoutParams.topMargin = ScreenUtils.dp2px(context, yTopOffset);
+        layoutParams.leftMargin = ScreenUtils.dp2px(context, xOffset);
         textView.setLayoutParams(layoutParams);
         return textView;
     }
