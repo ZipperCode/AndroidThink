@@ -1,15 +1,22 @@
 package com.think.core.util;
 
+<<<<<<< HEAD
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+=======
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+>>>>>>> origin/master
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+<<<<<<< HEAD
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -31,11 +38,22 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 /**
  * @author : zzp
  * @date : 2020/8/5
+=======
+import android.text.TextUtils;
+import android.widget.Toast;
+
+import java.util.List;
+
+/**
+ * @date : 2020/8/5
+ * @author : zzp
+>>>>>>> origin/master
  **/
 public class AppUtils {
 
     /**
      * 通过包名检查手机是否安装了某一款app
+<<<<<<< HEAD
      *
      * @param context     当前上下文
      * @param packageName 包名
@@ -43,12 +61,25 @@ public class AppUtils {
      */
     public static boolean containAppByPackage(Context context, String packageName) {
         if (context == null || TextUtils.isEmpty(packageName)) {
+=======
+     * @param context 当前上下文
+     * @param packageName 包名
+     * @return true 有安装，false 未安装
+     */
+    public static boolean containAppByPackage(Context context, String packageName){
+        if(context == null || TextUtils.isEmpty(packageName)){
+>>>>>>> origin/master
             return false;
         }
         PackageManager packageManager = context.getPackageManager();
         List<PackageInfo> installedPackages = packageManager.getInstalledPackages(0);
+<<<<<<< HEAD
         for (PackageInfo info : installedPackages) {
             if (packageName.equals(info.packageName)) {
+=======
+        for (PackageInfo info: installedPackages) {
+            if(packageName.equals(info.packageName)){
+>>>>>>> origin/master
                 return true;
             }
         }
@@ -57,20 +88,34 @@ public class AppUtils {
 
     /**
      * 通过应用名称检查手机是否安装了某一款app
+<<<<<<< HEAD
      *
+=======
+>>>>>>> origin/master
      * @param context 当前上下文
      * @param appName app名字
      * @return true表示有安装，false 表示未安装
      */
+<<<<<<< HEAD
     public static boolean containAppByName(Context context, String appName) {
         if (context == null || TextUtils.isEmpty(appName)) {
+=======
+    public static boolean containAppByName(Context context, String appName){
+        if(context == null || TextUtils.isEmpty(appName)){
+>>>>>>> origin/master
             return false;
         }
         PackageManager packageManager = context.getPackageManager();
         List<ApplicationInfo> installedApplications = packageManager.getInstalledApplications(0);
+<<<<<<< HEAD
         for (ApplicationInfo info : installedApplications) {
             String label = packageManager.getApplicationLabel(info).toString();
             if (appName.equals(label)) {
+=======
+        for (ApplicationInfo info: installedApplications) {
+            String label = packageManager.getApplicationLabel(info).toString();
+            if(appName.equals(label)){
+>>>>>>> origin/master
                 return true;
             }
         }
@@ -79,22 +124,37 @@ public class AppUtils {
 
     /**
      * 通过app名称查找第一个符合的应用包名，应用多开或者包名不同的相同应用只查找第一个找到的
+<<<<<<< HEAD
      *
+=======
+>>>>>>> origin/master
      * @param context 当前上下文
      * @param appName app名称
      * @return 包名
      */
+<<<<<<< HEAD
     public static String getPackageByPackage(Context context, String appName) {
         if (context == null || TextUtils.isEmpty(appName)) {
+=======
+    public static String getPackageByPackage(Context context, String appName){
+        if(context == null || TextUtils.isEmpty(appName)){
+>>>>>>> origin/master
             return "";
         }
         PackageManager packageManager = context.getPackageManager();
         List<ApplicationInfo> installedApplications = packageManager.getInstalledApplications(0);
         String packageName = "";
+<<<<<<< HEAD
         for (ApplicationInfo info : installedApplications) {
             String label = packageManager.getApplicationLabel(info).toString();
             if (appName.equals(label)) {
                 packageName = info.packageName;
+=======
+        for (ApplicationInfo info: installedApplications) {
+            String label = packageManager.getApplicationLabel(info).toString();
+            if(appName.equals(label)){
+                packageName =  info.packageName;
+>>>>>>> origin/master
                 break;
             }
         }
@@ -103,6 +163,7 @@ public class AppUtils {
 
     /**
      * 通过包名进行app的启动
+<<<<<<< HEAD
      *
      * @param context     当前上下文
      * @param packageName 包名
@@ -110,6 +171,14 @@ public class AppUtils {
     public static void startApp(Context context, String packageName) {
         PackageManager packageManager = context.getPackageManager();
         // 据说这种方式更简单，但是效率低
+=======
+     * @param context 当前上下文
+     * @param packageName 包名
+     */
+    public static void startApp(Context context, String packageName){
+        PackageManager packageManager = context.getPackageManager();
+
+>>>>>>> origin/master
 //        Intent launchIntentForPackage = packageManager.getLaunchIntentForPackage(packageName);
 //        context.startActivity(launchIntentForPackage);
 
@@ -117,21 +186,33 @@ public class AppUtils {
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         intent.setPackage(packageName);
         List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(intent, 0);
+<<<<<<< HEAD
         if (resolveInfos.size() > 0) {
+=======
+        if(resolveInfos.size() > 0){
+>>>>>>> origin/master
             ResolveInfo resolveInfo = resolveInfos.get(0);
             String actPackageName = resolveInfo.activityInfo.packageName;
             String actClassName = resolveInfo.activityInfo.name;
             ComponentName componentName = new ComponentName(packageName, actClassName);
             intent.setComponent(componentName);
+<<<<<<< HEAD
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
             return;
         }
         Toast.makeText(context, "启动APP失败，请重试", Toast.LENGTH_LONG).show();
+=======
+            context.startActivity(intent);
+            return;
+        }
+        Toast.makeText(context,"启动APP失败，请重试",Toast.LENGTH_LONG).show();
+>>>>>>> origin/master
     }
 
     /**
      * 通过包名进行app的启动
+<<<<<<< HEAD
      *
      * @param context 当前上下文
      * @param appName app名字

@@ -1,8 +1,14 @@
 package com.think.core.util;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  *
@@ -34,12 +40,14 @@ public class FileUtils {
     /**
      * /data 根目录
      */
-    public static final String DATA_PATH = Environment.getDataDirectory().getAbsolutePath();
+    public static final String DATA_PATH = Environment.getDataDirectory().getAbsolutePath()
+            + File.separator;
 
     /**
      * /cache 缓存目录
      */
-    public static final String CACHE_ROOT_PATH = Environment.getDownloadCacheDirectory().getAbsolutePath();
+    public static final String CACHE_ROOT_PATH = Environment.getDownloadCacheDirectory()
+            .getAbsolutePath() + File.separator;
 
     /**
      * 判断外部存储是否可以写
@@ -64,5 +72,43 @@ public class FileUtils {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 将BitMap图片放在根目录
+     * @param bitmap bitmap图片
+     * @param fileName 文件名称
+     * @return 保存的路径
+     */
+    public String saveBitmap(Bitmap bitmap, String fileName){
+        String imgPath = SD_ROOT_PATH +fileName;//直接放根目录
+        File file = new File(imgPath);
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG,100,fileOutputStream);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return imgPath;
+    }
+
+    /**
+     * 从文件中获取Bitmap图片信息
+     * @param path 文件路径
+     * @return bitMap图片
+     */
+    public static Bitmap getImageForPath(String path){
+        Bitmap bitmap = null;
+        if(path == null || "".equals(path))
+            return null;
+        try {
+            FileInputStream fileInputStream = new FileInputStream(path);
+            bitmap = BitmapFactory.decodeStream(fileInputStream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
     }
 }

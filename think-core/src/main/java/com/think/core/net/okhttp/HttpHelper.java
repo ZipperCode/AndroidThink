@@ -4,7 +4,7 @@ package com.think.core.net.okhttp;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.haofangame.box.constant.FileConstant;
+import com.think.core.util.FileUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -16,18 +16,29 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
+
+import okhttp3.Cache;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class HttpHelper {
 
     /**
      * 缓存文件名称
      */
-    private static final String CACHE_FILE = FileConstant.BASE_DIR + File.separator + "cache";
+    private static final String CACHE_FILE = FileUtils.CACHE_ROOT_PATH + File.separator + "cache";
     /**
      * 临时存储目录
      */
-    private static final String TEMP_DIR = FileConstant.BASE_DIR + File.separator + "temp";
+    private static final String TEMP_DIR = FileUtils.DATA_PATH + File.separator + "temp";
     /**
      * 默认缓存大小、超时时间（秒）
      */
@@ -75,13 +86,18 @@ public class HttpHelper {
                 // 添加响应缓存
                 .cache(cache)
                 // 不验证证书
-                .hostnameVerifier((hostname, session) -> true)
+                .hostnameVerifier(new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String s, SSLSession sslSession) {
+                        return true;
+                    }
+                })
                 // 请求、响应日志拦截器
                 .addInterceptor(new LogInterceptor())
                 .build();
     }
 
-    public void request(RequestWrapper requestWrapper, final CallBack callBack) {
+    public void request(final RequestWrapper requestWrapper, final CallBack callBack) {
         CLIENT.newCall(requestWrapper.request()).enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -170,7 +186,7 @@ public class HttpHelper {
      */
     private void onSuccess(RequestWrapper requestWrapper,
                            Response response,
-                           CallBack callback) throws IOException {
+                           final CallBack callback) throws IOException {
         ResponseBody responseBody = response.body();
         ResponseWrapper.Builder builder = new ResponseWrapper.Builder();
         if (responseBody != null && responseBody.contentType() != null) {
@@ -189,15 +205,18 @@ public class HttpHelper {
                     // 配置响应的类型为流类型，标识文件下载
 
                     try {
-                        ResponseWrapper responseWrapper = builder
+                        final ResponseWrapper responseWrapper = builder
                                 .responseText(ContentType.STREAM)
                                 .build();
                         if(requestWrapper.isRunMainThread()){
-                            handler.post(()->{
-                                try{
-                                    callback.success(responseWrapper);
-                                }catch (Exception e){
-                                    onError(e, callback);
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try{
+                                        callback.success(responseWrapper);
+                                    }catch (Exception e){
+                                        onError(e, callback);
+                                    }
                                 }
                             });
                         }else{
@@ -234,10 +253,13 @@ public class HttpHelper {
         callback.failure(message);
     }
 
-    private void onFailure(boolean isRunMain, String message, CallBack callback) {
+    private void onFailure(boolean isRunMain, final String message, final CallBack callback) {
         if(isRunMain){
-            handler.post(()->{
-                callback.failure(message);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.failure(message);
+                }
             });
         }else{
             callback.failure(message);
@@ -248,10 +270,13 @@ public class HttpHelper {
         callback.onError(new NetworkException(NetworkException.ExceptionCode.EXCEPTION));
     }
 
-    private void onError(boolean isRunMain, Exception e, CallBack callback) {
+    private void onError(boolean isRunMain, Exception e, final CallBack callback) {
         if(isRunMain){
-            handler.post(()->{
-                callback.onError(new NetworkException(NetworkException.ExceptionCode.EXCEPTION));
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onError(new NetworkException(NetworkException.ExceptionCode.EXCEPTION));
+                }
             });
         }else{
             callback.onError(new NetworkException(NetworkException.ExceptionCode.EXCEPTION));

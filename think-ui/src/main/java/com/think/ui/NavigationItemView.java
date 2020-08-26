@@ -20,8 +20,8 @@ import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.haofangame.box.utils.LogUtils;
-import com.haofangame.box.utils.ScreentUtils;
+import com.think.core.util.LogUtils;
+import com.think.core.util.ScreentUtils;
 
 public class NavigationItemView extends LinearLayout implements View.OnClickListener {
 
@@ -191,12 +191,15 @@ public class NavigationItemView extends LinearLayout implements View.OnClickList
     }
 
     @Override
-    public void setOnClickListener(@Nullable OnClickListener l) {
-        super.setOnClickListener(v -> {
-            setSelected(true);
-            onClick(v);
-            if (l != null) {
-                l.onClick(v);
+    public void setOnClickListener(@Nullable final OnClickListener l) {
+        super.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setSelected(true);
+                onClick(v);
+                if (l != null) {
+                    l.onClick(v);
+                }
             }
         });
     }
