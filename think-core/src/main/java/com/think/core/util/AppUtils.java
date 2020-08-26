@@ -1,27 +1,18 @@
 package com.think.core.util;
 
-<<<<<<< HEAD
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-=======
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
->>>>>>> origin/master
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-<<<<<<< HEAD
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
-import android.os.StrictMode;
 import android.text.TextUtils;
 import android.webkit.URLUtil;
 import android.widget.Toast;
@@ -31,29 +22,17 @@ import androidx.core.content.FileProvider;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.jar.Manifest;
-
-import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 
 /**
  * @author : zzp
  * @date : 2020/8/5
-=======
-import android.text.TextUtils;
-import android.widget.Toast;
+ */
 
-import java.util.List;
 
-/**
- * @date : 2020/8/5
- * @author : zzp
->>>>>>> origin/master
- **/
 public class AppUtils {
 
     /**
      * 通过包名检查手机是否安装了某一款app
-<<<<<<< HEAD
      *
      * @param context     当前上下文
      * @param packageName 包名
@@ -61,25 +40,12 @@ public class AppUtils {
      */
     public static boolean containAppByPackage(Context context, String packageName) {
         if (context == null || TextUtils.isEmpty(packageName)) {
-=======
-     * @param context 当前上下文
-     * @param packageName 包名
-     * @return true 有安装，false 未安装
-     */
-    public static boolean containAppByPackage(Context context, String packageName){
-        if(context == null || TextUtils.isEmpty(packageName)){
->>>>>>> origin/master
             return false;
         }
         PackageManager packageManager = context.getPackageManager();
         List<PackageInfo> installedPackages = packageManager.getInstalledPackages(0);
-<<<<<<< HEAD
         for (PackageInfo info : installedPackages) {
             if (packageName.equals(info.packageName)) {
-=======
-        for (PackageInfo info: installedPackages) {
-            if(packageName.equals(info.packageName)){
->>>>>>> origin/master
                 return true;
             }
         }
@@ -88,34 +54,20 @@ public class AppUtils {
 
     /**
      * 通过应用名称检查手机是否安装了某一款app
-<<<<<<< HEAD
      *
-=======
->>>>>>> origin/master
      * @param context 当前上下文
      * @param appName app名字
      * @return true表示有安装，false 表示未安装
      */
-<<<<<<< HEAD
     public static boolean containAppByName(Context context, String appName) {
         if (context == null || TextUtils.isEmpty(appName)) {
-=======
-    public static boolean containAppByName(Context context, String appName){
-        if(context == null || TextUtils.isEmpty(appName)){
->>>>>>> origin/master
             return false;
         }
         PackageManager packageManager = context.getPackageManager();
         List<ApplicationInfo> installedApplications = packageManager.getInstalledApplications(0);
-<<<<<<< HEAD
         for (ApplicationInfo info : installedApplications) {
             String label = packageManager.getApplicationLabel(info).toString();
             if (appName.equals(label)) {
-=======
-        for (ApplicationInfo info: installedApplications) {
-            String label = packageManager.getApplicationLabel(info).toString();
-            if(appName.equals(label)){
->>>>>>> origin/master
                 return true;
             }
         }
@@ -124,61 +76,38 @@ public class AppUtils {
 
     /**
      * 通过app名称查找第一个符合的应用包名，应用多开或者包名不同的相同应用只查找第一个找到的
-<<<<<<< HEAD
      *
-=======
->>>>>>> origin/master
      * @param context 当前上下文
      * @param appName app名称
      * @return 包名
      */
-<<<<<<< HEAD
     public static String getPackageByPackage(Context context, String appName) {
         if (context == null || TextUtils.isEmpty(appName)) {
-=======
-    public static String getPackageByPackage(Context context, String appName){
-        if(context == null || TextUtils.isEmpty(appName)){
->>>>>>> origin/master
             return "";
         }
         PackageManager packageManager = context.getPackageManager();
         List<ApplicationInfo> installedApplications = packageManager.getInstalledApplications(0);
         String packageName = "";
-<<<<<<< HEAD
         for (ApplicationInfo info : installedApplications) {
             String label = packageManager.getApplicationLabel(info).toString();
             if (appName.equals(label)) {
                 packageName = info.packageName;
-=======
-        for (ApplicationInfo info: installedApplications) {
-            String label = packageManager.getApplicationLabel(info).toString();
-            if(appName.equals(label)){
-                packageName =  info.packageName;
->>>>>>> origin/master
                 break;
             }
         }
         return packageName;
     }
 
+
     /**
      * 通过包名进行app的启动
-<<<<<<< HEAD
      *
      * @param context     当前上下文
      * @param packageName 包名
      */
+
     public static void startApp(Context context, String packageName) {
         PackageManager packageManager = context.getPackageManager();
-        // 据说这种方式更简单，但是效率低
-=======
-     * @param context 当前上下文
-     * @param packageName 包名
-     */
-    public static void startApp(Context context, String packageName){
-        PackageManager packageManager = context.getPackageManager();
-
->>>>>>> origin/master
 //        Intent launchIntentForPackage = packageManager.getLaunchIntentForPackage(packageName);
 //        context.startActivity(launchIntentForPackage);
 
@@ -186,33 +115,22 @@ public class AppUtils {
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         intent.setPackage(packageName);
         List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(intent, 0);
-<<<<<<< HEAD
         if (resolveInfos.size() > 0) {
-=======
-        if(resolveInfos.size() > 0){
->>>>>>> origin/master
             ResolveInfo resolveInfo = resolveInfos.get(0);
             String actPackageName = resolveInfo.activityInfo.packageName;
             String actClassName = resolveInfo.activityInfo.name;
             ComponentName componentName = new ComponentName(packageName, actClassName);
             intent.setComponent(componentName);
-<<<<<<< HEAD
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
             return;
         }
         Toast.makeText(context, "启动APP失败，请重试", Toast.LENGTH_LONG).show();
-=======
-            context.startActivity(intent);
-            return;
-        }
-        Toast.makeText(context,"启动APP失败，请重试",Toast.LENGTH_LONG).show();
->>>>>>> origin/master
+        context.startActivity(intent);
     }
 
     /**
      * 通过包名进行app的启动
-<<<<<<< HEAD
      *
      * @param context 当前上下文
      * @param appName app名字
@@ -287,7 +205,7 @@ public class AppUtils {
             return;
         }
         Intent intent = new Intent();
-        Uri uri = null;
+        final Uri uri;
         File file = new File(filepath);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             uri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileProvider", file);
@@ -304,7 +222,6 @@ public class AppUtils {
         context.startActivity(intent);
     }
 
-
     /**
      * 系统下载辅助工具类
      */
@@ -313,6 +230,7 @@ public class AppUtils {
          * 系统下载程序的包名
          */
         private static final String SYSTEM_DOWNLOAD_PACKAGE_NAME = "com.android.providers.downloads";
+
         /**
          * 判断系统的下载服务是否可用
          *
@@ -320,7 +238,7 @@ public class AppUtils {
          * @return true 标识可用，false 标识不可用
          */
         public static boolean isEnableSystemDownload(Context context) {
-            PackageInfo packageInfo = null;
+            PackageInfo packageInfo;
             boolean isExists = true;
             try {
                 packageInfo = context.getPackageManager().getPackageInfo(SYSTEM_DOWNLOAD_PACKAGE_NAME, 0);
@@ -329,7 +247,7 @@ public class AppUtils {
                 e.printStackTrace();
                 isExists = false;
             }
-            if(!isExists){
+            if (!isExists) {
                 return false;
             }
 
@@ -340,7 +258,7 @@ public class AppUtils {
                     || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED);
         }
 
-        public static void startSystemDownload(Context context){
+        public static void startSystemDownload(Context context) {
 
         }
 
@@ -404,7 +322,6 @@ public class AppUtils {
             context.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
             return downloadId;
         }
-
 
         /**
          * 调用系统下载服务进行下载，并且回调下载状态
@@ -514,49 +431,52 @@ public class AppUtils {
                 }
             }
         }
-    }
 
-    public interface ProgressCallback {
+        public interface ProgressCallback {
+            /**
+             * 回调下载进度
+             *
+             * @param progress 进度信息：99.01
+             */
+            void onProgress(float progress);
+
+            /**
+             * 回调成功
+             */
+            void onSuccess(Uri uri);
+
+            /**
+             * 回调暂停
+             */
+            void onPause();
+
+            /**
+             * 回调失败
+             */
+            void onFailure();
+        }
         /**
-         * 回调下载进度
+         * AppUtils.openAndroidFile(localFilename);
+         * BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
          *
-         * @param progress 进度信息：99.01
+         * @Override public void onReceive(Context context, Intent intent) {
+         * LogUtils.debug("收到安装广播 intent = " + intent + ", action = " + intent.getAction() );
+         * if (INSTALLED.equals(intent.getAction())) {
+         * // TODO 安装成功
+         * mInstalledSuccess.setValue(true);
+         * GameApplication.appContext.unregisterReceiver(this);
+         * }
+         * }
+         * };
+         * IntentFilter intentFilter = new IntentFilter();
+         * intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+         * intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+         * intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+         * intentFilter.addDataScheme("package");
+         * GameApplication.appContext.registerReceiver(broadcastReceiver,intentFilter);
          */
-        void onProgress(float progress);
 
-        /**
-         * 回调成功
-         */
-        void onSuccess(Uri uri);
-
-        /**
-         * 回调暂停
-         */
-        void onPause();
-
-        /**
-         * 回调失败
-         */
-        void onFailure();
     }
-    /**
-     * AppUtils.openAndroidFile(localFilename);
-     *                     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-     *                         @Override
-     *                         public void onReceive(Context context, Intent intent) {
-     *                             LogUtils.debug("收到安装广播 intent = " + intent + ", action = " + intent.getAction() );
-     *                             if (INSTALLED.equals(intent.getAction())) {
-     *                                 // TODO 安装成功
-     *                                 mInstalledSuccess.setValue(true);
-     *                                 GameApplication.appContext.unregisterReceiver(this);
-     *                             }
-     *                         }
-     *                     };
-     *                     IntentFilter intentFilter = new IntentFilter();
-     *                     intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-     *                     intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-     *                     intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-     *                     intentFilter.addDataScheme("package");
-     *                     GameApplication.appContext.registerReceiver(broadcastReceiver,intentFilter);
-     */
 }
+
+
