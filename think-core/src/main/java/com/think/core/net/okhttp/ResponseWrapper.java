@@ -1,5 +1,7 @@
 package com.think.core.net.okhttp;
 
+import android.app.AlertDialog.Builder;
+
 import com.google.gson.Gson;
 
 import java.io.InputStream;
@@ -19,45 +21,55 @@ public class ResponseWrapper {
      */
     private Object data;
     /**
+     * 本地实际存储的文件名，下载过程中，本地文件存在会重命名
+     */
+    private String downloadLocalFileName;
+    /**
      * 下载进度回调
      */
     private ProgressCallback progressCallback;
 
     public ResponseWrapper(Builder builder) {
         this.builder = builder;
+        this.progressCallback = builder.progressCallback;
         this.contentType = builder.contentType;
-        if(ContentType.JSON.equals(this.contentType)){
+        if (ContentType.JSON.equals(this.contentType)) {
             data = new Gson().fromJson(builder.responseText, builder.responseType);
-        }else if(ContentType.TEXT.equals(this.contentType)){
+        } else if (ContentType.TEXT.equals(this.contentType)) {
             data = builder.responseText;
         }
     }
 
-    public <T> T data(){
+    public <T> T data() {
         return (T) data;
     }
 
-    public void setProgressCallback(ProgressCallback progressCallback) {
-        this.progressCallback = progressCallback;
-    }
 
-    public ProgressCallback getProgressCallback() {
+    public ProgressCallback progressCallback() {
         return progressCallback;
     }
 
-    public static class Builder{
+    public String downloadLocalFileName(){
+        return downloadLocalFileName;
+    }
+
+    public static class Builder {
         Type responseType;
 
         String responseText;
 
-        private String contentType;
+        String contentType;
+
+        String downloadLocalFileName;
+
+        ProgressCallback progressCallback;
 
         public Builder() {
             responseType = String.class;
             contentType = ContentType.TEXT;
         }
 
-        public Builder responseType(Type responseType){
+        public Builder responseType(Type responseType) {
             this.responseType = responseType;
 //            if(responseType != null){
 //                if(responseType instanceof ParameterizedType){
@@ -71,18 +83,27 @@ public class ResponseWrapper {
             return this;
         }
 
-        public Builder responseText(String responseText){
+        public Builder responseText(String responseText) {
             this.responseText = responseText;
             return this;
         }
 
-        public Builder contentType(String contentType){
+        public Builder contentType(String contentType) {
             this.contentType = contentType;
             return this;
         }
 
+        public Builder progressCallback(ProgressCallback progressCallback) {
+            this.progressCallback = progressCallback;
+            return this;
+        }
 
-        public ResponseWrapper build(){
+        public Builder downloadLocalFileName(String downloadLocalFileName){
+            this.downloadLocalFileName = downloadLocalFileName;
+            return this;
+        }
+
+        public ResponseWrapper build() {
             return new ResponseWrapper(this);
         }
     }

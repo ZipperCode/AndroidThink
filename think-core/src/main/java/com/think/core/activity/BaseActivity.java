@@ -5,7 +5,7 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.think.core.util.ScreentUtils;
+import com.think.core.util.ScreenUtils;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -21,8 +21,8 @@ public class BaseActivity extends AppCompatActivity {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 View view = getCurrentFocus();
-                if (ScreentUtils.isHideKeyBoard(view, ev)) {
-                    ScreentUtils.closeKeyboard(this);
+                if (ScreenUtils.isHideKeyBoard(view, ev)) {
+                    ScreenUtils.closeKeyboard(this);
                 }
             default:
                 break;

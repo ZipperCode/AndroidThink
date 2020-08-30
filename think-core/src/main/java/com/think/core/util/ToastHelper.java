@@ -43,7 +43,7 @@ public final class ToastHelper {
      * @param msg 字符串
      */
     public void toast(final String msg){
-        ThreadManager.getInstance().exeOnMainThread(new Runnable() {
+        ThreadManager.getInstance().execOnMainThread(new Runnable() {
             @Override
             public void run() {
                 mToast.cancel();

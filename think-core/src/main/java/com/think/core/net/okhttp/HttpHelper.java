@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.think.core.util.FileUtils;
+import com.think.core.util.StringUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -102,7 +103,7 @@ public class HttpHelper {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 // 异常信息
-                onError(requestWrapper.isRunMainThread(),e,callBack);
+                onError(requestWrapper.isRunMainThread(), e, callBack);
             }
 
             @Override
@@ -111,70 +112,17 @@ public class HttpHelper {
                     try {
                         onSuccess(requestWrapper, response, callBack);
                     } catch (IOException e) {
-                        onError(requestWrapper.isRunMainThread(),e,callBack);
+                        onError(requestWrapper.isRunMainThread(), e, callBack);
                     }
                 } else {
                     String text = response.toString();
-                    HttpHelper.this.onFailure(requestWrapper.isRunMainThread(),text, callBack);
+                    HttpHelper.this.onFailure(requestWrapper.isRunMainThread(), text, callBack);
                 }
                 response.close();
             }
         });
     }
 
-    /**
-     * 下载处理，此时success中的回调信息返回空的实体包装，<br/>
-     * 若在success回调中出现异常则触发failure回调。<br/>
-     * 如果需要在下载中接受下载进度，可以在ResponseWrapper中<br/>
-     * 实现{@link ProgressCallback}接口用于接收下载进度
-     *
-     * @param requestWrapper 请求包装类
-     * @param responseBody   请求响应实体
-     * @param responseWrapper   请求响应包装
-     * @throws IOException 出现的异常信息
-     */
-    private void download(RequestWrapper requestWrapper,
-                          ResponseBody responseBody,
-                          ResponseWrapper responseWrapper) throws IOException {
-
-        ProgressCallback progressCallback = responseWrapper.getProgressCallback();
-        // 请求包装类中提供的下载目录
-        String downloadDir = requestWrapper.getDownloadDir();
-        File downloadDirFile = new File(downloadDir);
-        if (!downloadDirFile.exists()) {
-            downloadDirFile.mkdirs();
-        }
-        String fileName = OtherUtils.downloadRename(downloadDir
-                + File.separator + requestWrapper.getDownloadFileName());
-        // 请求包装类中提供的下载文件名，默认url截取值,文件存在会重命名
-        File downloadFileName = new File(fileName);
-        if (!downloadFileName.exists()) {
-            downloadFileName.createNewFile();
-        }
-        // 总大小
-        long totalSize = responseBody.contentLength();
-        // 已经下载的大小
-        long downloadSize = 0;
-        // 读取的长度
-        int readLength = 0;
-        // 读取缓冲区
-        byte[] buffer = new byte[DOWNLOAD_BUFFER_SIZE];
-        try (FileOutputStream fileOutputStream = new FileOutputStream(downloadFileName);
-             InputStream inputStream = responseBody.byteStream()) {
-            while ((readLength = inputStream.read(buffer)) != -1) {
-                fileOutputStream.write(buffer, 0, readLength);
-                downloadSize += readLength;
-                // 计算百分比
-                int percent = (int) ((downloadSize * 1.0f / totalSize) * 100);
-                if (progressCallback != null) {
-                    progressCallback.uploadProgress(percent);
-                }
-            }
-            fileOutputStream.flush();
-        } catch (IOException e) {
-            throw e;
-        }
-    }
 
     /**
      * 请求响应成功
@@ -205,24 +153,7 @@ public class HttpHelper {
                     // 配置响应的类型为流类型，标识文件下载
 
                     try {
-                        final ResponseWrapper responseWrapper = builder
-                                .responseText(ContentType.STREAM)
-                                .build();
-                        if(requestWrapper.isRunMainThread()){
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try{
-                                        callback.success(responseWrapper);
-                                    }catch (Exception e){
-                                        onError(e, callback);
-                                    }
-                                }
-                            });
-                        }else{
-                            callback.success(responseWrapper);
-                        }
-                        download(requestWrapper, responseBody,responseWrapper);
+                        download(callback, requestWrapper, responseBody, builder);
                     } catch (Exception e) {
                         onError(requestWrapper.isRunMainThread(), e, callback);
                     }
@@ -234,7 +165,7 @@ public class HttpHelper {
                     try {
                         callback.success(builder.build());
                     } catch (Exception e) {
-                        onError(requestWrapper.isRunMainThread(),e, callback);
+                        onError(requestWrapper.isRunMainThread(), e, callback);
                     }
             }
         } else {
@@ -244,7 +175,7 @@ public class HttpHelper {
             try {
                 callback.success(builder.build());
             } catch (Exception e) {
-                onError(requestWrapper.isRunMainThread(),e, callback);
+                onError(requestWrapper.isRunMainThread(), e, callback);
             }
         }
     }
@@ -254,14 +185,14 @@ public class HttpHelper {
     }
 
     private void onFailure(boolean isRunMain, final String message, final CallBack callback) {
-        if(isRunMain){
+        if (isRunMain) {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
                     callback.failure(message);
                 }
             });
-        }else{
+        } else {
             callback.failure(message);
         }
     }
@@ -271,18 +202,100 @@ public class HttpHelper {
     }
 
     private void onError(boolean isRunMain, Exception e, final CallBack callback) {
-        if(isRunMain){
+        if (isRunMain) {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
                     callback.onError(new NetworkException(NetworkException.ExceptionCode.EXCEPTION));
                 }
             });
-        }else{
+        } else {
             callback.onError(new NetworkException(NetworkException.ExceptionCode.EXCEPTION));
         }
     }
 
+    /**
+     * 下载处理，此时success中的回调信息返回空的实体包装，<br/>
+     * 若在success回调中出现异常则触发failure回调。<br/>
+     * 如果需要在下载中接受下载进度，可以在ResponseWrapper中<br/>
+     * 实现{@link ProgressCallback}接口用于接收下载进度
+     *
+     * @param callBack       回调函数
+     * @param requestWrapper 请求包装类
+     * @param responseBody   请求响应实体
+     * @param builder        请求响应包装构造类
+     * @throws IOException 出现的异常信息
+     */
+    private void download(
+            final CallBack callBack,
+            RequestWrapper requestWrapper,
+            ResponseBody responseBody,
+            ResponseWrapper.Builder builder) throws IOException {
+        builder
+                .contentType(ContentType.STREAM)
+                .progressCallback(requestWrapper.progressCallback());
+        ProgressCallback progressCallback = requestWrapper.progressCallback();
+        // 请求包装类中提供的下载目录
+        String downloadDir = requestWrapper.downloadDir();
+        File downloadDirFile = new File(downloadDir);
+        if (!downloadDirFile.exists()) {
+            downloadDirFile.mkdirs();
+        }
+        // 重命名下载文件，FileUtils会判断本地文件自动重命名文件
+        String fileName = FileUtils.downloadRename(downloadDir
+                + File.separator + requestWrapper.downloadFileName());
+        // 请求包装类中提供的下载文件名，默认url截取值,文件存在会重命名
+        File downloadFileName = new File(fileName);
+        if (!downloadFileName.exists()) {
+            downloadFileName.createNewFile();
+        }
+        // 生成response包装
+        final ResponseWrapper responseWrapper = builder
+                .downloadLocalFileName(fileName)
+                .responseText(fileName)
+                .build();
+        // 总大小
+        long totalSize = responseBody.contentLength();
+        // 已经下载的大小
+        long downloadSize = 0;
+        // 读取的长度
+        int readLength = 0;
+        // 读取缓冲区
+        byte[] buffer = new byte[DOWNLOAD_BUFFER_SIZE];
+        try (FileOutputStream fileOutputStream = new FileOutputStream(downloadFileName);
+             InputStream inputStream = responseBody.byteStream()) {
+            while ((readLength = inputStream.read(buffer)) != -1) {
+                fileOutputStream.write(buffer, 0, readLength);
+                downloadSize += readLength;
+                // 计算百分比
+                // int percent = (int) ((downloadSize * 1.0f / totalSize) * 100);
+                if (progressCallback != null) {
+                    progressCallback.progress(downloadSize, totalSize);
+                }
+            }
+            fileOutputStream.flush();
+        } catch (IOException e) {
+            throw e;
+        }
+        if (requestWrapper.isRunMainThread()) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        callBack.success(responseWrapper);
+                    } catch (Exception e) {
+                        onError(e, callBack);
+                    }
+                }
+            });
+        } else {
+            try {
+                callBack.success(responseWrapper);
+            } catch (Exception e) {
+                onError(e, callBack);
+            }
+        }
+    }
 
     public void get(RequestWrapper requestWrapper, CallBack callBack) {
         request(requestWrapper, callBack);
@@ -384,13 +397,7 @@ public class HttpHelper {
         HttpHelper.getInstance().download(requestWrapper, new CallBack() {
             @Override
             public void success(ResponseWrapper t) throws Exception {
-                System.out.println();
-                t.setProgressCallback(new ProgressCallback() {
-                    @Override
-                    public void uploadProgress(long progress) {
-                        System.out.println(progress);
-                    }
-                });
+                System.out.println("download file = " + t.downloadLocalFileName());
             }
 
             @Override

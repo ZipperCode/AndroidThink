@@ -108,6 +108,21 @@ public class BarUtils {
         return sbar;
     }
 
+    public static int getStatusBarHeight(Context context) {
+        int x = 0, sbar = 38;
+        try {
+            Class<?> c = Class.forName("com.android.internal.R$dimen");
+            Object obj = c.newInstance();
+            Field field = c.getField("status_bar_height");
+            x = Integer.parseInt(String.valueOf(field.get(obj)));
+            sbar = context.getResources().getDimensionPixelSize(x);
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        System.out.println("bar height = " + sbar);
+        return sbar;
+    }
+
     public static void setStatusBarColor(Activity activity, int colorId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             activity.getWindow().setStatusBarColor(ContextCompat.getColor(activity, colorId));

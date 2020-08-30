@@ -1,14 +1,16 @@
-package com.think.core.net.okhttp;
+package com.think.core.util;
 
 import java.io.File;
 
-public class OtherUtils {
+
+public class StringUtils {
+    @Deprecated
     public static String downloadRename(String srcFileName){
         String parentPath = new File(srcFileName).getParent();
         System.out.println("parentPath = " + parentPath);
         return appendFileName(srcFileName,0);
     }
-
+    @Deprecated
     public static String appendFileName(String srcFileName, int index){
         File file = new File(srcFileName);
         if(!file.exists()){

@@ -1,5 +1,7 @@
 package com.think.core.net.okhttp;
 
+import android.os.Environment;
+
 import com.google.gson.internal.$Gson$Types;
 
 import java.io.File;
@@ -31,17 +33,31 @@ public class RequestWrapper {
     public static final MediaType MEDIA_TYPE_STREAM
             = MediaType.parse("application/octet-stream");
 
+    /**
+     * 默认字符编码
+     */
     public static final String CHARSET_UTF8 = "UTF-8";
-
-    public static final String DEFAULT_DOWNLOAD_DIR = Paths.get("D:","OkHttpDownload")
-            .normalize().toString();
+    /**
+     * 默认下载地址
+     */
+    public static final String DEFAULT_DOWNLOAD_DIR = Environment.getDownloadCacheDirectory().getAbsolutePath();
 
     /**
      * 封装的OkHttp Request
      */
     private Request request;
-
+    /**
+     * 构建器
+     */
     private Builder builder;
+    /**
+     * url
+     */
+    private String url;
+    /**
+     * 请求tag
+     */
+    private String tag;
 
     /**
      * 响应类型
@@ -70,11 +86,17 @@ public class RequestWrapper {
         this.progressCallback = builder.progressCallback;
         this.downloadDir = builder.downloadDir;
         this.isRunMainThread = builder.isRunMainThread;
+        this.downloadFileName = builder.downloadFileName;
+        this.url = builder.url;
+        this.tag = builder.tag;
+        // 文件名如果没有设置，默认取url最后的字符
         this.downloadFileName = builder.downloadFileName == null || "".equals(downloadFileName) ?
                 builder.url.substring(builder.url.lastIndexOf("/") +1) :
                 builder.downloadFileName;
+        // 创建一个okHttp Request.Builder
         Request.Builder requestBuilder = new Request.Builder()
                 .url(builder.url);
+        // 设置请求头
         for(Map.Entry<String, String> entry : builder.headers.entrySet()){
             requestBuilder.addHeader(entry.getKey(),entry.getValue());
         }
@@ -134,16 +156,24 @@ public class RequestWrapper {
         return this.progressCallback;
     }
 
-    public String getDownloadDir() {
+    public String downloadDir() {
         return downloadDir;
     }
 
-    public String getDownloadFileName() {
+    public String downloadFileName() {
         return downloadFileName;
     }
 
     public boolean isRunMainThread() {
         return isRunMainThread;
+    }
+
+    public String url(){
+        return url;
+    }
+
+    public String tag(){
+        return tag;
     }
 
     public static class Builder {

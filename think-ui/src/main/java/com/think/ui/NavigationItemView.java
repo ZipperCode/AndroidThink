@@ -21,7 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.think.core.util.LogUtils;
-import com.think.core.util.ScreentUtils;
+import com.think.core.util.ScreenUtils;
 
 public class NavigationItemView extends LinearLayout implements View.OnClickListener {
 
@@ -83,7 +83,7 @@ public class NavigationItemView extends LinearLayout implements View.OnClickList
                 "" : typedArray.getString(R.styleable.NavigationItemView_title);
 
         int iconSize = typedArray.getDimensionPixelSize(R.styleable.NavigationItemView_icon_size,
-                ScreentUtils.dp2px(context, DEFAULT_ICON_SIZE));
+                ScreenUtils.dp2px(context, DEFAULT_ICON_SIZE));
         float textSize = typedArray.getDimension(R.styleable.NavigationItemView_text_size,
                 DEFAULT_TEXT_SIZE);
 
@@ -99,8 +99,8 @@ public class NavigationItemView extends LinearLayout implements View.OnClickList
         }
         typedArray.recycle();
 
-        if (iconSize >= ScreentUtils.dp2px(context, MAX_ICON_SIZE)) {
-            iconSize = ScreentUtils.dp2px(context, MAX_ICON_SIZE);
+        if (iconSize >= ScreenUtils.dp2px(context, MAX_ICON_SIZE)) {
+            iconSize = ScreenUtils.dp2px(context, MAX_ICON_SIZE);
         }
         LayoutParams mNavIconLayoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         LayoutParams mNavTitleLayoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -180,8 +180,8 @@ public class NavigationItemView extends LinearLayout implements View.OnClickList
         if (iconSize >= MAX_ICON_SIZE) {
             iconSize = MAX_ICON_SIZE;
         }
-        layoutParams.weight = ScreentUtils.dp2px(getContext(), iconSize);
-        layoutParams.height = ScreentUtils.dp2px(getContext(), iconSize);
+        layoutParams.weight = ScreenUtils.dp2px(getContext(), iconSize);
+        layoutParams.height = ScreenUtils.dp2px(getContext(), iconSize);
         mNavIcon.setLayoutParams(layoutParams);
     }
 

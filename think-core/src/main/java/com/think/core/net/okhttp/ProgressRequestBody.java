@@ -54,9 +54,9 @@ public class ProgressRequestBody extends RequestBody {
             long totalBytesRead = 0;
             for (long readCount; (readCount = source.read(bufferedSink.getBuffer(), 8192)) != -1; ) {
                 totalBytesRead += readCount;
-                int percent = (int)(contentLength * 1.0f / totalBytesRead) * 100;
+                int percent = (int)( totalBytesRead / contentLength * 1.0f) * 100;
                 progress = percent;
-                progressCallback.uploadProgress(percent);
+                progressCallback.progress(totalBytesRead,contentLength);
             }
         } finally {
             if(source != null){

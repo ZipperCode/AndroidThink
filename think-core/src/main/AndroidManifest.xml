@@ -13,15 +13,16 @@
     <application
 
         >
-        <service
-            android:name=".alive.MainService"
-            android:enabled="true"
-            android:exported="false" />
-        <service
-            android:name=".alive.GuardService"
-            android:enabled="true"
-            android:exported="false"
-            android:process=":alive" />
+<!--        <service-->
+<!--            android:name=".alive.MainService"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false" />-->
+<!--        <service-->
+<!--            android:name=".alive.GuardService"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false"-->
+<!--            android:process=":alive" />-->
+        <receiver android:name=".util.ViewScreenHelper"/>
         <!-- 用于文件共享使用 -->
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -30,7 +31,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="" />
+                android:resource="@xml/file_provider_path" />
         </provider>
     </application>
 
