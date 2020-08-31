@@ -129,6 +129,11 @@ public final class ThreadManager {
         mExecutorService.execute(runnable);
     }
 
+    public void execPoolFuture(Runnable runnable) {
+        Future<?> submit = mExecutorService.submit(runnable);
+        mScheduleTask.put(runnable,submit);
+    }
+
     public void execSchedule(Runnable runnable, long initDelay, long period, TimeUnit timeUnit) {
         ScheduledFuture<?> scheduledFuture = mScheduledExecutorService.scheduleWithFixedDelay(runnable, initDelay, period, timeUnit);
         mScheduleTask.put(runnable, scheduledFuture);

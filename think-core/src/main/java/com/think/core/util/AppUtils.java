@@ -20,7 +20,9 @@ import android.widget.Toast;
 import androidx.core.content.FileProvider;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -31,6 +33,21 @@ import java.util.concurrent.TimeUnit;
 
 public class AppUtils {
 
+
+    public static List<PackageInfo> getPackages(Context context){
+        PackageManager packageManager = context.getPackageManager();
+        List<PackageInfo> installedPackages = packageManager.getInstalledPackages(0);
+        return installedPackages;
+    }
+
+    public static Set<String> getPackageNames(Context context){
+        List<PackageInfo> packages = getPackages(context);
+        Set<String> packageNames = new HashSet<>();
+        for (PackageInfo info : packages){
+            packageNames.add(info.packageName);
+        }
+        return packageNames;
+    }
     /**
      * 通过包名检查手机是否安装了某一款app
      *
