@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -76,6 +77,17 @@ public class VpnConnection implements Runnable {
             e.printStackTrace();
             Log.e(TAG,"连接出现错误");
         }
+
+    }
+
+    public void dispose(){
+        IoUtils.close(mFos,mFis,mParcelFileDescriptor);
+    }
+
+    private boolean connect(SocketAddress socketAddress) throws IOException{
+        SocketChannel client = SocketChannel.open();
+        client.connect(socketAddress);
+        client.configureBlocking(false);
         try {
             int readSize = 0;
             mFis = new FileInputStream(mParcelFileDescriptor.getFileDescriptor());
@@ -88,14 +100,6 @@ public class VpnConnection implements Runnable {
         }catch (IOException e){
             LogUtils.error("IO 异常");
         }
-
-    }
-
-    public void dispose(){
-        IoUtils.close(mFos,mFis,mParcelFileDescriptor);
-    }
-
-    private boolean connect(SocketAddress socketAddress) throws IOException{
         return false;
     }
 
@@ -103,7 +107,7 @@ public class VpnConnection implements Runnable {
         if(mPacket.mIpHeader.getProtocol() == IPHeader.PROTOCOL_TCP){
 
         }else if(mPacket.mIpHeader.getProtocol() == IPHeader.PROTOCOL_UDP){
-            
+
         }
     }
 
