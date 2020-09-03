@@ -1,20 +1,17 @@
 package com.think.demo;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.Window;
-import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.think.core.util.BarUtils;
 import com.think.core.util.ScreenUtils;
 import com.think.core.util.ViewScreenHelper;
-import com.think.ui.ParticleView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
         System.out.println(BarUtils.getStatusBarHeight(this));
         System.out.println("是否全屏 = " + ScreenUtils.isFullScreen(this));
         System.out.println(ViewScreenHelper.getInstance().toString());
+
+
     }
 
     @Override

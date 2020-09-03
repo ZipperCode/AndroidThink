@@ -2,6 +2,7 @@ package com.think.vpn;
 
 import android.util.Log;
 
+import com.think.core.util.IoUtils;
 import com.think.core.util.LogUtils;
 
 import java.io.IOException;
@@ -45,25 +46,25 @@ public class LocalTcpProxyServer implements Runnable {
             // 注册OnAccept事件
             mServerSocketChannel.register(mSelector, SelectionKey.OP_ACCEPT);
             mLocalServerPort = mServerSocketChannel.socket().getLocalPort();
-            Log.i(TAG,"正在监听端口：" + (mLocalServerPort & 0xFFFF));
+            Log.i(TAG, "正在监听端口：" + (mLocalServerPort & 0xFFFF));
         } catch (IOException e) {
             e.printStackTrace();
-            Log.i(TAG,"出现错误");
+            Log.i(TAG, "出现错误");
         }
     }
 
     @Override
     public void run() {
         try {
-            while (true) {
+            while (!Thread.interrupted()) {
                 if (mSelector.select(1) > 0) {
                     Iterator<SelectionKey> keyIterator = mSelector.selectedKeys().iterator();
                     while (keyIterator.hasNext()) {
                         SelectionKey selectionKey = keyIterator.next();
-                        if(selectionKey.isValid()){
-                            if(selectionKey.isAcceptable()){
+                        if (selectionKey.isValid()) {
+                            if (selectionKey.isAcceptable()) {
                                 onAccept(selectionKey);
-                            }else if (selectionKey.isReadable()) {
+                            } else if (selectionKey.isReadable()) {
                                 onReadable(selectionKey);
                             } else if (selectionKey.isWritable()) {
                                 onWriteable(selectionKey);
@@ -77,41 +78,33 @@ public class LocalTcpProxyServer implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (mSelector != null && mSelector.isOpen()) {
-                    mSelector.close();
-                }
-                if (mServerSocketChannel != null && mServerSocketChannel.isOpen()) {
-                    mServerSocketChannel.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            LogUtils.error(TAG, "finally 方法调用");
+            IoUtils.close(mServerSocketChannel, mSelector);
         }
     }
 
-    private void onAccept(SelectionKey selectionKey){
+    private void onAccept(SelectionKey selectionKey) {
         try {
-            SocketChannel localChannel =mServerSocketChannel.accept();
+            SocketChannel localChannel = mServerSocketChannel.accept();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void onReadable(SelectionKey selectionKey){
+    private void onReadable(SelectionKey selectionKey) {
         LogUtils.debug("onReadable : " + selectionKey);
     }
 
-    private void onWriteable(SelectionKey selectionKey){
+    private void onWriteable(SelectionKey selectionKey) {
         LogUtils.debug("onWriteable : " + selectionKey);
     }
 
-    private void start(){
+    private void start() {
 
     }
 
-    private void stop(){
+    private void stop() {
 
     }
 

@@ -84,6 +84,7 @@ public class TCPHeader {
     public TCPHeader(byte[] data, int dataOffset) {
         this.mData = ByteBuffer.wrap(data);
         this.mDataOffset = dataOffset;
+        this.mDataOffset = mIpHeaderOffset + Packet.TCP_HEADER_SIZE;
     }
 
     public TCPHeader(ByteBuffer data, int ipHeaderOffset) {

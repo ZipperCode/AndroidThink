@@ -1,11 +1,15 @@
 package com.think.vpn;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
@@ -71,7 +75,9 @@ public class LocalVpnService extends VpnService implements Runnable {
     @Override
     public void onCreate() {
         super.onCreate();
-        mConfigureIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class),
+        Intent intent = new Intent();;
+        intent.setComponent(new ComponentName("com.think.demo","com.think.demo.VpnActivity"));
+        mConfigureIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
         mServerName = "";
         mServerPort = 2345;
@@ -82,7 +88,7 @@ public class LocalVpnService extends VpnService implements Runnable {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && ACTION_CONNECT.equals(intent.getAction())) {
+        if (intent != null && ACTION_DISCONNECT.equals(intent.getAction())) {
             // 断开上一次连接
             if (mIsConnected) {
                 disconnect();
@@ -98,38 +104,46 @@ public class LocalVpnService extends VpnService implements Runnable {
      * 开始连接
      */
     public void connect() {
+        LogUtils.debug(TAG,"connect 方法调用");
+        onStatusChange("VpnService 正在连接");
         mLocalTcpProxyServer = new LocalTcpProxyServer(0);
         mIsConnected = true;
-        ThreadManager.getInstance().execPoolFuture(this);
+        ThreadManager.getInstance().execPool(this);
     }
 
     /**
      * 断开连接
      */
     public void disconnect() {
-        ThreadManager.getInstance().cancelSchedule(this);
+        LogUtils.debug(TAG,"disconnect 方法调用");
+        onStatusChange("VpnService 断开连接");
+        ThreadManager.getInstance().cancelSchedule(mLocalTcpProxyServer);
+        ThreadManager.getInstance().cancelSchedule(mVpnConnect);
         mIsConnected = false;
     }
 
     @Override
     public void run() {
-        waitUntilPrepared();
+        LogUtils.debug(TAG,"LocalVpnService run ");
+//        waitUntilPrepared();
         LogUtils.debug(TAG, "已经关闭其他app的Vpn服务，正在准备当前vpn服务");
         ParcelFileDescriptor fileDescriptor = establishVpn();
         mVpnConnect = new VpnConnection(fileDescriptor, mServerName, mServerPort, proxyHost, proxyPort);
         ThreadManager.getInstance().execPoolFuture(mLocalTcpProxyServer);
         ThreadManager.getInstance().execPoolFuture(mVpnConnect);
         LogUtils.debug(TAG, "Vpn服务开始启动");
-
+        onStatusChange("VpnService 连接中");
     }
 
     private ParcelFileDescriptor establishVpn() {
         Builder builder = new Builder()
                 .setMtu(MTU_PACK_SIZE)
                 .setSession(SESSION_NAME)
-                .addAddress("10.0.0.2", 24)
+                .addAddress(VpnConnection.LOCAL_IP_ADDRESS_STR, 24)
                 .addAddress("26.26.26.2", 32)
+                .addAddress("10.8.0.2", 32)
                 .addDnsServer("8.8.8.8")
+                .addDnsServer("10.0.2.3")
                 .setBlocking(false)
                 .addRoute("0.0.0.0", 0)
                 .addRoute("255.255.0.0", 16);
@@ -147,19 +161,6 @@ public class LocalVpnService extends VpnService implements Runnable {
     }
 
 
-    /**
-     * 等待其他VPN服务释放
-     */
-    private void waitUntilPrepared() {
-        while (VpnService.prepare(this) != null) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-        }
-    }
-
     public void onStatusChange(final String msg){
         mHandler.post(new Runnable() {
             @Override
@@ -175,10 +176,17 @@ public class LocalVpnService extends VpnService implements Runnable {
         if (notificationManager == null) {
             return;
         }
-        Notification notification = new Notification();
-        notification.icon = R.drawable.ic_vpn;
-        notification.tickerText = "VpnService 正在运行";
-        notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
-        notificationManager.notify(0, notification);
+        Notification.Builder builder = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new Notification.Builder(this,NOTIFICATION_CHANNEL_ID);
+        }else{
+            builder = new Notification.Builder(this);
+        }
+        Notification notification = builder.setContentIntent(mConfigureIntent)
+                .setSmallIcon(R.drawable.ic_vpn)
+//                .setTicker(msg)
+                .setContentText(msg)
+                .build();
+        notificationManager.notify(NOTIFICATION_ID,notification);
     }
 }

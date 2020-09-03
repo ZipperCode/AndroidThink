@@ -216,9 +216,6 @@ public class IPHeader {
         return mData.getInt(SRC_ADDRESS_OFFSET);
     }
 
-    public int getSourceAddress() {
-        return this.mData.getInt(SRC_ADDRESS_OFFSET);
-    }
 
     public IPHeader setDestinationAddress(int destinationAddress) {
         this.mData.putInt(DEST_ADDRESS_OFFSET, destinationAddress);
@@ -248,6 +245,16 @@ public class IPHeader {
                 .append("32位目标IP地址:").append(CommonUtil.int2Ip(getDestAddress())).append("\r\n")
                 .append("}");
         return stringBuilder.toString();
+    }
+
+    public void fullDefault(){
+        setHeaderLength(20);
+        setServiceType((byte) 0);
+        setTotalLen(0);
+        setIdentifier(0);
+        setSliceFlag((short) 0);
+        setSliceFlag((short) 0);
+        setTtl((byte) 64);
     }
 
     public static void main(String[] args) {

@@ -189,11 +189,13 @@ public abstract class BaseDialogFragmentX extends DialogFragment implements
                 );
     }
 
+    @Override
     public String getTagName() {
         return mTagName;
     }
 
 
+    @Override
     public void setTagName(String tagName) {
         this.mTagName = tagName;
     }

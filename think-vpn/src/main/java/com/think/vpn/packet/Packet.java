@@ -33,7 +33,7 @@ public class Packet {
         this.mByteBuffer = data;
         mIpHeader = new IPHeader(mByteBuffer,IP4_HEADER_SIZE);
         mTcpHeader = new TCPHeader(mByteBuffer,IP4_HEADER_SIZE);
-        mUdpHeader = new UDPHeader(mByteBuffer,IP4_HEADER_SIZE + UDP_HEADER_SIZE);
+        mUdpHeader = new UDPHeader(mByteBuffer,IP4_HEADER_SIZE);
     }
 
 

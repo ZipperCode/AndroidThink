@@ -16,7 +16,7 @@ import java.util.LinkedList;
  * @author : zzp
  *  date : 2020/8/11
  **/
-public class DialogManager {
+public class FragmentManager {
 
     /**
      * 保存实现IFragment的实现类
@@ -162,10 +162,10 @@ public class DialogManager {
     }
 
     private static class InnerInstance {
-        private static final DialogManager INSTANCE = new DialogManager();
+        private static final FragmentManager INSTANCE = new FragmentManager();
     }
 
-    public static DialogManager getInstance() {
+    public static FragmentManager getInstance() {
         return InnerInstance.INSTANCE;
     }
 }

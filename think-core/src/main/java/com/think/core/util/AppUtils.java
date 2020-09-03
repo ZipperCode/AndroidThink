@@ -1,9 +1,11 @@
 package com.think.core.util;
 
+import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -11,6 +13,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
@@ -33,6 +36,29 @@ import java.util.concurrent.TimeUnit;
 
 public class AppUtils {
 
+    /**
+     * 通过Context获取Activity
+     * @param context 上下文
+     * @return 如果context为空，则返回空
+     */
+    public static Activity getActivity(Context context){
+        if(context == null){
+            return null;
+        }
+        if(context instanceof Activity && isActivityAlive((Activity)context)){
+            return (Activity)context;
+        }
+        return getActivity(((ContextWrapper)context).getBaseContext());
+    }
+
+    /**
+     * 判断Activity是否存活
+     * @param activity Activity对象
+     * @return true为存活
+     */
+    public static boolean isActivityAlive(final Activity activity) {
+        return activity != null && !activity.isFinishing() && !activity.isDestroyed();
+    }
 
     public static List<PackageInfo> getPackages(Context context){
         PackageManager packageManager = context.getPackageManager();
