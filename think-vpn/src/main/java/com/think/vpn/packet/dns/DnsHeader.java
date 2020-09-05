@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
  * DNS 报头格式
  */
 public class DnsHeader {
+
+    public static final int DNS_HEADER_SIZE = 12;
     /**
      * 事务ID DNS 报文的 ID 标识。对于请求报文和其对应的应答报文，该字段的值是相同的。
      * 通过它可以区分 DNS 应答报文是对哪个请求进行响应的。

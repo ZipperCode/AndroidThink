@@ -11,13 +11,16 @@ import com.think.vpn.packet.dns.DnsPacket;
 import com.think.vpn.packet.dns.Question;
 import com.think.vpn.packet.dns.Resource;
 import com.think.vpn.packet.dns.ResourcePointer;
+import com.think.vpn.utils.CommonUtil;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -44,8 +47,15 @@ public class DnsProxy implements Runnable {
      * 每一个查询
      */
     private final SparseArray<QueryState> mQueryArray;
+    /**
+     * dns头中的transactionId
+     */
+    private short mQueryID;
 
-    public DnsProxy() {
+    private final VpnConnection mVpnConnection;
+
+    public DnsProxy(VpnConnection vpnConnection) {
+        this.mVpnConnection = vpnConnection;
         this.mQueryArray = new SparseArray<QueryState>();
         try {
             this.mClient = new DatagramSocket();
@@ -68,7 +78,7 @@ public class DnsProxy implements Runnable {
             dnsBuffer = dnsBuffer.slice();
             // 定义一个数据报
             DatagramPacket packet = new DatagramPacket(RECEIVE_BUFFER, headerLength, RECEIVE_BUFFER.length - headerLength);
-            while (mClient != null && !mClient.isClosed() && !Thread.interrupted()) {
+            while (mClient != null && !mClient.isClosed()) {
                 // 数据长度应该减去头的长度
                 packet.setLength(RECEIVE_BUFFER.length - headerLength);
                 mClient.receive(packet);
@@ -76,9 +86,10 @@ public class DnsProxy implements Runnable {
                 dnsBuffer.limit(packet.getLength());
                 try {
                     DnsPacket dnsPacket = DnsPacket.fromBytes(dnsBuffer);
+//                    LogUtils.debug(TAG,"收到的dnsBuffer包 = " +dnsPacket);
                     if (dnsPacket != null) {
-//                        onDnsResponseReceived(ipHeader, udpHeader, dnsPacket);
-                        System.out.println("DNS代理解析 ： " + dnsPacket);
+                        LogUtils.debug("DNS代理解析 ： " + dnsPacket);
+                        onDnsResponseReceived(ipHeader, udpHeader, dnsPacket);
                     }
                 } catch (Exception e) {
                     LogUtils.error("dns解析错误");
@@ -102,7 +113,7 @@ public class DnsProxy implements Runnable {
 
         if (state != null) {
             //DNS污染，默认污染海外网站
-            dnsPollution(udpHeader.getDataByte(), dnsPacket);
+            dnsPollution(udpHeader.dataByte(), dnsPacket);
             dnsPacket.mHeader.setTransactionId(state.clientQueryId);
             ipHeader.setSourceAddress(state.remoteIp)
                     .setDestinationAddress(state.clientIp)
@@ -112,7 +123,7 @@ public class DnsProxy implements Runnable {
                     .setDestPort(state.clientPort)
                     .setTotalLength(Packet.UDP_HEADER_SIZE + dnsPacket.mSize);
             // 将数据包通过VpnService发送出去
-//            LocalVpnService.Instance.sendUDPPacket(ipHeader, udpHeader);
+            mVpnConnection.sendUdpPacket(new Packet(ipHeader.mData));
         }
     }
 
@@ -177,9 +188,10 @@ public class DnsProxy implements Runnable {
 
     /**
      * 串改dns响应头
+     *
      * @param rawPacket 数据包
      * @param dnsPacket dns封装的数据包
-     * @param newIp 新的ip
+     * @param newIp     新的ip
      */
     private void tamperDnsResponse(byte[] rawPacket, DnsPacket dnsPacket, int newIp) {
         // 获取dns请求的第一个问题资源
@@ -204,46 +216,53 @@ public class DnsProxy implements Runnable {
 
     /**
      * 从VpnService发出的UDP请求在这里进行DNS解析
-     * @param ipHeader ip头
+     *
+     * @param ipHeader  ip头
      * @param udpHeader udp头
      * @param dnsPacket 数据包
      */
     public void onDnsRequestReceived(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
-        if (!interceptDns(ipHeader, udpHeader, dnsPacket)) {
-            QueryState state = new QueryState();
-            state.ClientQueryID = dnsPacket.Header.ID;
-            state.QueryNanoTime = System.nanoTime();
-            state.ClientIP = ipHeader.getSourceIP();
-            state.ClientPort = udpHeader.getSourcePort();
-            state.RemoteIP = ipHeader.getDestinationIP();
-            state.RemotePort = udpHeader.getDestinationPort();
+//        if (!interceptDns(ipHeader, udpHeader, dnsPacket)) {
+        QueryState state = new QueryState();
+        state.clientQueryId = dnsPacket.mHeader.mTransactionId;
+        state.queryNanoTime = System.nanoTime();
+        state.clientIp = ipHeader.getSourceIpAddress();
+        state.clientPort = udpHeader.getSrcPort();
+        state.remoteIp = ipHeader.getDestAddress();
+        state.remotePort = udpHeader.getDestPort();
 
-            m_QueryID++;
-            dnsPacket.Header.setID(m_QueryID);
+//        LogUtils.debug(TAG,state.toString());
+        mQueryID++;
+        // dns头在请求是设置一个随机数，在响应的时候返回此随机数
+        dnsPacket.mHeader.setTransactionId(mQueryID);
 
-            synchronized (m_QueryArray) {
-                clearExpiredQueries();
-                m_QueryArray.put(m_QueryID, state);
-            }
-
-            InetSocketAddress remoteAddress = new InetSocketAddress(CommonMethods.ipIntToInet4Address(state.RemoteIP), state.RemotePort);
-            DatagramPacket packet = new DatagramPacket(udpHeader.m_Data, udpHeader.m_Offset + 8, dnsPacket.Size);
-            packet.setSocketAddress(remoteAddress);
-
-            try {
-                if (LocalVpnService.Instance.protect(m_Client)) {
-                    mClient.send(packet);
-                } else {
-                    Log.e(TAG, "VPN protect udp socket failed.");
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "protect", e);
-            }
+        synchronized (mQueryArray) {
+            clearExpiredQueries();
+            mQueryArray.put(mQueryID, state);
         }
+        ByteBuffer dnsBuffer = ByteBuffer.allocate(dnsPacket.mSize);
+        dnsPacket.toBytes(dnsBuffer);
+
+        InetSocketAddress remoteAddress = new InetSocketAddress(CommonUtil.getAddress(state.remoteIp), state.remotePort);
+//        DatagramPacket packet = new DatagramPacket(udpHeader.dataByte(), udpHeader.offset(), dnsPacket.mSize);
+        DatagramPacket packet = new DatagramPacket(dnsBuffer.array(), dnsPacket.mSize);
+        packet.setSocketAddress(remoteAddress);
+
+        try {
+            if (mVpnConnection.protect(mClient)) {
+                mClient.send(packet);
+            } else {
+                LogUtils.error(TAG, "VPN protect udp socket failed.");
+            }
+        } catch (IOException e) {
+            LogUtils.error(TAG, e.getMessage());
+        }
+//        }
     }
 
     /**
      * 拦截dns请求数据
+     *
      * @param ipHeader
      * @param udpHeader
      * @param dnsPacket
@@ -251,31 +270,41 @@ public class DnsProxy implements Runnable {
      */
     private boolean interceptDns(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
         Question question = dnsPacket.mQuestions[0];
-        LogUtils.debug(TAG,"Question Query Domain = " + question.mQueryDomain);
+        LogUtils.debug(TAG, "Question Query Domain = " + question.mQueryDomain);
         // 1 表示地址
         if (question.mQueryType == 1) {
-            //
-            if (ProxyConfig.Instance.needProxy(question.Domain)) {
-                int fakeIP = getOrCreateFakeIP(question.Domain);
-                tamperDnsResponse(ipHeader.mData.array(), dnsPacket, fakeIP);
-
-                // 获取当前请求的ip地址和端口
-                int sourceIp = ipHeader.getSourceIpAddress();
-                short sourcePort = (short) udpHeader.getSrcPort();
-                LogUtils.debug(TAG,"当前发送的IP请求，来自：" + sourceIp + ":" + sourcePort);
-                // 将源和目的相互对换
-                ipHeader.setSourceAddress(ipHeader.getDestAddress());
-                ipHeader.setDestinationAddress(sourceIp);
-                ipHeader.setTotalLen(20 + 8 + dnsPacket.mSize);
-                udpHeader.setSrcPort(udpHeader.getDestPort());
-                udpHeader.setDestPort(sourcePort);
-                udpHeader.setTotalLength(8 + dnsPacket.mSize);
-                // 使用Vpn发送数据包
-//                LocalVpnService.Instance.sendUDPPacket(ipHeader, udpHeader);
-                return true;
-            }
+            // 判断此请求在本地是否存在代理
+//            if (ProxyConfig.Instance.needProxy(question.Domain)) {
+//                int fakeIP = getOrCreateFakeIP(question.Domain);
+//                tamperDnsResponse(ipHeader.mData.array(), dnsPacket, fakeIP);
+//
+//                // 获取当前请求的ip地址和端口
+//                int sourceIp = ipHeader.getSourceIpAddress();
+//                short sourcePort = (short) udpHeader.getSrcPort();
+//                LogUtils.debug(TAG, "当前发送的IP请求，来自：" + sourceIp + ":" + sourcePort);
+//                // 将源和目的相互对换
+//                ipHeader.setSourceAddress(ipHeader.getDestAddress());
+//                ipHeader.setDestinationAddress(sourceIp);
+//                ipHeader.setTotalLen(20 + 8 + dnsPacket.mSize);
+//                udpHeader.setSrcPort(udpHeader.getDestPort());
+//                udpHeader.setDestPort(sourcePort);
+//                udpHeader.setTotalLength(8 + dnsPacket.mSize);
+//                // 使用Vpn发送数据包
+////                LocalVpnService.Instance.sendUDPPacket(ipHeader, udpHeader);
+//                return true;
+//            }
         }
         return false;
+    }
+
+    private void clearExpiredQueries() {
+        long now = System.nanoTime();
+        for (int i = mQueryArray.size() - 1; i >= 0; i--) {
+            QueryState state = mQueryArray.valueAt(i);
+            if ((now - state.queryNanoTime) > QUERY_TIMEOUT_NS) {
+                mQueryArray.removeAt(i);
+            }
+        }
     }
 
 
@@ -293,5 +322,17 @@ public class DnsProxy implements Runnable {
         public int remoteIp;
         /* 远程端口 */
         public short remotePort;
+
+        @Override
+        public String toString() {
+            return "QueryState{" +
+                    "clientQueryId=" + clientQueryId +
+                    ", queryNanoTime=" + queryNanoTime +
+                    ", clientIp=" + clientIp +
+                    ", clientPort=" + clientPort +
+                    ", remoteIp=" + remoteIp +
+                    ", remotePort=" + remotePort +
+                    '}';
+        }
     }
 }

@@ -1,11 +1,9 @@
 package com.think.vpn;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
@@ -37,7 +35,7 @@ public class LocalVpnService extends VpnService implements Runnable {
      * 关闭vpnService指令
      */
     public static final String ACTION_DISCONNECT = "com.think.vpn.DISCONNECT";
-
+    /* 通知栏ID */
     public static final int NOTIFICATION_ID = 0x0010;
     public static final String NOTIFICATION_CHANNEL_ID = "VPN";
 
@@ -49,6 +47,7 @@ public class LocalVpnService extends VpnService implements Runnable {
      * SessionName
      */
     public static final String SESSION_NAME = "VPN";
+    /* 是否已经连接 */
     private boolean mIsConnected = false;
 
     /**
@@ -56,22 +55,22 @@ public class LocalVpnService extends VpnService implements Runnable {
      */
     private PendingIntent mConfigureIntent;
 
-    private LocalTcpProxyServer mLocalTcpProxyServer;
-
+    /**
+     * VPN连接处理
+     */
     private VpnConnection mVpnConnect;
 
-    private DnsProxy mDnsProxy;
-
+    /* 远程服务器名称 */
     private String mServerName;
+    /* 远程服务器端口 */
     private int mServerPort;
+    /* 代理主机 */
     private String proxyHost;
+    /* 代理端口 */
     private int proxyPort;
-
+    /* 拦截网络数据的应用包名 */
     private Set<String> mPackages;
-
-//    private Future<?> mTcpServerFuture;
-//    private Future<?> mVpnConnectFuture;
-
+    /* 主线程处理 */
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -108,8 +107,6 @@ public class LocalVpnService extends VpnService implements Runnable {
     public void connect() {
         LogUtils.debug(TAG,"connect 方法调用");
         onStatusChange("VpnService 正在连接");
-        mLocalTcpProxyServer = new LocalTcpProxyServer(0);
-        mDnsProxy = new DnsProxy();
         mIsConnected = true;
         ThreadManager.getInstance().execPool(this);
     }
@@ -120,7 +117,6 @@ public class LocalVpnService extends VpnService implements Runnable {
     public void disconnect() {
         LogUtils.debug(TAG,"disconnect 方法调用");
         onStatusChange("VpnService 断开连接");
-        ThreadManager.getInstance().cancelSchedule(mLocalTcpProxyServer);
         ThreadManager.getInstance().cancelSchedule(mVpnConnect);
         mIsConnected = false;
     }
@@ -131,10 +127,8 @@ public class LocalVpnService extends VpnService implements Runnable {
 //        waitUntilPrepared();
         LogUtils.debug(TAG, "已经关闭其他app的Vpn服务，正在准备当前vpn服务");
         ParcelFileDescriptor fileDescriptor = establishVpn();
-        mVpnConnect = new VpnConnection(fileDescriptor,mDnsProxy, mServerName, mServerPort, proxyHost, proxyPort);
-        ThreadManager.getInstance().execPoolFuture(mLocalTcpProxyServer);
+        mVpnConnect = new VpnConnection(this,fileDescriptor, mServerName, mServerPort, proxyHost, proxyPort);
         ThreadManager.getInstance().execPoolFuture(mVpnConnect);
-        ThreadManager.getInstance().execPoolFuture(mDnsProxy);
         LogUtils.debug(TAG, "Vpn服务开始启动");
         onStatusChange("VpnService 连接中");
     }

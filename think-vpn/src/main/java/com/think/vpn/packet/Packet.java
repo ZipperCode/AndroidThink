@@ -26,14 +26,13 @@ public class Packet {
 
     public UDPHeader mUdpHeader;
 
-    private ByteBuffer mByteBuffer;
-
+    public byte[] mData;
 
     public Packet(ByteBuffer data){
-        this.mByteBuffer = data;
-        mIpHeader = new IPHeader(mByteBuffer.array(),IP4_HEADER_SIZE);
-        mTcpHeader = new TCPHeader(mByteBuffer.array(),IP4_HEADER_SIZE);
-        mUdpHeader = new UDPHeader(mByteBuffer.array(),IP4_HEADER_SIZE);
+        this.mData = data.array();
+        mIpHeader = new IPHeader(mData,IP4_HEADER_SIZE);
+        mTcpHeader = new TCPHeader(mData,IP4_HEADER_SIZE);
+        mUdpHeader = new UDPHeader(mData,IP4_HEADER_SIZE);
     }
 
 

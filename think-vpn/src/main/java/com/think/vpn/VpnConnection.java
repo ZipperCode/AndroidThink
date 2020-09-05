@@ -1,5 +1,6 @@
 package com.think.vpn;
 
+import android.net.VpnService;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
@@ -7,6 +8,7 @@ import android.util.Log;
 
 import com.think.core.util.IoUtils;
 import com.think.core.util.LogUtils;
+import com.think.core.util.ThreadManager;
 import com.think.vpn.packet.IPHeader;
 import com.think.vpn.packet.Packet;
 import com.think.vpn.packet.TCPHeader;
@@ -18,7 +20,9 @@ import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -49,24 +53,45 @@ public class VpnConnection implements Runnable, Closeable {
     public static final String LOCAL_IP_ADDRESS_STR = "10.0.0.2";
 
     private final ParcelFileDescriptor mParcelFileDescriptor;
+
+    /**
+     * 本地TCP代理服务
+     */
+    private final LocalTcpProxyServer mLocalTcpProxyServer;
+    /**
+     * DNS代理
+     */
+    private final DnsProxy mDnsProxy;
+
     private final String mServerName;
     private final int mServerPort;
     private String proxyHost;
     private int proxyPort;
-
+    /**
+     * fd获取的输入输出流
+     */
     private FileInputStream mFis;
     private FileOutputStream mFos;
 
-    private final DnsProxy mDnsProxy;
-
     private ByteBuffer mReadPacketBuffer;
-
+    /**
+     * 本地地址
+     */
     private int mLocalIpAddress;
-
+    /**
+     * 数据包类
+     */
     private Packet mPacket;
 
-    public VpnConnection(ParcelFileDescriptor mParcelFileDescriptor, DnsProxy dnsProxy, String mServerName, int mServerPort, String proxyHost, int proxyPort) {
-        this.mDnsProxy = dnsProxy;
+    private final LocalVpnService mLocalVpnService;
+
+    public VpnConnection(LocalVpnService vpnService,
+                         ParcelFileDescriptor mParcelFileDescriptor,
+                         String mServerName,
+                         int mServerPort,
+                         String proxyHost,
+                         int proxyPort) {
+        mLocalVpnService = vpnService;
         this.mParcelFileDescriptor = mParcelFileDescriptor;
         this.mServerName = mServerName;
         this.mServerPort = mServerPort;
@@ -75,6 +100,8 @@ public class VpnConnection implements Runnable, Closeable {
         this.mReadPacketBuffer = ByteBuffer.allocate(MAX_PACKET_SIZE);
         this.mPacket = new Packet(mReadPacketBuffer);
         this.mLocalIpAddress = CommonUtil.ip2Int(LOCAL_IP_ADDRESS_STR);
+        mLocalTcpProxyServer = new LocalTcpProxyServer(0);
+        this.mDnsProxy = new DnsProxy(this);
     }
 
     @Override
@@ -94,19 +121,18 @@ public class VpnConnection implements Runnable, Closeable {
 //            e.printStackTrace();
 //            Log.e(TAG,"连接出现错误");
 //        }
+        ThreadManager.getInstance().execPoolFuture(mDnsProxy);
         readPacket();
     }
 
-    public void dispose() {
-        IoUtils.close(mFos, mFis, mParcelFileDescriptor);
+
+
+    public boolean protect(DatagramSocket socket){
+        return mLocalVpnService.protect(socket);
     }
 
-    private boolean connect(SocketAddress socketAddress) throws IOException {
-        SocketChannel client = SocketChannel.open();
-        client.connect(socketAddress);
-        client.configureBlocking(false);
-
-        return false;
+    public boolean protect(Socket socket){
+        return mLocalVpnService.protect(socket);
     }
 
     public void readPacket() {
@@ -134,19 +160,25 @@ public class VpnConnection implements Runnable, Closeable {
 //        System.out.println(ipHeader);
         if (ipHeader.getProtocol() == IPHeader.PROTOCOL_TCP) {
             TCPHeader tcpHeader = mPacket.mTcpHeader;
-            System.out.println("解析Tcp数据包");
-            System.out.println(tcpHeader);
+            LogUtils.info("解析Tcp数据包");
+            LogUtils.info(tcpHeader.toString());
 
         } else if (ipHeader.getProtocol() == IPHeader.PROTOCOL_UDP) {
             UDPHeader udpHeader = mPacket.mUdpHeader;
-            System.out.println("解析UDP数据包");
-            System.out.println(udpHeader);
-            if(ipHeader.getSourceIpAddress() == mLocalIpAddress && udpHeader.getDestPort() == 53){
-                System.out.println("本地发出的udp数据");
-                ByteBuffer data = udpHeader.getData();
-                data.clear();
-                data.limit(ipHeader.getTotalLen() - Packet.UDP_HEADER_SIZE);
-                DnsPacket dnsPacket = DnsPacket.fromBytes(data);
+            LogUtils.info("解析UDP数据包");
+//            LogUtils.info(udpHeader.toString());
+            if (ipHeader.getSourceIpAddress() == mLocalIpAddress && udpHeader.getDestPort() == 53) {
+                LogUtils.info("本地发出的udp数据");
+                ByteBuffer data = udpHeader.data();
+                data.position(udpHeader.offset());
+                ByteBuffer dnsData = data.slice();
+                dnsData.clear();
+//                LogUtils.debug(TAG,"ipHeader length = " + ipHeader.getTotalLen());
+//                LogUtils.debug(TAG,"udpHeader length = " + udpHeader.getTotalLength());
+//                LogUtils.debug(TAG,"udpHeader offset = " + udpHeader.offset());
+                dnsData.limit(ipHeader.getTotalLen() - udpHeader.offset());
+                DnsPacket dnsPacket = DnsPacket.fromBytes(dnsData);
+                LogUtils.debug(TAG,"dnsPacket = " +dnsPacket);
                 if (dnsPacket != null && dnsPacket.mHeader.mQuestionCount > 0) {
                     // 将数据转发到Dns代理中
                     mDnsProxy.onDnsRequestReceived(ipHeader, udpHeader, dnsPacket);
@@ -156,8 +188,19 @@ public class VpnConnection implements Runnable, Closeable {
         }
     }
 
+    public void sendUdpPacket(Packet packet){
+        try {
+            mFos.write(packet.mData,packet.mIpHeader.mDataOffset,packet.mIpHeader.getTotalLen());
+        } catch (IOException e) {
+            e.printStackTrace();
+            LogUtils.error(TAG,"sendUdpPacket error");
+        }
+    }
+
     @Override
     public void close() throws IOException {
+        ThreadManager.getInstance().cancelSchedule(mLocalTcpProxyServer);
+        ThreadManager.getInstance().cancelSchedule(mDnsProxy);
         IoUtils.close(mFis, mFos, mParcelFileDescriptor);
     }
 }

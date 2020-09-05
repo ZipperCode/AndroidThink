@@ -1,5 +1,8 @@
 package com.think.vpn.utils;
 
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
+
 public class CommonUtil {
 
     public static int ip2Int(String ip) {
@@ -30,6 +33,24 @@ public class CommonUtil {
             sb.append(tmp).append(" ");
         }
         return sb.toString();
+    }
+
+    public static byte[] ip2Bytes(int ip){
+        byte[] bytes = new byte[4];
+        bytes[0] = (byte)((ip >> 24) & 0xFF);
+        bytes[1] = (byte)((ip >> 16) & 0xFF);
+        bytes[2] = (byte)((ip >> 8) & 0xFF);
+        bytes[3] = (byte)(ip & 0xFF);
+        return bytes;
+    }
+
+    public static Inet4Address getAddress(int ip){
+        try {
+            return (Inet4Address) Inet4Address.getByAddress(ip2Bytes(ip));
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String getIpVersion(int version) {
