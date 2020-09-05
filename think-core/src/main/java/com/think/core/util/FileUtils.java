@@ -101,8 +101,9 @@ public class FileUtils {
      */
     public static Bitmap getImageForPath(String path){
         Bitmap bitmap = null;
-        if(path == null || "".equals(path))
+        if(path == null || "".equals(path)){
             return null;
+        }
         try {
             FileInputStream fileInputStream = new FileInputStream(path);
             bitmap = BitmapFactory.decodeStream(fileInputStream);
@@ -112,6 +113,11 @@ public class FileUtils {
         return bitmap;
     }
 
+    /**
+     * 文件重命名
+     * @param srcFileName 原文件名
+     * @return 重命名后文件名，若本地不存在此文件则返回源文件名
+     */
     public static String downloadRename(String srcFileName){
         String parentPath = new File(srcFileName).getParent();
         System.out.println("parentPath = " + parentPath);

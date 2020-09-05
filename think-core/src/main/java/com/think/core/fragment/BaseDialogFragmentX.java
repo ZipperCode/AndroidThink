@@ -44,7 +44,9 @@ public abstract class BaseDialogFragmentX extends DialogFragment implements
      * 标签名
      */
     protected String mTagName;
-
+    /**
+     * 是否使用自定定义的宽高
+     */
     private boolean mIsUseCustomWidthAndHeight = false;
 
     private WeakReference<FragmentActivity> mActivityRef;
@@ -187,11 +189,13 @@ public abstract class BaseDialogFragmentX extends DialogFragment implements
                 );
     }
 
+    @Override
     public String getTagName() {
         return mTagName;
     }
 
 
+    @Override
     public void setTagName(String tagName) {
         this.mTagName = tagName;
     }

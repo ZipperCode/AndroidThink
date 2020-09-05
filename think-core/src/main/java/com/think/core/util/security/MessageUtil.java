@@ -5,17 +5,23 @@ import com.think.core.util.DataTransformUtil;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * 消息摘要算法工具类
+ * @author zzp
+ */
 public class MessageUtil {
 
     private static final String TYPE_MD5 = "MD5";
     private static final String TYPE_SHA_1 = "SHA";
     private static final String TYPE_SHA_256 = "SHA-256";
+    private static final String TYPE_HMAC = "HmacMD5";
 
 
     public static String messageDigestCrypt(String string, String cryptType)
             throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance(cryptType);
-        byte[] result = digest.digest(string.getBytes()); //digest中会执行一次update
+        //digest中会执行一次update
+        byte[] result = digest.digest(string.getBytes());
         return DataTransformUtil.byteToHexString(result);
     }
 
@@ -45,4 +51,5 @@ public class MessageUtil {
         }
         return "";
     }
+
 }

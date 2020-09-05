@@ -1,2 +1,3 @@
-include ':app', ':think-ui', ':think-core'//,':think-business'
+
+include ':app', ':think-ui', ':think-core',"think-vpn",':think-business'
 rootProject.name='AndroidThink'

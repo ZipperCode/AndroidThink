@@ -1,4 +1,4 @@
-package com.think.core.fragment;
+package com.think.core.dialog;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.think.core.R;
+import com.think.core.fragment.IFragment;
 import com.think.core.util.ScreenUtils;
 import com.think.core.util.ToastHelper;
 
@@ -35,11 +36,7 @@ public abstract class BaseDialogFragment extends DialogFragment implements
         View.OnClickListener,
         DialogInterface.OnKeyListener,
         View.OnSystemUiVisibilityChangeListener,
-        IFragment{
-    /**
-     * 布局的根视图
-     */
-    protected View mContentView;
+        IDialog{
     /**
      * 标签名
      */
@@ -73,7 +70,13 @@ public abstract class BaseDialogFragment extends DialogFragment implements
      */
     @Nullable
     @Override
-    public abstract View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState);
+    public  View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
+        View layoutView = inflateView();
+        initView();
+        return layoutView;
+    }
+
+    protected abstract View inflateView();
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -81,8 +84,9 @@ public abstract class BaseDialogFragment extends DialogFragment implements
         view.setOnSystemUiVisibilityChangeListener(this);
     }
 
-    protected void initView() {
-        // TODO subClass implement
+    @Override
+    public void initView() {
+
     }
 
     protected void initData() {
@@ -192,7 +196,6 @@ public abstract class BaseDialogFragment extends DialogFragment implements
         return mTagName;
     }
 
-
     @Override
     public void setTagName(String tagName) {
         this.mTagName = tagName;
@@ -220,7 +223,7 @@ public abstract class BaseDialogFragment extends DialogFragment implements
     }
 
     @Override
-    public void show() {
+    public void showing() {
         if(mActivityRef.get() != null){
             FragmentManager fm = mActivityRef.get().getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
@@ -229,17 +232,21 @@ public abstract class BaseDialogFragment extends DialogFragment implements
     }
 
     @Override
-    public void hide() {
+    public void hiding() {
+        if(mActivityRef.get() != null){
+            FragmentManager fm = mActivityRef.get().getFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.hide(this);
+        }
+    }
+
+    @Override
+    public void dismissing() {
         if(mActivityRef.get() != null){
             FragmentManager fm = mActivityRef.get().getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
             ft.remove(this);
         }
-    }
-
-    @Override
-    public void dispose() {
-
     }
 
     @Override
