@@ -5,56 +5,72 @@ import java.util.Arrays;
 
 public class DnsPacket {
 
+    public static final int MAX_DNS_PACK_SIZE = 512;
+
+    /**
+     * DNS 报头部分
+     */
     public DnsHeader mHeader;
-
+    /**
+     * Question部分
+     */
     public Question[] mQuestions;
-
+    /**
+     * Answer部分
+     */
     public Resource[] mAnswers;
-
-    public Resource[] mAuthoritys;
-
+    /**
+     * Authoritys部分
+     */
+    public Resource[] mAuthorities;
+    /**
+     * Additionals部分
+     */
     public Resource[] mAdditionals;
-
+    /**
+     * 报文大小
+     */
     public int mSize;
 
-    public static DnsPacket fromBytes(ByteBuffer buffer) {
-        if (buffer.limit() < 12){
+    public static DnsPacket parseFromBuffer(ByteBuffer buffer){
+        if (buffer.limit() < DnsHeader.DNS_HEADER_SIZE){
             return null;
         }
-        if (buffer.limit() > 512){
-            return null;
-        }
-
-        DnsPacket packet = new DnsPacket();
-        packet.mSize =  buffer.limit();
-        packet.mHeader = DnsHeader.fromBytes(buffer);
-
-        if (packet.mHeader.mQuestionCount > 2 || packet.mHeader.mAnswerCount > 50 || packet.mHeader.mAuthorityCount > 50 || packet.mHeader.mAdditionalCount > 50) {
+        if (buffer.limit() > MAX_DNS_PACK_SIZE){
             return null;
         }
 
-        packet.mQuestions = new Question[packet.mHeader.mQuestionCount];
-        packet.mAnswers = new Resource[packet.mHeader.mAnswerCount];
-        packet.mAuthoritys = new Resource[packet.mHeader.mAuthorityCount];
-        packet.mAdditionals = new Resource[packet.mHeader.mAdditionalCount];
+        DnsPacket dnsPacket = new DnsPacket();
+        dnsPacket.mSize = buffer.limit();
+        dnsPacket.mHeader = DnsHeader.fromBytes(buffer);
+        if (dnsPacket.mHeader.mQuestionCount > 2
+                || dnsPacket.mHeader.mAnswerCount > 50
+                || dnsPacket.mHeader.mAuthorityCount > 50
+                || dnsPacket.mHeader.mAdditionalCount > 50) {
+            return null;
+        }
+        dnsPacket.mQuestions = new Question[dnsPacket.mHeader.mQuestionCount];
+        dnsPacket.mAnswers = new Resource[dnsPacket.mHeader.mAnswerCount];
+        dnsPacket.mAuthorities = new Resource[dnsPacket.mHeader.mAuthorityCount];
+        dnsPacket.mAdditionals = new Resource[dnsPacket.mHeader.mAdditionalCount];
 
-        for (int i = 0; i < packet.mQuestions.length; i++) {
-            packet.mQuestions[i] = Question.fromBytes(buffer);
+        for (int i = 0; i < dnsPacket.mQuestions.length; i++) {
+            dnsPacket.mQuestions[i] = Question.fromBytes(buffer);
         }
 
-        for (int i = 0; i < packet.mAnswers.length; i++) {
-            packet.mAnswers[i] = Resource.fromBytes(buffer);
+        for (int i = 0; i < dnsPacket.mAnswers.length; i++) {
+            dnsPacket.mAnswers[i] = Resource.fromBytes(buffer);
         }
 
-        for (int i = 0; i < packet.mAuthoritys.length; i++) {
-            packet.mAuthoritys[i] = Resource.fromBytes(buffer);
+        for (int i = 0; i < dnsPacket.mAuthorities.length; i++) {
+            dnsPacket.mAuthorities[i] = Resource.fromBytes(buffer);
         }
 
-        for (int i = 0; i < packet.mAdditionals.length; i++) {
-            packet.mAdditionals[i] = Resource.fromBytes(buffer);
+        for (int i = 0; i < dnsPacket.mAdditionals.length; i++) {
+            dnsPacket.mAdditionals[i] = Resource.fromBytes(buffer);
         }
 
-        return packet;
+        return dnsPacket;
     }
 
     public void toBytes(ByteBuffer buffer) {
@@ -69,8 +85,8 @@ public class DnsPacket {
         if (mAnswers != null){
             mHeader.mAnswerCount = (short) mAnswers.length;
         }
-        if (mAuthoritys != null){
-            mHeader.mAuthorityCount = (short) mAuthoritys.length;
+        if (mAuthorities != null){
+            mHeader.mAuthorityCount = (short) mAuthorities.length;
         }
         if (mAdditionals != null){
             mHeader.mAdditionalCount = (short) mAdditionals.length;
@@ -87,25 +103,28 @@ public class DnsPacket {
         }
 
         for (int i = 0; i < mHeader.mAuthorityCount; i++) {
-            this.mAuthoritys[i].toBytes(buffer);
+            this.mAuthorities[i].toBytes(buffer);
         }
 
         for (int i = 0; i < mHeader.mAdditionalCount; i++) {
             this.mAdditionals[i].toBytes(buffer);
         }
+        buffer.limit(buffer.position());
     }
 
     public static String readDomain(ByteBuffer buffer, int dnsHeaderOffset) {
         StringBuilder sb = new StringBuilder();
         int len = 0;
         while (buffer.hasRemaining() && (len = (buffer.get() & 0xFF)) > 0) {
-            if ((len & 0xc0) == 0xc0)// pointer 高2位为11表示是指针。如：1100 0000
-            {
+            // pointer 高2位为11表示是指针。如：1100 0000，如果域名在Question或者第一个Resources中存在，
+            // 则后续域名使用指针偏移表示
+            if ((len & 0xc0) == 0xc0) {
                 // 指针的取值是前一字节的后6位加后一字节的8位共14位的值。
                 int pointer = buffer.get() & 0xFF;// 低8位
                 pointer |= (len & 0x3F) << 8;// 高6位
 
-                ByteBuffer newBuffer = ByteBuffer.wrap(buffer.array(), dnsHeaderOffset + pointer, dnsHeaderOffset + buffer.limit());
+                ByteBuffer newBuffer = ByteBuffer.wrap(buffer.array(),
+                        dnsHeaderOffset + pointer, dnsHeaderOffset + buffer.limit());
                 sb.append(readDomain(newBuffer, dnsHeaderOffset));
                 return sb.toString();
             } else {
@@ -139,6 +158,7 @@ public class DnsPacket {
                 buffer.put((byte) item.codePointAt(i));
             }
         }
+        buffer.put((byte) 0x00);
     }
 
     @Override
@@ -147,7 +167,7 @@ public class DnsPacket {
                 "mHeader=" + mHeader +
                 ", mQuestions=" + Arrays.toString(mQuestions) +
                 ", mAnswers=" + Arrays.toString(mAnswers) +
-                ", mAuthoritys=" + Arrays.toString(mAuthoritys) +
+                ", mAuthorities=" + Arrays.toString(mAuthorities) +
                 ", mAdditionals=" + Arrays.toString(mAdditionals) +
                 ", mSize=" + mSize +
                 '}';

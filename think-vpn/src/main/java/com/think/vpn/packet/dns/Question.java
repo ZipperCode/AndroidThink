@@ -1,6 +1,5 @@
 package com.think.vpn.packet.dns;
 
-import com.think.vpn.utils.CommonUtil;
 
 import java.nio.ByteBuffer;
 
@@ -71,7 +70,7 @@ public class Question {
     public String toString() {
         return "Question{" +
                 "mQueryDomain='" + mQueryDomain +
-                ", mQueryType=" + CommonUtil.getDnsQueryType(mQueryType) +
+                ", mQueryType=" + mQueryType +
                 ", mQueryClass=" + (mQueryClass == 1 ? "IN" : "1")  +
                 ", mOffset=" + mOffset +
                 ", length=" + length +

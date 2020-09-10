@@ -1,5 +1,8 @@
 package com.think.vpn.packet.dns;
 
+
+import java.nio.ByteBuffer;
+
 public class DnsFlags {
 
     /**
@@ -57,42 +60,54 @@ public class DnsFlags {
     public static DnsFlags parse(short value) {
         int flagsNum = value & 0xFFFF;
         DnsFlags flags = new DnsFlags();
-        flags.mQr = ((flagsNum >> 7) & 0x01) == 1;
-        flags.mOpCode = (flagsNum >> 3) & 0x0F;
-        flags.mAa = ((flagsNum >> 2) & 0x01) == 1;
-        flags.mTc = ((flagsNum >> 1) & 0x01) == 1;
-        flags.mRd = (flagsNum & 0x01) == 1;
-        flags.mRa = (flagsNum >> 15) == 1;
-        flags.mZ = (flagsNum >> 12) & 0x07;
-        flags.mrCode = ((flagsNum >> 8) & 0xF);
+        flags.mQr = ((flagsNum >> 15) & 0x01) == 1;
+        flags.mOpCode = (flagsNum >> 11) & 0x0F;
+        flags.mAa = ((flagsNum >> 10) & 0x01) == 1;
+        flags.mTc = ((flagsNum >> 9) & 0x01) == 1;
+        flags.mRd = ((flagsNum >> 8) & 0x01) == 1;
+        flags.mRa = ((flagsNum >> 7) & 0x01) == 1;
+        flags.mZ = (flagsNum >> 4) & 0x07;
+        flags.mrCode = (flagsNum  & 0xF);
         return flags;
     }
 
     public static short format(DnsFlags dnsFlags){
         short flagNum = 0;
-        flagNum |= (dnsFlags.mQr ? 1 : 0) << 7;
-        flagNum |= (dnsFlags.mOpCode & 0x0F) << 3;
-        flagNum |= (dnsFlags.mAa ? 1 : 0) << 2;
-        flagNum |= (dnsFlags.mTc ? 1 : 0) << 1;
-        flagNum |= dnsFlags.mRd ? 1 : 0;
-        flagNum |= (dnsFlags.mRa ? 1 : 0) << 15;
-        flagNum |= (dnsFlags.mZ & 0x07) << 12;
-        flagNum |= (dnsFlags.mrCode & 0x0F) << 8;
+        flagNum |= (dnsFlags.mQr ? 0x01 : 0x00) << 15;
+        flagNum |= (dnsFlags.mOpCode & 0x0F) << 12;
+        flagNum |= (dnsFlags.mAa ? 0x01 : 0x00) << 11;
+        flagNum |= (dnsFlags.mTc ? 0x01 : 0x00) << 10;
+        flagNum |= (dnsFlags.mRd ? 0x01 : 0x00) << 9;
+        flagNum |= (dnsFlags.mRa ? 0x01 : 0x00) << 8;
+        flagNum |= (dnsFlags.mZ & 0x07) << 4;
+        flagNum |= dnsFlags.mrCode & 0x0F;
         return flagNum;
     }
 
-    @Deprecated
-    public short ToShort() {
-        int m_Flags = 0;
-        m_Flags |= (mQr ? 1 : 0) << 7;
-        m_Flags |= (mOpCode & 0x0F) << 3;
-        m_Flags |= (mAa ? 1 : 0) << 2;
-        m_Flags |= (mTc ? 1 : 0) << 1;
-        m_Flags |= mRd ? 1 : 0;
-        m_Flags |= (mRa ? 1 : 0) << 15;
-        m_Flags |= (mZ & 0x07) << 12;
-        m_Flags |= (mrCode & 0x0F) << 8;
-        return (short) m_Flags;
+    public void toBuffer(ByteBuffer byteBuffer){
+        short flagNum = 0;
+        flagNum |= (this.mQr ? 0x01 : 0x00) << 15;
+        flagNum |= (this.mOpCode & 0x0F) << 12;
+        flagNum |= (this.mAa ? 0x01 : 0x00) << 11;
+        flagNum |= (this.mTc ? 0x01 : 0x00) << 10;
+        flagNum |= (this.mRd ? 0x01 : 0x00) << 9;
+        flagNum |= (this.mRa ? 0x01 : 0x00) << 8;
+        flagNum |= (this.mZ & 0x07) << 4;
+        flagNum |= this.mrCode & 0x0F;
+        byteBuffer.putShort(flagNum);
+    }
+
+    public short toShort() {
+        short flagNum = 0;
+        flagNum |= (this.mQr ? 0x01 : 0x00) << 15;
+        flagNum |= (this.mOpCode & 0x0F) << 12;
+        flagNum |= (this.mAa ? 0x01 : 0x00) << 11;
+        flagNum |= (this.mTc ? 0x01 : 0x00) << 10;
+        flagNum |= (this.mRd ? 0x01 : 0x00) << 9;
+        flagNum |= (this.mRa ? 0x01 : 0x00) << 8;
+        flagNum |= (this.mZ & 0x07) << 4;
+        flagNum |= this.mrCode & 0x0F;
+        return flagNum;
     }
 
     @Override

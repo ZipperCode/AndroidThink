@@ -1,4 +1,4 @@
-package com.think.demo;
+package com.think.vpn;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import com.think.vpn.LocalVpnService;
+import com.think.R;
 
 public class VpnActivity extends AppCompatActivity {
 

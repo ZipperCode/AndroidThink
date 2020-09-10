@@ -53,25 +53,35 @@ public class DnsHeader {
 
     public void toBytes(ByteBuffer buffer) {
         buffer.putShort(this.mTransactionId);
-        buffer.putShort(this.mDnsFlags.ToShort());
+        buffer.putShort(this.mDnsFlags.toShort());
         buffer.putShort(this.mQuestionCount);
         buffer.putShort(this.mAnswerCount);
         buffer.putShort(this.mAuthorityCount);
         buffer.putShort(this.mAdditionalCount);
     }
 
-    static final short OFFSET_ID = 0;
-    static final short OFFSET_FLAGS = 2;
-    static final short OFFSET_QUESTION_COUNT = 4;
-    static final short OFFSET_ANSWER_COUNT = 6;
-    static final short OFFSET_AUTHORITY_COUNT = 8;
-    static final short OFFSET_ADDITIONAL_COUNT = 10;
+    /* ID偏移 */
+    public static final short OFFSET_ID = 0;
+    /* 标志位偏移 */
+    public static final short OFFSET_FLAGS = 2;
+    /* 问题数偏移 */
+    public static final short OFFSET_QUESTION_COUNT = 4;
+    /* 回答数偏移 */
+    public static final short OFFSET_ANSWER_COUNT = 6;
+    /* 授权数 */
+    public static final short OFFSET_AUTHORITY_COUNT = 8;
+    /* 附加偏移 */
+    public static final short OFFSET_ADDITIONAL_COUNT = 10;
 
     private ByteBuffer mData;
     private int mDataOffset;
 
+    public DnsHeader() {
+    }
+
     public DnsHeader(byte[] data, int offset) {
         this.mData = ByteBuffer.wrap(data);
+
         this.mDataOffset = offset;
     }
 

@@ -163,6 +163,7 @@ public class VpnConnection implements Runnable, Closeable {
             LogUtils.info("解析Tcp数据包");
             LogUtils.info(tcpHeader.toString());
 
+
         } else if (ipHeader.getProtocol() == IPHeader.PROTOCOL_UDP) {
             UDPHeader udpHeader = mPacket.mUdpHeader;
             LogUtils.info("解析UDP数据包");
@@ -177,7 +178,7 @@ public class VpnConnection implements Runnable, Closeable {
 //                LogUtils.debug(TAG,"udpHeader length = " + udpHeader.getTotalLength());
 //                LogUtils.debug(TAG,"udpHeader offset = " + udpHeader.offset());
                 dnsData.limit(ipHeader.getTotalLen() - udpHeader.offset());
-                DnsPacket dnsPacket = DnsPacket.fromBytes(dnsData);
+                DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsData);
                 LogUtils.debug(TAG,"dnsPacket = " +dnsPacket);
                 if (dnsPacket != null && dnsPacket.mHeader.mQuestionCount > 0) {
                     // 将数据转发到Dns代理中

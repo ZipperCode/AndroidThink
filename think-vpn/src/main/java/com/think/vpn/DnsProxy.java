@@ -85,7 +85,7 @@ public class DnsProxy implements Runnable {
                 dnsBuffer.clear();
                 dnsBuffer.limit(packet.getLength());
                 try {
-                    DnsPacket dnsPacket = DnsPacket.fromBytes(dnsBuffer);
+                    DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsBuffer);
 //                    LogUtils.debug(TAG,"收到的dnsBuffer包 = " +dnsPacket);
                     if (dnsPacket != null) {
                         LogUtils.debug("DNS代理解析 ： " + dnsPacket);
@@ -202,7 +202,7 @@ public class DnsProxy implements Runnable {
         dnsPacket.mHeader.mAdditionalCount = (short) 0;
 
         // 解析Answer为ResourcePointer
-        ResourcePointer rPointer = new ResourcePointer(rawPacket, question.offset() + question.length());
+        Resource rPointer = new Resource(rawPacket, question.offset() + question.length());
         //
         rPointer.setDomain((short) 0xC00C);
         rPointer.setType(question.mQueryType);

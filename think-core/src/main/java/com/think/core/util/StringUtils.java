@@ -44,4 +44,13 @@ public class StringUtils {
                 (ip & 0xFF);
     }
 
+    public static String byteHexToString(byte [] data){
+        StringBuilder stringBuilder = new StringBuilder(data.length * 2);
+        for (byte b : data){
+            stringBuilder.append(String.format("%02X ",b));
+        }
+        System.out.println(stringBuilder.toString());
+        return stringBuilder.toString();
+    }
+
 }
