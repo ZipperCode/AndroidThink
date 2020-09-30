@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.AssetManager
 import android.content.res.Resources
+import android.os.Build
+import android.view.LayoutInflater
 import dalvik.system.DexClassLoader
 import java.io.File
 import java.lang.reflect.Method
@@ -54,21 +56,30 @@ class ProxyContext(base: Context?) : ContextWrapper(base) {
     @SuppressLint("PrivateApi")
     override fun getSystemService(name: String): Any? {
         if (Context.LAYOUT_INFLATER_SERVICE == name) {
-            val layoutInflaterClass = Class.forName("com.android.internal.policy.PhoneLayoutInflater")
-            val constructor = layoutInflaterClass.getConstructor(Context::class.java)
-            val layoutInflater = constructor.newInstance(this);
-            return layoutInflater
-//            return PhoneLayoutInflater(this)
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P){
+                return LayoutInflater.from(baseContext).cloneInContext(this);
+            }
+            try{
+                if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M){
+                    val layoutInflaterClass = Class.forName("com.android.internal.policy.PhoneLayoutInflater")
+                    val constructor = layoutInflaterClass.getConstructor(Context::class.java)
+                    val layoutInflater = constructor.newInstance(this);
+//                  return PhoneLayoutInflater(this)
+                    return layoutInflater
+                }else{
+                    val policyClass = Class.forName("com.android.internal.policy.PolicyManager")
+                    val addAssetMethod = policyClass.getDeclaredMethod("makeNewLayoutInflater",Context::class.java)
+                    return addAssetMethod.invoke(null,this)
+                }
+            }catch (e: Exception){
+                e.printStackTrace()
+            }
         }
         return super.getSystemService(name)
     }
 
-    override fun getSystemServiceName(serviceClass: Class<*>): String? {
-        return super.getSystemServiceName(serviceClass)
-    }
-
     override fun getAssets(): AssetManager {
-        return super.getAssets()
+        return pluginAssetManager!!
     }
 
     override fun getClassLoader(): ClassLoader {

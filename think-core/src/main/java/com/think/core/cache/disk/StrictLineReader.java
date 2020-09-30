@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.think.core.cache;
+package com.think.core.cache.disk;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;

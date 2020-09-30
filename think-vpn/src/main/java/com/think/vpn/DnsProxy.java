@@ -10,7 +10,6 @@ import com.think.vpn.packet.UDPHeader;
 import com.think.vpn.packet.dns.DnsPacket;
 import com.think.vpn.packet.dns.Question;
 import com.think.vpn.packet.dns.Resource;
-import com.think.vpn.packet.dns.ResourcePointer;
 import com.think.vpn.utils.CommonUtil;
 
 import java.io.IOException;
