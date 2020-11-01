@@ -32,10 +32,14 @@ public class DnsPacket {
      */
     public int mSize;
 
+    // 根据udp数据抽象dns包类
     public static DnsPacket parseFromBuffer(ByteBuffer buffer){
+        // dns数据内容小于dns头长度
         if (buffer.limit() < DnsHeader.DNS_HEADER_SIZE){
             return null;
         }
+
+        // dns数据内容大于dns的最大长度
         if (buffer.limit() > MAX_DNS_PACK_SIZE){
             return null;
         }

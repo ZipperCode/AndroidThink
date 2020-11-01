@@ -42,7 +42,7 @@ public class LocalVpnService extends VpnService implements Runnable {
     /**
      * 一般分包大小 MTU = 1500
      */
-    private static final int MTU_PACK_SIZE = 1500;
+    public static final int MTU_PACK_SIZE = 1500;
     /**
      * SessionName
      */
@@ -71,7 +71,7 @@ public class LocalVpnService extends VpnService implements Runnable {
     /* 拦截网络数据的应用包名 */
     private Set<String> mPackages;
     /* 主线程处理 */
-    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     @Override
     public void onCreate() {
@@ -138,7 +138,6 @@ public class LocalVpnService extends VpnService implements Runnable {
                 .setMtu(MTU_PACK_SIZE)
                 .setSession(SESSION_NAME)
                 .addAddress(VpnConnection.LOCAL_IP_ADDRESS_STR, 24)
-                .addAddress("26.26.26.2", 32)
                 .addAddress("10.8.0.2", 32)
                 .addDnsServer("8.8.8.8")
                 .addDnsServer("10.0.2.3")

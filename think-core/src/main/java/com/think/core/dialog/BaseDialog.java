@@ -41,6 +41,7 @@ public abstract class BaseDialog extends Dialog implements IDialog{
         View layoutView = inflateView();
         setContentView(layoutView);
         initView();
+
     }
 
     @Override

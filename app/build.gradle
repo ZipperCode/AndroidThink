@@ -42,6 +42,4 @@ dependencies {
 
 //    implementation project(":think-study")
 //    implementation project(":think-vpn")
-//    implementation project(":think-ui")
-    implementation 'me.weishu:free_reflection:3.0.1'
 }

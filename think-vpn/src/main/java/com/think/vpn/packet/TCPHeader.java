@@ -83,7 +83,7 @@ public class TCPHeader {
 
     public TCPHeader(byte[] data, int dataOffset) {
         this.mData = ByteBuffer.wrap(data);
-        this.mDataOffset = dataOffset;
+        this.mIpHeaderOffset = dataOffset;
         this.mDataOffset = mIpHeaderOffset + Packet.TCP_HEADER_SIZE;
     }
 
@@ -149,7 +149,7 @@ public class TCPHeader {
     }
 
     public int getHeaderLen() {
-        return (mData.get(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET) >> 4) & 0x0F;
+        return ((mData.get(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET) >> 4) & 0x0F) * 32 / 8;
     }
 
     public int getFlag() {
@@ -166,17 +166,36 @@ public class TCPHeader {
         return size;
     }
 
-    public TCPHeader calcCheckSum() {
+    public synchronized TCPHeader calcCheckSum() {
+        // 首先校验位置零
         this.mData.putShort(mIpHeaderOffset + CHECK_SUM_OFFSET, (short) 0);
-        int checkSum = 0;
-        while (mData.hasRemaining()) {
-            checkSum += mData.getShort();
+        long checkSum = 0;
+
+        // 伪首部12字节 源地址、目标地址、标志、协议、tcp长度
+        ByteBuffer psdHeader = ByteBuffer.allocate(12);
+        psdHeader.putInt(this.mData.getInt(IPHeader.SRC_ADDRESS_OFFSET));
+        psdHeader.putInt(this.mData.getInt(IPHeader.DEST_ADDRESS_OFFSET));
+        psdHeader.put((byte) 0);
+        psdHeader.put(this.mData.get(IPHeader.PROTOCOL_OFFSET));
+        short tcpLength = (short) (this.mData.getShort(IPHeader.TOTAL_LEN_OFFSET) - Packet.IP4_HEADER_SIZE);
+        psdHeader.putShort(tcpLength);
+        psdHeader.flip();
+        // 伪首部累加
+        while (psdHeader.hasRemaining()) {
+            checkSum += psdHeader.getShort();
         }
-        checkSum = (checkSum >> 16) + (checkSum & 0xFFFF);
-        int hight = checkSum >> 16;
-        while (hight > 0) {
-            checkSum += hight;
-            hight = checkSum >> 16;
+        // 从ip头部偏移开始
+        this.mData.position(mIpHeaderOffset);
+        // 数据累加
+        while (mData.hasRemaining()) {
+            try {
+                checkSum += mData.getShort();
+            } catch (Exception e) {
+                mData.put((byte)0);
+            }
+        }
+        while ((checkSum >> 16) > 0){
+            checkSum = (checkSum >> 16) + checkSum & 0xFFFF;
         }
         short sum = (short) ~(checkSum & 0xFFFF);
         mData.putShort(mIpHeaderOffset + CHECK_SUM_OFFSET, sum);
@@ -187,20 +206,39 @@ public class TCPHeader {
         return mData.getShort(mIpHeaderOffset + CHECK_SUM_OFFSET) & 0xFFFF;
     }
 
-    public static boolean checkCheckSum(byte[] data) {
-        ByteBuffer wrap = ByteBuffer.wrap(data);
+    public static boolean checkCrc(TCPHeader tcpHeader){
         int checkSum = 0;
-        while (wrap.hasRemaining()) {
-            checkSum += wrap.getShort();
+        tcpHeader.mData.position(tcpHeader.mIpHeaderOffset);
+        ByteBuffer buffer = tcpHeader.mData;
+        ByteBuffer tcpBuffer = buffer.slice();
+        ByteBuffer psdHeader = ByteBuffer.allocate(12);
+        psdHeader.putInt(buffer.getInt(IPHeader.SRC_ADDRESS_OFFSET));
+        psdHeader.putInt(buffer.getInt(IPHeader.DEST_ADDRESS_OFFSET));
+        psdHeader.put((byte) 0);
+        psdHeader.put(buffer.get(IPHeader.PROTOCOL_OFFSET));
+        short tcpLength = (short) (buffer.getShort(IPHeader.TOTAL_LEN_OFFSET) - Packet.IP4_HEADER_SIZE);
+        psdHeader.putShort(tcpLength);
+        psdHeader.flip();
+        // 伪首部累加
+        while (psdHeader.hasRemaining()) {
+            checkSum += psdHeader.getShort();
         }
-        checkSum = (checkSum >> 16) + checkSum & 0xFFFF;
-        int hight = checkSum >> 16;
-        while (hight > 0) {
-            checkSum += hight;
-            hight = checkSum >> 16;
+
+        while (tcpBuffer.hasRemaining()) {
+            try{
+                checkSum += tcpBuffer.getShort();
+            }catch (Exception e){
+                tcpBuffer.put((byte)0);
+            }
         }
+        while ((checkSum >> 16) > 0){
+            // 前十六位和后十六位相加
+            checkSum = (checkSum >> 16) + checkSum & 0xFFFF;
+        }
+
         short sum = (short) ~(checkSum & 0xFFFF);
-        return sum == 0;
+        short packetCheckSum =  tcpHeader.mData.getShort(tcpHeader.mIpHeaderOffset + CHECK_SUM_OFFSET);
+        return sum == packetCheckSum;
     }
 
     public TCPHeader setUrgentPoint(int urgentPoint) {
@@ -212,16 +250,24 @@ public class TCPHeader {
         return mData.getShort(mIpHeaderOffset + URGENT_POINTER_OFFSET) & 0xFFFF;
     }
 
+    public ByteBuffer data() {
+        return mData;
+    }
+
+    public int offset() {
+        return mIpHeaderOffset;
+    }
+
     @NonNull
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("TCPHeader {").append("\r\n")
-                .append("源端口为：").append(getSrcPort()).append("\r\n")
+                .append("源端口为：").append(getSrcPort()).append(",")
                 .append("目的端口为：").append(getDestPort()).append("\r\n")
                 .append("序列号为：").append(getSeqNo()).append("\r\n")
                 .append("确认号为：").append(getAckNo()).append("\r\n")
-                .append("TCP首部长度为：").append(getHeaderLen()).append("\r\n")
+                .append("TCP首部长度为：").append(getHeaderLen()).append(",")
                 .append("标志位：[");
         int flag = getFlag();
         stringBuilder.append("URG=").append((flag & URG) == 0 ? 0 : 1).append(",")
@@ -229,10 +275,10 @@ public class TCPHeader {
                 .append("PSH=").append((flag & PSH) == 0 ? 0 : 1).append(",")
                 .append("RST=").append((flag & RST) == 0 ? 0 : 1).append(",")
                 .append("SYN=").append((flag & SYN) == 0 ? 0 : 1).append(",")
-                .append("FIN=").append((flag & FIN) == 0 ? 0 : 1).append("]\r\n");
+                .append("FIN=").append((flag & FIN) == 0 ? 0 : 1).append("],");
 
         stringBuilder.append("窗口大小：").append(getWindowSize()).append("\r\n")
-                .append("校验和：").append(getCheckSum()).append("\r\n")
+                .append("校验和：").append(getCheckSum()).append(",")
                 .append("紧急指针：").append(getUrgentPointer()).append("\r\n}");
 
 

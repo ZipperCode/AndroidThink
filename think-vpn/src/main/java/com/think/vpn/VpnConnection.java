@@ -1,8 +1,5 @@
 package com.think.vpn;
 
-import android.net.VpnService;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -21,11 +18,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -67,23 +61,26 @@ public class VpnConnection implements Runnable, Closeable {
     private final int mServerPort;
     private String proxyHost;
     private int proxyPort;
+
     /**
      * fd获取的输入输出流
      */
     private FileInputStream mFis;
     private FileOutputStream mFos;
 
-    private ByteBuffer mReadPacketBuffer;
+    private final ByteBuffer mReadPacketBuffer;
     /**
      * 本地地址
      */
-    private int mLocalIpAddress;
+    private final int mLocalIpAddress;
     /**
      * 数据包类
      */
-    private Packet mPacket;
+    private final Packet mPacket;
 
     private final LocalVpnService mLocalVpnService;
+
+    private boolean isStop = false;
 
     public VpnConnection(LocalVpnService vpnService,
                          ParcelFileDescriptor mParcelFileDescriptor,
@@ -100,101 +97,149 @@ public class VpnConnection implements Runnable, Closeable {
         this.mReadPacketBuffer = ByteBuffer.allocate(MAX_PACKET_SIZE);
         this.mPacket = new Packet(mReadPacketBuffer);
         this.mLocalIpAddress = CommonUtil.ip2Int(LOCAL_IP_ADDRESS_STR);
-        mLocalTcpProxyServer = new LocalTcpProxyServer(0);
+        this.mLocalTcpProxyServer = new LocalTcpProxyServer(this, 0);
         this.mDnsProxy = new DnsProxy(this);
     }
 
     @Override
     public void run() {
-//        try{
-//            Log.i(TAG,"开始Socket连接。。。");
-//            final SocketAddress serverAddress = new InetSocketAddress(mServerName,mServerPort);
-//            for (int attempt = 0; attempt < 3; ++attempt) {
-//                // 连接重试
-//                if (connect(serverAddress)) {
-//                    attempt = 0;
-//                }
-//                // 休眠后重新连接
-//                Thread.sleep(3000);
-//            }
-//        }catch (IOException | InterruptedException e) {
-//            e.printStackTrace();
-//            Log.e(TAG,"连接出现错误");
-//        }
         ThreadManager.getInstance().execPoolFuture(mDnsProxy);
-        readPacket();
+//        ThreadManager.getInstance().execPoolFuture(mLocalTcpProxyServer);
+        readVpnPacket();
     }
 
 
-
-    public boolean protect(DatagramSocket socket){
+    public boolean protect(DatagramSocket socket) {
         return mLocalVpnService.protect(socket);
     }
 
-    public boolean protect(Socket socket){
+    public boolean protect(Socket socket) {
         return mLocalVpnService.protect(socket);
     }
 
-    public void readPacket() {
+    public void readVpnPacket() {
         LogUtils.debug("读取数据包");
         try {
             int readSize = 0;
             mFis = new FileInputStream(mParcelFileDescriptor.getFileDescriptor());
             mFos = new FileOutputStream(mParcelFileDescriptor.getFileDescriptor());
-            while (readSize != -1 && !Thread.interrupted()) {
+            boolean idle = false;
+            while (!Thread.interrupted() && !isStop) {
+                idle = true;
                 while ((readSize = mFis.read(mReadPacketBuffer.array())) > 0) {
+                    mReadPacketBuffer.clear();
                     onIpPacketReceived(readSize);
+                    idle = false;
+                }
+                if (idle) {
+                    Thread.sleep(10);
                 }
             }
         } catch (IOException e) {
             LogUtils.error("IO 异常");
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             LogUtils.info(TAG, "调用finally方法");
             IoUtils.close(this);
         }
     }
 
-    public void onIpPacketReceived(int readSize) {
+    public void onIpPacketReceived(int readSize) throws IOException {
         IPHeader ipHeader = mPacket.mIpHeader;
-//        System.out.println("收到ip数据包");
-//        System.out.println(ipHeader);
+        ipHeader.mData.limit(readSize);
+//        System.out.println("收到ip数据包 ： ip协议类型 = " + ipHeader.getProtocol());
         if (ipHeader.getProtocol() == IPHeader.PROTOCOL_TCP) {
-            TCPHeader tcpHeader = mPacket.mTcpHeader;
-            LogUtils.info("解析Tcp数据包");
-            LogUtils.info(tcpHeader.toString());
-
-
+            receiveTcpPacket(ipHeader, readSize);
         } else if (ipHeader.getProtocol() == IPHeader.PROTOCOL_UDP) {
-            UDPHeader udpHeader = mPacket.mUdpHeader;
-            LogUtils.info("解析UDP数据包");
-//            LogUtils.info(udpHeader.toString());
-            if (ipHeader.getSourceIpAddress() == mLocalIpAddress && udpHeader.getDestPort() == 53) {
-                LogUtils.info("本地发出的udp数据");
-                ByteBuffer data = udpHeader.data();
-                data.position(udpHeader.offset());
-                ByteBuffer dnsData = data.slice();
-                dnsData.clear();
-//                LogUtils.debug(TAG,"ipHeader length = " + ipHeader.getTotalLen());
-//                LogUtils.debug(TAG,"udpHeader length = " + udpHeader.getTotalLength());
-//                LogUtils.debug(TAG,"udpHeader offset = " + udpHeader.offset());
-                dnsData.limit(ipHeader.getTotalLen() - udpHeader.offset());
-                DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsData);
-                LogUtils.debug(TAG,"dnsPacket = " +dnsPacket);
-                if (dnsPacket != null && dnsPacket.mHeader.mQuestionCount > 0) {
-                    // 将数据转发到Dns代理中
-                    mDnsProxy.onDnsRequestReceived(ipHeader, udpHeader, dnsPacket);
-                }
-            }
-
+            receiveUdpPacket(ipHeader);
         }
     }
 
-    public void sendUdpPacket(Packet packet){
+    private void receiveTcpPacket(IPHeader ipHeader, int size) throws IOException {
+        TCPHeader tcpHeader = mPacket.mTcpHeader;
+        LogUtils.info("解析Tcp数据包，源地址为："
+                + CommonUtil.int2Ip(ipHeader.getSourceIpAddress())
+                + ":" + tcpHeader.getSrcPort()
+                + "目标地址为："
+                + CommonUtil.int2Ip(ipHeader.getDestAddress())
+                + ":" + tcpHeader.getDestPort());
+        if (ipHeader.getSourceIpAddress() == mLocalIpAddress) {
+
+        }
+
+        if (tcpHeader.getSrcPort() == mLocalTcpProxyServer.getProxyPort()) {
+            LogUtils.debug(TAG, "收到本地Tcp代理服务器的数据");
+            Session session = mLocalTcpProxyServer.getSession(tcpHeader.getDestPort());
+            if (session != null) {
+                ipHeader.setSourceAddress(session.remoteIP);
+                tcpHeader.setSrcPort(session.remotePort);
+                ipHeader.setDestinationAddress(mLocalIpAddress);
+                mFos.write(ipHeader.mData.array(), 0, size);
+            }
+        } else {
+            int key = tcpHeader.getSrcPort();
+            Session session = mLocalTcpProxyServer.getSession(key);
+            if (session == null || session.remoteIP != ipHeader.getDestAddress() || session.remotePort
+                    != tcpHeader.getDestPort()) {
+                session = mLocalTcpProxyServer.createSession(key, ipHeader.getDestAddress(), tcpHeader
+                        .getDestPort());
+            }
+
+            session.packetSent++; //注意顺序
+//            Log.e(TAG, "ip = " + ipHeader);
+//            Log.e(TAG, "tcp = " + tcpHeader);
+            int tcpDataSize = ipHeader.getTotalLen() - ipHeader.getHeaderLength() - tcpHeader.getHeaderLen();
+
+
+            //丢弃tcp握手的第二个ACK报文。因为客户端发数据的时候也会带上ACK，这样可以在服务器Accept之前分析出HOST信息。
+            if (session.packetSent == 2 && tcpDataSize == 0) {
+                return;
+            }
+
+//            ipHeader.setSourceAddress(ipHeader.getDestAddress());
+            ipHeader.setDestinationAddress(mLocalIpAddress);
+            tcpHeader.setDestPort(mLocalTcpProxyServer.getProxyPort());
+//            Log.e(TAG, "ip = " + ipHeader);
+//            Log.e(TAG, "tcp = " + tcpHeader);
+            Log.e(TAG,"检查数据包checkSum ： tcp = "  + TCPHeader.checkCrc(tcpHeader));
+            mFos.write(ipHeader.mData.array(), 0, size);
+        }
+    }
+
+    private void receiveUdpPacket(IPHeader ipHeader) {
+        UDPHeader udpHeader = mPacket.mUdpHeader;
+//        LogUtils.info("解析UDP数据包，源地址为：" + CommonUtil.int2Ip(ipHeader.getSourceIpAddress()) + ",目的端口为：" + udpHeader.getDestPort());
+//            LogUtils.info(udpHeader.toString());
+        if (ipHeader.getSourceIpAddress() == mLocalIpAddress && udpHeader.getDestPort() == 53) {
+//            LogUtils.info("本地发出的udp数据");
+            // 获取udp数据，包括头和实际数据
+            ByteBuffer data = udpHeader.data();
+            // 设置位置到数据部分，后面发送的时候直接发送数据部分
+            data.position(udpHeader.offset());
+            // 将数据部分进行切分
+            ByteBuffer dnsData = data.slice();
+            // 标志位复位
+            dnsData.clear();
+            // 设置数据长度为ip头长度-udp头长度 ipHeader-UdpHeader-Data
+            dnsData.limit(ipHeader.getTotalLen() - udpHeader.offset());
+            // 构造一个dns数据包
+            DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsData);
+            if (dnsPacket != null && dnsPacket.mHeader.mQuestionCount > 0) {
+                // 将数据转发到Dns代理中
+                mDnsProxy.onDnsRequestReceived(ipHeader, udpHeader, dnsPacket);
+            }
+        }
+    }
+
+
+    public void sendUdpPacket(Packet packet) {
         try {
-            mFos.write(packet.mData,packet.mIpHeader.mDataOffset,packet.mIpHeader.getTotalLen());
+            Log.e(TAG,"插件udp checkSum = " + UDPHeader.checkCrc(packet.mUdpHeader));
+            mFos.write(packet.mData, packet.mIpHeader.mDataOffset, packet.mIpHeader.getTotalLen());
         } catch (IOException e) {
             e.printStackTrace();
-            LogUtils.error(TAG,"sendUdpPacket error");
+            LogUtils.error(TAG, "sendUdpPacket error");
         }
     }
 

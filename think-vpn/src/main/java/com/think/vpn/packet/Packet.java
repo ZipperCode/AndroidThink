@@ -1,6 +1,7 @@
 package com.think.vpn.packet;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class Packet {
     /**
@@ -26,6 +27,8 @@ public class Packet {
 
     public UDPHeader mUdpHeader;
 
+    public boolean isTCP;
+
     public byte[] mData;
 
     public Packet(ByteBuffer data){
@@ -36,4 +39,17 @@ public class Packet {
     }
 
 
+    @Override
+    public String toString() {
+        return isTCP ? "Packet{" +
+                "mIpHeader=" + mIpHeader +
+                ", mTcpHeader=" + mTcpHeader +
+                ", mData=" + Arrays.toString(mData) +
+                '}':
+                "Packet{" +
+                        "mIpHeader=" + mIpHeader +
+                        ", mUdpHeader=" + mUdpHeader +
+                        ", mData=" + Arrays.toString(mData) +
+                        '}';
+    }
 }

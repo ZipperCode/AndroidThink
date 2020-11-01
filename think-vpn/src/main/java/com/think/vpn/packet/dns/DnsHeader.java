@@ -41,7 +41,7 @@ public class DnsHeader {
 
 
     public static DnsHeader fromBytes(ByteBuffer buffer) {
-        DnsHeader header = new DnsHeader(buffer.array(), buffer.arrayOffset() + buffer.position());
+        DnsHeader header = new DnsHeader(buffer.array(),  buffer.position());
         header.mTransactionId = buffer.getShort();
         header.mDnsFlags = DnsFlags.parse(buffer.getShort());
         header.mQuestionCount = buffer.getShort();

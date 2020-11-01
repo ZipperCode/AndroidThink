@@ -22,6 +22,7 @@ public class Recycler {
 
     public View get(int type){
 
+        return null;
     }
 
 }

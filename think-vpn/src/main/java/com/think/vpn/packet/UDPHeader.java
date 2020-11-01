@@ -68,20 +68,71 @@ public class UDPHeader {
     }
 
     public UDPHeader calcCheckSum(){
-        this.mData.rewind();
         int checkSum = 0;
         this.mData.putShort(mIpHeaderOffset + CHECK_SUM_OFFSET,(short)0);
-        while (this.mData.hasRemaining()){
-            checkSum += this.mData.getShort();
+
+        // 伪首部12字节 源地址、目标地址、标志、协议、tcp长度
+        ByteBuffer psdHeader = ByteBuffer.allocate(12);
+        psdHeader.putInt(this.mData.getInt(IPHeader.SRC_ADDRESS_OFFSET));
+        psdHeader.putInt(this.mData.getInt(IPHeader.DEST_ADDRESS_OFFSET));
+        psdHeader.put((byte) 0);
+        psdHeader.put(this.mData.get(IPHeader.PROTOCOL_OFFSET));
+        short udpLength = (short) (this.mData.getShort(IPHeader.TOTAL_LEN_OFFSET) - Packet.IP4_HEADER_SIZE);
+        psdHeader.putShort(udpLength);
+        psdHeader.flip();
+        // 伪首部累加
+        while (psdHeader.hasRemaining()) {
+            checkSum += psdHeader.getShort();
         }
-        checkSum = (checkSum >> 16) + (checkSum & 0xFFFF);
-        int hight = checkSum >> 16;
-        while (hight > 0){
-            checkSum += hight;
-            hight = checkSum >> 16;
+        this.mData.position(this.mIpHeaderOffset);
+        ByteBuffer udpBuffer = mData.slice();
+        while (udpBuffer.hasRemaining()){
+            try {
+                checkSum += udpBuffer.getShort();
+            } catch (Exception e) {
+                udpBuffer.put((byte)0);
+            }
+        }
+        while ((checkSum >> 16) > 0){
+            checkSum = (checkSum >> 16) + checkSum & 0xFFFF;
         }
         this.mData.putShort(mIpHeaderOffset + CHECK_SUM_OFFSET,(short)~(checkSum & 0xFFFF));
         return this;
+    }
+
+    public static boolean checkCrc(UDPHeader udpHeader){
+        long checkSum = 0;
+        ByteBuffer buffer = udpHeader.mData;
+        buffer.position(udpHeader.mIpHeaderOffset);
+        ByteBuffer psdHeader = ByteBuffer.allocate(12);
+        psdHeader.putInt(buffer.getInt(IPHeader.SRC_ADDRESS_OFFSET));
+        psdHeader.putInt(buffer.getInt(IPHeader.DEST_ADDRESS_OFFSET));
+        psdHeader.put((byte) 0);
+        psdHeader.put(buffer.get(IPHeader.PROTOCOL_OFFSET));
+        short tcpLength = (short) (buffer.getShort(IPHeader.TOTAL_LEN_OFFSET) - Packet.IP4_HEADER_SIZE);
+        psdHeader.putShort(tcpLength);
+        psdHeader.flip();
+        // 伪首部累加
+        while (psdHeader.hasRemaining()) {
+            checkSum += psdHeader.getShort();
+        }
+
+        ByteBuffer udpBuffer = buffer.slice();
+        while (udpBuffer.hasRemaining()){
+            try {
+                checkSum += udpBuffer.getShort();
+            } catch (Exception e) {
+                udpBuffer.put((byte)0);
+            }
+        }
+        short packetCheckSum =  udpHeader.mData.getShort(udpHeader.mIpHeaderOffset + CHECK_SUM_OFFSET);
+        checkSum -= packetCheckSum;
+        while ((checkSum >> 16) > 0){
+            checkSum = (checkSum >> 16) + checkSum & 0xFFFF;
+        }
+        short sum = (short) ~(checkSum & 0xFFFF);
+
+        return sum == packetCheckSum;
     }
 
     public ByteBuffer data() {
@@ -95,8 +146,6 @@ public class UDPHeader {
     public int offset(){
         return mDataOffset;
     }
-
-
 
     @Override
     public String toString() {
