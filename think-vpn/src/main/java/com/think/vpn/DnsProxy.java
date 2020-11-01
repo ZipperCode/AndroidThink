@@ -51,9 +51,12 @@ public class DnsProxy implements Runnable {
 
     private final VpnConnection mVpnConnection;
 
+    private final Packet mPacket;
+
     public DnsProxy(VpnConnection vpnConnection) {
         this.mVpnConnection = vpnConnection;
         this.mQueryArray = new SparseArray<QueryState>();
+        mPacket = new Packet(RECEIVE_BUFFER);
         try {
             this.mClient = new DatagramSocket();
         } catch (SocketException e) {
@@ -65,9 +68,8 @@ public class DnsProxy implements Runnable {
     public void run() {
         try {
             int headerLength = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
-            Packet packet = new Packet(ByteBuffer.wrap(RECEIVE_BUFFER));
-            packet.mIpHeader.fullDefault();
-            packet.isTCP = false;
+            mPacket.mIpHeader.fullDefault();
+            mPacket.isTCP = false;
             ByteBuffer dnsBuffer = ByteBuffer.wrap(RECEIVE_BUFFER);
             // 将position移动到数据区
             dnsBuffer.position(headerLength);
@@ -81,7 +83,7 @@ public class DnsProxy implements Runnable {
                 mClient.receive(datagramPacket);
                 dnsBuffer.clear();
                 dnsBuffer.limit(datagramPacket.getLength());
-                onDnsResponseReceived(packet,dnsBuffer);
+                onDnsResponseReceived(dnsBuffer);
             }
         } catch (IOException e) {
             LogUtils.error(TAG, e.getMessage());
@@ -143,44 +145,79 @@ public class DnsProxy implements Runnable {
     }
 
 
-    private void onDnsResponseReceived(Packet packet, ByteBuffer dnsBuffer) {
+    private void onDnsResponseReceived(ByteBuffer dnsBuffer) {
         // dnsBuffer和数据报使用同一个缓冲区，直接解析dnsBuffer
-        DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsBuffer);
+        int transactionId = dnsBuffer.getShort(0);
+        int dnsSize = dnsBuffer.limit();
+        Log.e(TAG,"transactionId = " + transactionId + ",dnsSize = " +dnsSize);
+//        DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsBuffer);
 
-//        LogUtils.debug(TAG, "收到的dnsBuffer包 = " + dnsPacket);
-        if (dnsPacket != null) {
-            LogUtils.debug("DNS代理解析 ： " + dnsPacket);
-            QueryState state = null;
-            synchronized (mQueryArray) {
-                // 取出发送前存入的真实应用头信息
-                state = mQueryArray.get(dnsPacket.mHeader.mTransactionId);
-                if (state != null) {
-                    mQueryArray.remove(dnsPacket.mHeader.mTransactionId);
-                }
-            }
-            LogUtils.debug("onDnsResponseReceived >>> state = " + state);
+        QueryState state = null;
+        synchronized (mQueryArray) {
+            // 取出发送前存入的真实应用头信息
+            state = mQueryArray.get(transactionId);
             if (state != null) {
-                //DNS污染，默认污染海外网站
-                // dnsPollution(udpHeader.dataByte(), dnsPacket);
-//                dnsPacket.mHeader.setTransactionId(state.clientQueryId);
-                dnsBuffer.putShort(0, state.clientQueryId);
-                // 响应数据源地址伪装成请求的目的地址
-                packet.mIpHeader.setSourceAddress(state.remoteIp)
-                        // 目标地址伪装为源地址
-                        .setDestinationAddress(state.clientIp)
-                        // 设置协议类型
-                        .setProtocol(Packet.UDP_PROTOCOL)
-                        // 设置数据包长度，头长度 + 数据长度
-                        .setTotalLen(Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE + dnsPacket.mSize);
-                packet.mUdpHeader.setSrcPort(state.remotePort)
-                        .setDestPort(state.clientPort)
-                        .setTotalLength(Packet.UDP_HEADER_SIZE + dnsPacket.mSize);
-                Log.e(TAG,"dnsPacket == >" + dnsPacket);
-                Log.e(TAG,"Packet == >" + packet);
-                // 将数据包通过VpnService发送出去
-                mVpnConnection.sendUdpPacket(packet);
+                mQueryArray.remove(transactionId);
             }
         }
+        LogUtils.debug("onDnsResponseReceived >>> state = " + state);
+        if (state != null) {
+            //DNS污染，默认污染海外网站
+            // dnsPollution(udpHeader.dataByte(), dnsPacket);
+//                dnsPacket.mHeader.setTransactionId(state.clientQueryId);
+            dnsBuffer.putShort(0, state.clientQueryId);
+            // 响应数据源地址伪装成请求的目的地址
+            mPacket.mIpHeader
+                    .setSourceAddress(state.remoteIp)
+                    // 目标地址伪装为源地址
+                    .setDestinationAddress(state.clientIp)
+                    // 设置协议类型
+                    .setProtocol(Packet.UDP_PROTOCOL)
+                    // 设置数据包长度，头长度 + 数据长度
+                    .setTotalLen(Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE + dnsSize);
+            mPacket.mUdpHeader
+                    .setSrcPort(state.remotePort)
+                    .setDestPort(state.clientPort)
+                    .setTotalLength(Packet.UDP_HEADER_SIZE + dnsSize);
+            Log.e(TAG,"Packet == >" + mPacket);
+            // 将数据包通过VpnService发送出去
+            mVpnConnection.sendUdpPacket(mPacket);
+        }
+
+//        LogUtils.debug(TAG, "收到的dnsBuffer包 = " + dnsPacket);
+//        if (dnsPacket != null) {
+//            LogUtils.debug("DNS代理解析 ： " + dnsPacket);
+//            QueryState state = null;
+//            synchronized (mQueryArray) {
+//                // 取出发送前存入的真实应用头信息
+//                state = mQueryArray.get(dnsPacket.mHeader.mTransactionId);
+//                if (state != null) {
+//                    mQueryArray.remove(dnsPacket.mHeader.mTransactionId);
+//                }
+//            }
+//            LogUtils.debug("onDnsResponseReceived >>> state = " + state);
+//            if (state != null) {
+//                //DNS污染，默认污染海外网站
+//                // dnsPollution(udpHeader.dataByte(), dnsPacket);
+////                dnsPacket.mHeader.setTransactionId(state.clientQueryId);
+//                dnsBuffer.putShort(0, state.clientQueryId);
+//                // 响应数据源地址伪装成请求的目的地址
+//                mPacket.mIpHeader.setSourceAddress(state.remoteIp)
+//                        // 目标地址伪装为源地址
+//                        .setDestinationAddress(state.clientIp)
+//                        // 设置协议类型
+//                        .setProtocol(Packet.UDP_PROTOCOL)
+//                        // 设置数据包长度，头长度 + 数据长度
+//                        .setTotalLen(Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE + dnsPacket.mSize);
+//                mPacket.mUdpHeader.setSrcPort(state.remotePort)
+//                        .setDestPort(state.clientPort)
+//                        .setTotalLength(Packet.UDP_HEADER_SIZE + dnsPacket.mSize);
+//                Log.e(TAG,"dnsPacket == >" + dnsPacket);
+//                Log.e(TAG,"Packet == >" + mPacket);
+//                // 将数据包通过VpnService发送出去
+//                mVpnConnection.sendUdpPacket(mPacket);
+//            }
+//        }
 
 
     }

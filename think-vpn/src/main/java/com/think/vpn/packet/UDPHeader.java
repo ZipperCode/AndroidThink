@@ -150,13 +150,13 @@ public class UDPHeader {
     @Override
     public String toString() {
         return "UDPHeader{" +
-                "源端口 = " + getSrcPort() + "\n" +
-                "目标端口 = " + getDestPort() +"\n" +
-                "长度 = " + getTotalLength() +"\n" +
+                "源端口 = " + getSrcPort() + ",\t" +
+                "目标端口 = " + getDestPort() +",\t" +
+                "长度 = " + getTotalLength() +",\t" +
                 "校验和 = 0x" + Integer.toHexString(mData
-                .getShort(mIpHeaderOffset + CHECK_SUM_OFFSET)) + "\n" +
+                .getShort(mIpHeaderOffset + CHECK_SUM_OFFSET)) + "\t" +
                 ", mIpHeaderOffset=" + mIpHeaderOffset +
                 ", mDataOffset=" + mDataOffset +
-                '}';
+                "}\n";
     }
 }

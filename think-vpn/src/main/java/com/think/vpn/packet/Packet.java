@@ -38,6 +38,12 @@ public class Packet {
         mUdpHeader = new UDPHeader(mData,IP4_HEADER_SIZE);
     }
 
+    public Packet(byte[] data){
+        this.mData = data;
+        mIpHeader = new IPHeader(mData,IP4_HEADER_SIZE);
+        mTcpHeader = new TCPHeader(mData,IP4_HEADER_SIZE);
+        mUdpHeader = new UDPHeader(mData,IP4_HEADER_SIZE);
+    }
 
     @Override
     public String toString() {
