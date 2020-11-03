@@ -201,16 +201,16 @@ public class TCPHeader {
         psdHeader.flip();
         // 伪首部累加
         while (psdHeader.hasRemaining()) {
-            checkSum += psdHeader.getShort();
+            checkSum += psdHeader.getShort() & 0xFFFF;
         }
         // 从ip头部偏移开始
         this.mData.position(mIpHeaderOffset);
         // 数据累加
         while (mData.hasRemaining()) {
             try {
-                checkSum += mData.getShort();
+                checkSum += mData.getShort() & 0xFFFF;
             } catch (Exception e) {
-                checkSum += (mData.get() << 8);
+                checkSum += (mData.get() << 8) & 0xFFFF;
             }
         }
         while ((checkSum >> 16) > 0){
@@ -225,31 +225,32 @@ public class TCPHeader {
         return mData.getShort(mIpHeaderOffset + CHECK_SUM_OFFSET) & 0xFFFF;
     }
 
-    public static boolean checkCrc(TCPHeader tcpHeader){
-        int checkSum = 0;
-        tcpHeader.mData.position(tcpHeader.mIpHeaderOffset);
-        ByteBuffer buffer = tcpHeader.mData;
-        ByteBuffer tcpBuffer = buffer.slice();
+    public synchronized static boolean checkCrc(TCPHeader tcpHeader){
+        long checkSum = 0;
+        ByteBuffer newBuffer = ByteBuffer.wrap(tcpHeader.mData.array());
+        newBuffer.position(tcpHeader.mIpHeaderOffset);
+        ByteBuffer tcpBuffer = newBuffer.slice();
         ByteBuffer psdHeader = ByteBuffer.allocate(12);
-        psdHeader.putInt(buffer.getInt(IPHeader.SRC_ADDRESS_OFFSET));
-        psdHeader.putInt(buffer.getInt(IPHeader.DEST_ADDRESS_OFFSET));
+        psdHeader.putInt(newBuffer.getInt(IPHeader.SRC_ADDRESS_OFFSET));
+        psdHeader.putInt(newBuffer.getInt(IPHeader.DEST_ADDRESS_OFFSET));
         psdHeader.put((byte) 0);
-        psdHeader.put(buffer.get(IPHeader.PROTOCOL_OFFSET));
-        short tcpLength = (short) (buffer.getShort(IPHeader.TOTAL_LEN_OFFSET) - Packet.IP4_HEADER_SIZE);
+        psdHeader.put(newBuffer.get(IPHeader.PROTOCOL_OFFSET));
+        short tcpLength = (short) (newBuffer.getShort(IPHeader.TOTAL_LEN_OFFSET) - Packet.IP4_HEADER_SIZE);
         psdHeader.putShort(tcpLength);
         psdHeader.flip();
         // 伪首部累加
         while (psdHeader.hasRemaining()) {
-            checkSum += psdHeader.getShort();
+            checkSum += psdHeader.getShort() & 0xFFFF;
         }
 
         while (tcpBuffer.hasRemaining()) {
             try{
-                checkSum += tcpBuffer.getShort();
+                checkSum += tcpBuffer.getShort() & 0xFFFF;
             }catch (Exception e){
-                tcpBuffer.put((byte)0);
+                checkSum += ((tcpBuffer.get() << 8) & 0xFFFF);
             }
         }
+        checkSum -= tcpHeader.getCheckSum();
         while ((checkSum >> 16) > 0){
             // 前十六位和后十六位相加
             checkSum = (checkSum >> 16) + checkSum & 0xFFFF;

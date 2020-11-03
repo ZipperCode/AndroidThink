@@ -112,7 +112,7 @@ public class IPHeader {
     }
 
     public int getServiceType() {
-        return mData.get(SERVICE_TYPE_OFFSET);
+        return mData.get(SERVICE_TYPE_OFFSET) & 0xFF;
     }
 
     public IPHeader setTotalLen(int totalLen) {
@@ -121,7 +121,7 @@ public class IPHeader {
     }
 
     public int getTotalLen() {
-        return mData.getShort(TOTAL_LEN_OFFSET);
+        return mData.getShort(TOTAL_LEN_OFFSET) & 0xFFFF;
     }
 
     public IPHeader setIdentifier(int identifier) {
@@ -134,7 +134,7 @@ public class IPHeader {
     }
 
     public IPHeader setSliceFlag(int sliceFlag) {
-        this.mData.put(SLICE_OFFSET, (byte) ((sliceFlag & 0xF) << 1));
+        this.mData.put(SLICE_OFFSET, (byte) ((sliceFlag & 0xF) << 5));
         return calcCheckSum();
     }
 
@@ -144,14 +144,15 @@ public class IPHeader {
 
     public IPHeader setSlice(int slice) {
         byte temp = this.mData.get(SLICE_OFFSET);
-        temp |= ((slice & 0x1FFF) >> 8);
-        this.mData.put(SLICE_OFFSET, temp);
-        this.mData.put(SLICE_OFFSET + 1, (byte) (slice & 0xFF));
+        temp &= 0xE0; // 0000 0000 1110 0000 取出前三位
+        slice &= 0x1FFF; // 设置后十三位 num & 0001 1111 1111 1111
+        temp <<= 8; // 1110 0000 0000 0000
+        this.mData.putShort((short) (temp | slice));
         return calcCheckSum();
     }
 
     public int getSlice() {
-        return (mData.getShort(SLICE_OFFSET) & 0x1FFF);
+        return mData.getShort(SLICE_OFFSET) & 0x1FFF;
     }
 
     public IPHeader setTtl(int ttl) {
@@ -168,7 +169,6 @@ public class IPHeader {
         return calcCheckSum();
     }
 
-
     public int getProtocol() {
         return this.mData.get(PROTOCOL_OFFSET);
     }
@@ -176,21 +176,22 @@ public class IPHeader {
     public synchronized IPHeader calcCheckSum() {
         // 计算IP头部校验和
         mData.putShort(CHECK_SUM_OFFSET, (short) 0);
-        int oldLimit = mData.limit();
-        mData.limit(getHeaderLength());
-        mData.position(0);
+        ByteBuffer newBuffer = ByteBuffer.wrap(mData.array());
+//        int oldLimit = mData.limit();
+        newBuffer.limit(Packet.IP4_HEADER_SIZE);
+        newBuffer.position(0);
         long checkSum = 0;
-        while (mData.hasRemaining()) {
+        while (newBuffer.hasRemaining()) {
             try {
-                checkSum += (mData.getShort() & 0xFFFF);
+                checkSum += (newBuffer.getShort() & 0xFFFF);
             } catch (Exception e) {
-                checkSum += ((mData.get() << 8) & 0xFFFF);
+                checkSum += ((newBuffer.get() << 8) & 0xFFFF);
             }
         }
         while ((checkSum >> 16) > 0){
             checkSum = (checkSum >> 16) + (checkSum & 0xFFFF);
         }
-        mData.limit(oldLimit);
+//        mData.limit(oldLimit);
         mData.putShort(CHECK_SUM_OFFSET, (short) ~(checkSum & 0xFFFF));
         return this;
     }
@@ -198,21 +199,6 @@ public class IPHeader {
 
     public int getCheckSum() {
         return mData.getShort(CHECK_SUM_OFFSET) & 0xFFFF;
-    }
-
-    public static boolean checkCheckSum(byte[] data) {
-        ByteBuffer wrap = ByteBuffer.wrap(data);
-        int checkSum = 0;
-        while (wrap.hasRemaining()) {
-            checkSum += (wrap.getShort() & 0xFFFF);
-        }
-        checkSum = ((checkSum >> 16) + (checkSum & 0xFFFF));
-        int hight = checkSum >> 16;
-        while (hight > 0) {
-            checkSum += hight;
-            hight = checkSum >> 16;
-        }
-        return (short) ~(checkSum & 0xFFFF) == 0x0000;
     }
 
     public IPHeader setSourceAddress(int sourceAddress) {
@@ -232,6 +218,27 @@ public class IPHeader {
 
     public int getDestAddress() {
         return mData.getInt(DEST_ADDRESS_OFFSET);
+    }
+
+    public synchronized static boolean checkCrc(IPHeader ipHeader){
+        ByteBuffer buffer = ByteBuffer.wrap(ipHeader.mData.array());
+        int originCheckSum = ipHeader.getCheckSum() & 0xFFFF;
+        buffer.limit(Packet.IP4_HEADER_SIZE);
+        buffer.position(0);
+        long checkSum = 0;
+        while (buffer.hasRemaining()) {
+            try {
+                checkSum += (buffer.getShort() & 0xFFFF);
+            } catch (Exception e) {
+                checkSum += ((buffer.get() << 8) & 0xFFFF);
+            }
+        }
+        checkSum -= originCheckSum;
+        while ((checkSum >> 16) > 0){
+            checkSum = (checkSum >> 16) + (checkSum & 0xFFFF);
+        }
+        int res =  (short) ~(checkSum & 0xFFFF);
+        return res == originCheckSum;
     }
 
     @Override

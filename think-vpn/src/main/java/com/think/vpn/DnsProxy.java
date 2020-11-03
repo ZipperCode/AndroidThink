@@ -81,10 +81,12 @@ public class DnsProxy implements Runnable {
             while (mClient != null && !mClient.isClosed()) {
                 // 数据长度应该减去头的长度
 //                datagramPacket.setLength(RECEIVE_BUFFER.length - headerLength);
-                mClient.receive(datagramPacket);
-                dnsBuffer.clear();
-                dnsBuffer.limit(datagramPacket.getLength());
-                onDnsResponseReceived(dnsBuffer);
+                synchronized (RECEIVE_BUFFER){
+                    mClient.receive(datagramPacket);
+                    dnsBuffer.clear();
+                    dnsBuffer.limit(datagramPacket.getLength());
+                    onDnsResponseReceived(dnsBuffer);
+                }
             }
         } catch (IOException e) {
             LogUtils.error(TAG, e.getMessage());
@@ -150,7 +152,7 @@ public class DnsProxy implements Runnable {
         // dnsBuffer和数据报使用同一个缓冲区，直接解析dnsBuffer
         int transactionId = dnsBuffer.getShort(0);
         int dnsSize = dnsBuffer.limit();
-        Log.e(TAG,"transactionId = " + transactionId + ",dnsSize = " +dnsSize);
+//        Log.e(TAG,"transactionId = " + transactionId + ",dnsSize = " +dnsSize);
 //        DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsBuffer);
 
         QueryState state = null;
@@ -161,7 +163,7 @@ public class DnsProxy implements Runnable {
                 mQueryArray.remove(transactionId);
             }
         }
-        LogUtils.debug("onDnsResponseReceived >>> state = " + state);
+//        LogUtils.debug("onDnsResponseReceived >>> state = " + state);
         if (state != null) {
             //DNS污染，默认污染海外网站
             // dnsPollution(udpHeader.dataByte(), dnsPacket);
@@ -183,7 +185,7 @@ public class DnsProxy implements Runnable {
                     .setSrcPort(state.remotePort)
                     .setDestPort(state.clientPort)
                     .setTotalLength(Packet.UDP_HEADER_SIZE + dnsSize);
-            Log.e(TAG,"Packet == >" + mPacket);
+//            Log.e(TAG,"Packet == >" + mPacket);
             // 将数据包通过VpnService发送出去
             mVpnConnection.sendUdpPacket(mPacket);
         }
@@ -309,7 +311,6 @@ public class DnsProxy implements Runnable {
         rPointer.setTtl(64);
         rPointer.setDataLength((short) 4);
         rPointer.setIp(newIp);
-
         dnsPacket.mSize = 12 + question.length() + 16;
     }
 

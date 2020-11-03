@@ -128,6 +128,7 @@ public class VpnConnection implements Runnable, Closeable {
                 idle = true;
                 while ((readSize = mFis.read(mReadPacketBuffer.array())) > 0) {
                     mReadPacketBuffer.clear();
+                    mReadPacketBuffer.limit(readSize);
                     onIpPacketReceived(readSize);
                     idle = false;
                 }
@@ -147,7 +148,7 @@ public class VpnConnection implements Runnable, Closeable {
 
     public void onIpPacketReceived(int readSize) throws IOException {
         IPHeader ipHeader = mPacket.mIpHeader;
-        ipHeader.mData.limit(readSize);
+//        ipHeader.mData.limit(readSize);
 //        System.out.println("收到ip数据包 ： ip协议类型 = " + ipHeader.getProtocol());
         if (ipHeader.getProtocol() == IPHeader.PROTOCOL_TCP) {
             receiveTcpPacket(ipHeader, readSize);
@@ -161,9 +162,10 @@ public class VpnConnection implements Runnable, Closeable {
         LogUtils.info("解析Tcp数据包，源地址为："
                 + CommonUtil.int2Ip(ipHeader.getSourceIpAddress())
                 + ":" + tcpHeader.getSrcPort()
-                + "目标地址为："
-                + CommonUtil.int2Ip(ipHeader.getDestAddress())
-                + ":" + tcpHeader.getDestPort());
+                + "目标地址为：" + CommonUtil.int2Ip(ipHeader.getDestAddress()) + ":" + tcpHeader.getDestPort()
+                + ",校验ip数据是否正常：" + IPHeader.checkCrc(ipHeader)
+                + ",校验Tcp数据是否正常：" + TCPHeader.checkCrc(tcpHeader));
+        LogUtils.error("IP数据报为：" + ipHeader);
         if (ipHeader.getSourceIpAddress() == mLocalIpAddress) {
 
         }
@@ -187,11 +189,7 @@ public class VpnConnection implements Runnable, Closeable {
             }
 
             session.packetSent++; //注意顺序
-//            Log.e(TAG, "ip = " + ipHeader);
-//            Log.e(TAG, "tcp = " + tcpHeader);
             int tcpDataSize = ipHeader.getTotalLen() - ipHeader.getHeaderLength() - tcpHeader.getHeaderLen();
-
-
             //丢弃tcp握手的第二个ACK报文。因为客户端发数据的时候也会带上ACK，这样可以在服务器Accept之前分析出HOST信息。
             if (session.packetSent == 2 && tcpDataSize == 0) {
                 return;
@@ -202,15 +200,20 @@ public class VpnConnection implements Runnable, Closeable {
             tcpHeader.setDestPort(mLocalTcpProxyServer.getProxyPort());
 //            Log.e(TAG, "ip = " + ipHeader);
 //            Log.e(TAG, "tcp = " + tcpHeader);
-            Log.e(TAG,"检查数据包checkSum ： tcp = "  + TCPHeader.checkCrc(tcpHeader));
+            LogUtils.error("修改后IP数据报为：" + ipHeader);
+            Log.e(TAG, "检查数据包checkSum ： ip = " + IPHeader.checkCrc(ipHeader) + ",tcp = "+ TCPHeader.checkCrc(tcpHeader));
             mFos.write(ipHeader.mData.array(), 0, size);
         }
     }
 
     private void receiveUdpPacket(IPHeader ipHeader) {
         UDPHeader udpHeader = mPacket.mUdpHeader;
-//        LogUtils.info("解析UDP数据包，源地址为：" + CommonUtil.int2Ip(ipHeader.getSourceIpAddress()) + ",目的端口为：" + udpHeader.getDestPort());
-//            LogUtils.info(udpHeader.toString());
+        LogUtils.info("解析Tcp数据包，源地址为："
+                + CommonUtil.int2Ip(ipHeader.getSourceIpAddress())
+                + ":" + udpHeader.getSrcPort()
+                + "目标地址为：" + CommonUtil.int2Ip(ipHeader.getDestAddress()) + ":" + udpHeader.getDestPort()
+                + ",校验ip数据是否正常：" + IPHeader.checkCrc(ipHeader)
+                + ",校验Tcp数据是否正常：" + UDPHeader.checkCrc(udpHeader));
         if (ipHeader.getSourceIpAddress() == mLocalIpAddress && udpHeader.getDestPort() == 53) {
 //            LogUtils.info("本地发出的udp数据");
             // 获取udp数据，包括头和实际数据
@@ -225,7 +228,7 @@ public class VpnConnection implements Runnable, Closeable {
             dnsData.limit(ipHeader.getTotalLen() - udpHeader.offset());
             // 构造一个dns数据包
             DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsData);
-            Log.d(TAG,"ipHeader ==> " + ipHeader + "udpHeader = " + udpHeader);
+//            Log.d(TAG, "ipHeader ==> " + ipHeader + "udpHeader = " + udpHeader);
 
             if (dnsPacket != null && dnsPacket.mHeader.mQuestionCount > 0) {
                 // 将数据转发到Dns代理中
@@ -237,8 +240,8 @@ public class VpnConnection implements Runnable, Closeable {
 
     public void sendUdpPacket(Packet packet) {
         try {
-            Log.e(TAG,"插件udp checkSum = " + UDPHeader.checkCrc(packet.mUdpHeader));
-            Log.e(TAG,"ip数据报总长度 = " + packet.mIpHeader.getTotalLen());
+            Log.e(TAG, "插件udp checkSum = " + UDPHeader.checkCrc(packet.mUdpHeader));
+            Log.e(TAG, "ip数据报总长度 = " + packet.mIpHeader.getTotalLen());
             mFos.write(packet.mData, 0, packet.mIpHeader.getTotalLen());
         } catch (IOException e) {
             e.printStackTrace();
