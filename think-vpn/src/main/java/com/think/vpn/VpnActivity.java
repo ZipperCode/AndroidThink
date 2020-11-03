@@ -9,21 +9,28 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.think.R;
+import com.think.core.util.ThreadManager;
 import com.think.vpn.packet.dns.DnsFlags;
 import com.think.vpn.packet.dns.DnsHeader;
 import com.think.vpn.packet.dns.DnsPacket;
 import com.think.vpn.packet.dns.Question;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import test.Server;
 
 public class VpnActivity extends AppCompatActivity {
 
@@ -113,7 +120,7 @@ public class VpnActivity extends AppCompatActivity {
                             OkHttpClient client = new OkHttpClient();
 
                             Request request = new Request.Builder()
-                                    .url("http:www.baidu.com")
+                                    .url("http://mumu.163.com")
                                     .build();
 
                             try (Response response = client.newCall(request).execute()) {
@@ -127,6 +134,42 @@ public class VpnActivity extends AppCompatActivity {
                 }).start();
             }
         });
+
+        findViewById(R.id.btn_tcp).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Socket sock = null; // 连接指定服务器和端口
+                        try {
+                            System.out.println("before write hello");
+                            sock = new Socket( "localhost",9999);
+                            System.err.println("localPort = " + sock.getLocalPort());
+                            try (InputStream input = sock.getInputStream()) {
+                                try (OutputStream output = sock.getOutputStream()) {
+                                    System.out.println("write hello");
+                                    output.write("hello".getBytes());
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                }
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }).start();
+            }
+        });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new Server();
+            }
+        }).start();
     }
 
     @Override

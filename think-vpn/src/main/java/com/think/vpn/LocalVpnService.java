@@ -18,6 +18,7 @@ import com.think.core.util.AppUtils;
 import com.think.core.util.LogUtils;
 import com.think.core.util.ThreadManager;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -144,9 +145,15 @@ public class LocalVpnService extends VpnService implements Runnable {
                 .setBlocking(false)
                 .addRoute("0.0.0.0", 0)
                 .addRoute("255.255.0.0", 16);
-
+//        try {
+//            LogUtils.debug("允许包名：" + getPackageName() + "被捕获");
+//            builder.addAllowedApplication(getPackageName());
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
         for (String packageName : mPackages) {
             try {
+                LogUtils.debug("允许包名：" + packageName + "被捕获");
                 builder.addAllowedApplication(packageName);
             } catch (PackageManager.NameNotFoundException e) {
                 Log.e(TAG, "VPN 构建时，无法找到包名:" + packageName);

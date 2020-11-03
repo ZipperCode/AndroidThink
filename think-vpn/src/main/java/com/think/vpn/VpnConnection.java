@@ -97,7 +97,7 @@ public class VpnConnection implements Runnable, Closeable {
         this.mReadPacketBuffer = ByteBuffer.allocate(MAX_PACKET_SIZE);
         this.mPacket = new Packet(mReadPacketBuffer);
         this.mLocalIpAddress = CommonUtil.ip2Int(LOCAL_IP_ADDRESS_STR);
-        this.mLocalTcpProxyServer = new LocalTcpProxyServer(this, 0);
+        this.mLocalTcpProxyServer = new LocalTcpProxyServer(this, 8888);
         this.mDnsProxy = new DnsProxy(this);
     }
 
@@ -146,7 +146,7 @@ public class VpnConnection implements Runnable, Closeable {
         }
     }
 
-    public void onIpPacketReceived(int readSize) throws IOException {
+    public void  onIpPacketReceived(int readSize) throws IOException {
         IPHeader ipHeader = mPacket.mIpHeader;
 //        ipHeader.mData.limit(readSize);
 //        System.out.println("收到ip数据包 ： ip协议类型 = " + ipHeader.getProtocol());
@@ -165,7 +165,8 @@ public class VpnConnection implements Runnable, Closeable {
                 + "目标地址为：" + CommonUtil.int2Ip(ipHeader.getDestAddress()) + ":" + tcpHeader.getDestPort()
                 + ",校验ip数据是否正常：" + IPHeader.checkCrc(ipHeader)
                 + ",校验Tcp数据是否正常：" + TCPHeader.checkCrc(tcpHeader));
-        LogUtils.error("IP数据报为：" + ipHeader);
+//        LogUtils.error("IP数据报为：" + ipHeader);
+        Log.e(TAG, "修改前TCP数据报为 = " + tcpHeader);
         if (ipHeader.getSourceIpAddress() == mLocalIpAddress) {
 
         }
@@ -198,9 +199,8 @@ public class VpnConnection implements Runnable, Closeable {
 //            ipHeader.setSourceAddress(ipHeader.getDestAddress());
             ipHeader.setDestinationAddress(mLocalIpAddress);
             tcpHeader.setDestPort(mLocalTcpProxyServer.getProxyPort());
-//            Log.e(TAG, "ip = " + ipHeader);
-//            Log.e(TAG, "tcp = " + tcpHeader);
-            LogUtils.error("修改后IP数据报为：" + ipHeader);
+            Log.e(TAG, "修改后TCP数据报为 = " + tcpHeader);
+//            LogUtils.error("修改后IP数据报为：" + ipHeader);
             Log.e(TAG, "检查数据包checkSum ： ip = " + IPHeader.checkCrc(ipHeader) + ",tcp = "+ TCPHeader.checkCrc(tcpHeader));
             mFos.write(ipHeader.mData.array(), 0, size);
         }
@@ -229,7 +229,7 @@ public class VpnConnection implements Runnable, Closeable {
             // 构造一个dns数据包
             DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsData);
 //            Log.d(TAG, "ipHeader ==> " + ipHeader + "udpHeader = " + udpHeader);
-            Log.e(TAG,"请求的dnsPacket = " + dnsPacket);
+//            Log.e(TAG,"请求的dnsPacket = " + dnsPacket);
 
             if (dnsPacket != null && dnsPacket.mHeader.mQuestionCount > 0) {
                 // 将数据转发到Dns代理中
@@ -241,8 +241,7 @@ public class VpnConnection implements Runnable, Closeable {
 
     public void sendUdpPacket(Packet packet) {
         try {
-            Log.e(TAG, "插件udp checkSum = " + UDPHeader.checkCrc(packet.mUdpHeader));
-            Log.e(TAG, "ip数据报总长度 = " + packet.mIpHeader.getTotalLen());
+            Log.e(TAG, "udp checkSum = " + UDPHeader.checkCrc(packet.mUdpHeader) + ",ip数据报总长度 = " + packet.mIpHeader.getTotalLen());
             mFos.write(packet.mData, 0, packet.mIpHeader.getTotalLen());
         } catch (IOException e) {
             e.printStackTrace();

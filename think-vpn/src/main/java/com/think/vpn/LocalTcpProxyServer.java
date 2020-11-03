@@ -72,7 +72,7 @@ public class LocalTcpProxyServer implements Runnable {
             // 设置非阻塞
             mServerSocketChannel.configureBlocking(false);
             // 绑定本地端口
-            mServerSocketChannel.socket().bind(new InetSocketAddress("10.0.0.2",localServerPort));
+            mServerSocketChannel.socket().bind(new InetSocketAddress(localServerPort));
             // 注册OnAccept事件
             mServerSocketChannel.register(mSelector, SelectionKey.OP_ACCEPT);
             mLocalServerPort = mServerSocketChannel.socket().getLocalPort();

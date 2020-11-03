@@ -283,11 +283,11 @@ public class TCPHeader {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("TCPHeader {").append("\r\n")
-                .append("源端口为：").append(getSrcPort()).append(",")
-                .append("目的端口为：").append(getDestPort()).append("\r\n")
-                .append("序列号为：").append(getSeqNo()).append("\r\n")
-                .append("确认号为：").append(getAckNo()).append("\r\n")
-                .append("TCP首部长度为：").append(getHeaderLen()).append(",")
+                .append("源端口为：").append(getSrcPort()).append(",\t")
+                .append("目的端口为：").append(getDestPort()).append(",\t")
+                .append("序列号为：").append(getSeqNo()).append(",\t")
+                .append("确认号为：").append(getAckNo()).append(",\t")
+                .append("TCP首部长度为：").append(getHeaderLen()).append(",\t")
                 .append("标志位：[");
         int flag = getFlag();
         stringBuilder.append("URG=").append((flag & URG) == 0 ? 0 : 1).append(",")
@@ -295,11 +295,11 @@ public class TCPHeader {
                 .append("PSH=").append((flag & PSH) == 0 ? 0 : 1).append(",")
                 .append("RST=").append((flag & RST) == 0 ? 0 : 1).append(",")
                 .append("SYN=").append((flag & SYN) == 0 ? 0 : 1).append(",")
-                .append("FIN=").append((flag & FIN) == 0 ? 0 : 1).append("],");
+                .append("FIN=").append((flag & FIN) == 0 ? 0 : 1).append("],\t");
 
-        stringBuilder.append("窗口大小：").append(getWindowSize()).append("\r\n")
+        stringBuilder.append("窗口大小：").append(getWindowSize()).append("\t")
                 .append("校验和：").append(getCheckSum()).append(",")
-                .append("紧急指针：").append(getUrgentPointer()).append("\r\n}");
+                .append("紧急指针：").append(getUrgentPointer()).append(" }");
 
 
         return stringBuilder.toString();
