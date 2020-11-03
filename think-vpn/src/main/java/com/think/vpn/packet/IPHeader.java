@@ -3,6 +3,7 @@ package com.think.vpn.packet;
 import com.think.vpn.utils.CommonUtil;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class IPHeader {
 
@@ -93,9 +94,10 @@ public class IPHeader {
     }
 
     public IPHeader setHeaderLength(int headerLength) {
+        byte hl = (byte)(headerLength * 8 / 32);
         // 后四位清零
         byte clr = (byte) (mData.get(VER_NUM_AND_LEN_OFFSET) & 0xF0);
-        clr |= ((headerLength & 0x0F));
+        clr |= ((hl & 0x0F));
         this.mData.put(VER_NUM_AND_LEN_OFFSET, clr);
         return calcCheckSum();
     }
@@ -182,7 +184,7 @@ public class IPHeader {
             try {
                 checkSum += (mData.getShort() & 0xFFFF);
             } catch (Exception e) {
-                mData.put((byte)0);
+                checkSum += ((mData.get() << 8) & 0xFFFF);
             }
         }
         while ((checkSum >> 16) > 0){
@@ -193,8 +195,9 @@ public class IPHeader {
         return this;
     }
 
+
     public int getCheckSum() {
-        return mData.getShort(CHECK_SUM_OFFSET);
+        return mData.getShort(CHECK_SUM_OFFSET) & 0xFFFF;
     }
 
     public static boolean checkCheckSum(byte[] data) {
@@ -237,28 +240,28 @@ public class IPHeader {
         stringBuilder
                 .append("IPHeader{").append("\r\n")
                 .append("4位版本号 ：").append(CommonUtil.getIpVersion(getVersion())).append(",\t")
-                .append("4为首部长度 ：").append(CommonUtil.getHeaderLength(getHeaderLength())).append("字节,\t")
+                .append("4为首部长度 ：").append(CommonUtil.getHeaderLength(getHeaderLength())).append(",\t")
                 .append("8位服务类型：").append(Integer.toBinaryString(getServiceType())).append(",\t")
-                .append("16位总长度：").append(getTotalLen()).append("字节\r\n")
-                .append("16位标识：").append(getIdentifier()).append(", \t")
+                .append("16位总长度：").append(getTotalLen()).append(",\t")
+                .append("16位标识：").append(getIdentifier()).append(",\t")
                 .append("3位标志：").append(Integer.toBinaryString(getSliceFlag())).append(",\t")
-                .append("13位片偏移：").append(getSlice()).append("\r\n")
-                .append("8位生存时间：").append(getTtl()).append(", \t")
+                .append("13位片偏移：").append(getSlice()).append(",\t")
+                .append("8位生存时间：").append(getTtl()).append(",\t")
                 .append("8位协议：").append(CommonUtil.getProtocolString(getProtocol())).append(",\t")
-                .append("16位校验和：").append(getCheckSum()).append("\r\n")
-                .append("32位源IP地址:").append(CommonUtil.int2Ip(getSourceIpAddress())).append("\r\n")
-                .append("32位目标IP地址:").append(CommonUtil.int2Ip(getDestAddress())).append("\r\n")
-                .append("}");
+                .append("16位校验和：").append(Integer.toHexString(getCheckSum())).append(",\t")
+                .append("32位源IP地址:").append(CommonUtil.int2Ip(getSourceIpAddress())).append(",\t")
+                .append("32位目标IP地址:").append(CommonUtil.int2Ip(getDestAddress())).append(",\t")
+                .append("}\r\n");
         return stringBuilder.toString();
     }
 
     public void fullDefault() {
         setHeaderLength(20);
         setServiceType((byte) 0);
-        setTotalLen(0);
+        setTotalLen(Packet.IP4_HEADER_SIZE);
         setIdentifier(0);
         setSliceFlag((short) 0);
-        setSliceFlag((short) 0);
+        setProtocol(IP4);
         setTtl((byte) 64);
     }
 

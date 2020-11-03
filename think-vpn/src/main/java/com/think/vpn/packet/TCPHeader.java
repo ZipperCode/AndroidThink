@@ -134,6 +134,25 @@ public class TCPHeader {
         return ackNo;
     }
 
+    public TCPHeader setHeaderLength(int headerLength){
+        int len = headerLength * 8 / 32;
+        this.mData.put(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET, (byte) ((len & 0xF) << 4));
+        return calcCheckSum();
+    }
+
+    public TCPHeader setFlag(TcpFlag tcpFlag){
+        // 前两位保留，后六位为标志位
+        byte flag = mData.get(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET + 1);
+        if(tcpFlag.URG) flag |= 0x20; // 0010 0000
+        if(tcpFlag.ACK) flag |= 0x10; // 0001 0000
+        if(tcpFlag.PSH) flag |= 0x08; // 0000 1000
+        if(tcpFlag.RST) flag |= 0x04; // 0000 0100
+        if(tcpFlag.SYN) flag |= 0x02; // 0000 0010
+        if(tcpFlag.FIN) flag |= 0x01; // 0000 0001
+        this.mData.put(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET + 1, flag);
+        return calcCheckSum();
+    }
+
     /**
      * 头部4位
      *
@@ -191,7 +210,7 @@ public class TCPHeader {
             try {
                 checkSum += mData.getShort();
             } catch (Exception e) {
-                mData.put((byte)0);
+                checkSum += (mData.get() << 8);
             }
         }
         while ((checkSum >> 16) > 0){
@@ -283,5 +302,15 @@ public class TCPHeader {
 
 
         return stringBuilder.toString();
+    }
+
+    public static class TcpFlag{
+        public boolean URG;
+        public boolean ACK;
+        public boolean PSH;
+        public boolean RST;
+        public boolean SYN;
+        public boolean FIN;
+
     }
 }

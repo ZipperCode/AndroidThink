@@ -225,6 +225,8 @@ public class VpnConnection implements Runnable, Closeable {
             dnsData.limit(ipHeader.getTotalLen() - udpHeader.offset());
             // 构造一个dns数据包
             DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsData);
+            Log.d(TAG,"ipHeader ==> " + ipHeader + "udpHeader = " + udpHeader);
+
             if (dnsPacket != null && dnsPacket.mHeader.mQuestionCount > 0) {
                 // 将数据转发到Dns代理中
                 mDnsProxy.onDnsRequestReceived(ipHeader, udpHeader, dnsPacket);
@@ -236,7 +238,8 @@ public class VpnConnection implements Runnable, Closeable {
     public void sendUdpPacket(Packet packet) {
         try {
             Log.e(TAG,"插件udp checkSum = " + UDPHeader.checkCrc(packet.mUdpHeader));
-            mFos.write(packet.mData, packet.mIpHeader.mDataOffset, packet.mIpHeader.getTotalLen());
+            Log.e(TAG,"ip数据报总长度 = " + packet.mIpHeader.getTotalLen());
+            mFos.write(packet.mData, 0, packet.mIpHeader.getTotalLen());
         } catch (IOException e) {
             e.printStackTrace();
             LogUtils.error(TAG, "sendUdpPacket error");

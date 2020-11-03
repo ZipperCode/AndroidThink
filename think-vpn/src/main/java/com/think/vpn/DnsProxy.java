@@ -18,6 +18,7 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -79,7 +80,7 @@ public class DnsProxy implements Runnable {
             DatagramPacket datagramPacket = new DatagramPacket(RECEIVE_BUFFER, headerLength, RECEIVE_BUFFER.length - headerLength);
             while (mClient != null && !mClient.isClosed()) {
                 // 数据长度应该减去头的长度
-                datagramPacket.setLength(RECEIVE_BUFFER.length - headerLength);
+//                datagramPacket.setLength(RECEIVE_BUFFER.length - headerLength);
                 mClient.receive(datagramPacket);
                 dnsBuffer.clear();
                 dnsBuffer.limit(datagramPacket.getLength());
@@ -168,13 +169,16 @@ public class DnsProxy implements Runnable {
             dnsBuffer.putShort(0, state.clientQueryId);
             // 响应数据源地址伪装成请求的目的地址
             mPacket.mIpHeader
-                    .setSourceAddress(state.remoteIp)
-                    // 目标地址伪装为源地址
-                    .setDestinationAddress(state.clientIp)
+                    .setVersion(IPHeader.IP4)
                     // 设置协议类型
                     .setProtocol(Packet.UDP_PROTOCOL)
+                    .setSliceFlag(0x02)
+                    .setIdentifier(new Random().nextInt(Integer.MAX_VALUE))
                     // 设置数据包长度，头长度 + 数据长度
-                    .setTotalLen(Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE + dnsSize);
+                    .setTotalLen(Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE + dnsSize)
+                    .setSourceAddress(state.remoteIp)
+                    // 目标地址伪装为源地址
+                    .setDestinationAddress(state.clientIp);
             mPacket.mUdpHeader
                     .setSrcPort(state.remotePort)
                     .setDestPort(state.clientPort)

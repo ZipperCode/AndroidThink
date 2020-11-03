@@ -82,15 +82,15 @@ public class UDPHeader {
         psdHeader.flip();
         // 伪首部累加
         while (psdHeader.hasRemaining()) {
-            checkSum += psdHeader.getShort();
+            checkSum += (psdHeader.getShort() & 0x0000FFFF);
         }
         this.mData.position(this.mIpHeaderOffset);
         ByteBuffer udpBuffer = mData.slice();
         while (udpBuffer.hasRemaining()){
             try {
-                checkSum += udpBuffer.getShort();
+                checkSum += (udpBuffer.getShort() & 0x0000FFFF);
             } catch (Exception e) {
-                udpBuffer.put((byte)0);
+                checkSum += ((udpBuffer.get() << 8) & 0x0000FFFF);
             }
         }
         while ((checkSum >> 16) > 0){
@@ -120,12 +120,12 @@ public class UDPHeader {
         ByteBuffer udpBuffer = buffer.slice();
         while (udpBuffer.hasRemaining()){
             try {
-                checkSum += udpBuffer.getShort();
+                checkSum += udpBuffer.getShort() & 0xFFFF;
             } catch (Exception e) {
-                udpBuffer.put((byte)0);
+               checkSum += (udpBuffer.get() << 8) & 0xFFFF;
             }
         }
-        short packetCheckSum =  udpHeader.mData.getShort(udpHeader.mIpHeaderOffset + CHECK_SUM_OFFSET);
+        int packetCheckSum =  udpHeader.mData.getShort(udpHeader.mIpHeaderOffset + CHECK_SUM_OFFSET) & 0xFFFF;
         checkSum -= packetCheckSum;
         while ((checkSum >> 16) > 0){
             checkSum = (checkSum >> 16) + checkSum & 0xFFFF;
