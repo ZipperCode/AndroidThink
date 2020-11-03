@@ -208,12 +208,12 @@ public class VpnConnection implements Runnable, Closeable {
 
     private void receiveUdpPacket(IPHeader ipHeader) {
         UDPHeader udpHeader = mPacket.mUdpHeader;
-        LogUtils.info("解析Tcp数据包，源地址为："
+        LogUtils.info("解析UDP数据包，源地址为："
                 + CommonUtil.int2Ip(ipHeader.getSourceIpAddress())
                 + ":" + udpHeader.getSrcPort()
                 + "目标地址为：" + CommonUtil.int2Ip(ipHeader.getDestAddress()) + ":" + udpHeader.getDestPort()
                 + ",校验ip数据是否正常：" + IPHeader.checkCrc(ipHeader)
-                + ",校验Tcp数据是否正常：" + UDPHeader.checkCrc(udpHeader));
+                + ",校验UDP数据是否正常：" + UDPHeader.checkCrc(udpHeader));
         if (ipHeader.getSourceIpAddress() == mLocalIpAddress && udpHeader.getDestPort() == 53) {
 //            LogUtils.info("本地发出的udp数据");
             // 获取udp数据，包括头和实际数据
@@ -229,6 +229,7 @@ public class VpnConnection implements Runnable, Closeable {
             // 构造一个dns数据包
             DnsPacket dnsPacket = DnsPacket.parseFromBuffer(dnsData);
 //            Log.d(TAG, "ipHeader ==> " + ipHeader + "udpHeader = " + udpHeader);
+            Log.e(TAG,"请求的dnsPacket = " + dnsPacket);
 
             if (dnsPacket != null && dnsPacket.mHeader.mQuestionCount > 0) {
                 // 将数据转发到Dns代理中

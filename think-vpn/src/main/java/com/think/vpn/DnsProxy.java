@@ -169,6 +169,9 @@ public class DnsProxy implements Runnable {
             // dnsPollution(udpHeader.dataByte(), dnsPacket);
 //                dnsPacket.mHeader.setTransactionId(state.clientQueryId);
             dnsBuffer.putShort(0, state.clientQueryId);
+
+            Log.e(TAG,"收到的dnsPacket = " + DnsPacket.parseFromBuffer(dnsBuffer));
+
             // 响应数据源地址伪装成请求的目的地址
             mPacket.mIpHeader
                     .setVersion(IPHeader.IP4)
