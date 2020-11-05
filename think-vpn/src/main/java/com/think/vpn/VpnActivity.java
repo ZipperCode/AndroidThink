@@ -120,7 +120,7 @@ public class VpnActivity extends AppCompatActivity {
                             OkHttpClient client = new OkHttpClient();
 
                             Request request = new Request.Builder()
-                                    .url("http://mumu.163.com")
+                                    .url("http://app.yeshen.com")
                                     .build();
 
                             try (Response response = client.newCall(request).execute()) {
@@ -144,7 +144,7 @@ public class VpnActivity extends AppCompatActivity {
                         Socket sock = null; // 连接指定服务器和端口
                         try {
                             System.out.println("before write hello");
-                            sock = new Socket( "localhost",9999);
+                            sock = new Socket( "localhost",8888);
                             System.err.println("localPort = " + sock.getLocalPort());
                             try (InputStream input = sock.getInputStream()) {
                                 try (OutputStream output = sock.getOutputStream()) {
@@ -164,12 +164,12 @@ public class VpnActivity extends AppCompatActivity {
                 }).start();
             }
         });
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                new Server();
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                new Server();
+//            }
+//        }).start();
     }
 
     @Override

@@ -70,6 +70,8 @@ public class IPHeader {
     public ByteBuffer mData;
     public int mDataOffset = 20;
 
+    public int mSize;
+
     public IPHeader(byte[] data, int offset) {
         this.mData = ByteBuffer.wrap(data);
         this.mDataOffset = offset;
@@ -177,7 +179,6 @@ public class IPHeader {
         // 计算IP头部校验和
         mData.putShort(CHECK_SUM_OFFSET, (short) 0);
         ByteBuffer newBuffer = ByteBuffer.wrap(mData.array());
-//        int oldLimit = mData.limit();
         newBuffer.limit(Packet.IP4_HEADER_SIZE);
         newBuffer.position(0);
         long checkSum = 0;
@@ -191,9 +192,11 @@ public class IPHeader {
         while ((checkSum >> 16) > 0){
             checkSum = (checkSum >> 16) + (checkSum & 0xFFFF);
         }
-//        mData.limit(oldLimit);
         mData.putShort(CHECK_SUM_OFFSET, (short) ~(checkSum & 0xFFFF));
         return this;
+    }
+    public void setCheckSum(short checkSum) {
+        mData.putShort(CHECK_SUM_OFFSET,checkSum);
     }
 
 

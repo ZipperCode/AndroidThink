@@ -26,6 +26,8 @@ public class UDPHeader {
      */
     private int mDataOffset;
 
+    public int mSize;
+
     public UDPHeader(byte[] data, int ipHeaderOffset) {
         this.mData = ByteBuffer.wrap(data);
         this.mIpHeaderOffset = ipHeaderOffset;
@@ -63,8 +65,16 @@ public class UDPHeader {
         return calcCheckSum();
     }
 
-    public short getTotalLength(){
-        return mData.getShort(mIpHeaderOffset + LENGTH_OFFSET);
+    public int getTotalLength(){
+        return mData.getShort(mIpHeaderOffset + LENGTH_OFFSET) & 0xFFFF;
+    }
+
+    public void setCheckSum(short checkSum){
+        mData.putShort(mIpHeaderOffset + CHECK_SUM_OFFSET, checkSum);
+    }
+
+    public short getCheckSum(){
+        return mData.getShort(mIpHeaderOffset + CHECK_SUM_OFFSET);
     }
 
     public UDPHeader calcCheckSum(){
@@ -84,8 +94,10 @@ public class UDPHeader {
         while (psdHeader.hasRemaining()) {
             checkSum += (psdHeader.getShort() & 0x0000FFFF);
         }
-        this.mData.position(this.mIpHeaderOffset);
-        ByteBuffer udpBuffer = mData.slice();
+        ByteBuffer newBuffer = ByteBuffer.wrap(this.mData.array());
+        newBuffer.position(mIpHeaderOffset);
+        newBuffer.limit(mIpHeaderOffset + getTotalLength());
+        ByteBuffer udpBuffer = newBuffer.slice();
         while (udpBuffer.hasRemaining()){
             try {
                 checkSum += (udpBuffer.getShort() & 0x0000FFFF);

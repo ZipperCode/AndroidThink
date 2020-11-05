@@ -45,6 +45,12 @@ public class Packet {
         mUdpHeader = new UDPHeader(mData,IP4_HEADER_SIZE);
     }
 
+    public void size(int size){
+        mIpHeader.mSize = size;
+        mTcpHeader.mSize = size - IP4_HEADER_SIZE;
+        mUdpHeader.mSize = size - IP4_HEADER_SIZE;
+    }
+
     @Override
     public String toString() {
         return isTCP ? "Packet{" +

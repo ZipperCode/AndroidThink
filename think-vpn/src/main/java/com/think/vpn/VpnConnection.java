@@ -44,7 +44,7 @@ public class VpnConnection implements Runnable, Closeable {
      */
     private static final long RECONNECT_WAIT_MS = TimeUnit.SECONDS.toMillis(3);
     /* 本地ip地址 */
-    public static final String LOCAL_IP_ADDRESS_STR = "10.0.0.2";
+    public static final String LOCAL_IP_ADDRESS_STR = "10.8.0.2";
 
     private final ParcelFileDescriptor mParcelFileDescriptor;
 
@@ -68,7 +68,7 @@ public class VpnConnection implements Runnable, Closeable {
     private FileInputStream mFis;
     private FileOutputStream mFos;
 
-    private final ByteBuffer mReadPacketBuffer;
+    private final byte[] mReadPacketBuffer;
     /**
      * 本地地址
      */
@@ -77,6 +77,7 @@ public class VpnConnection implements Runnable, Closeable {
      * 数据包类
      */
     private final Packet mPacket;
+
 
     private final LocalVpnService mLocalVpnService;
 
@@ -94,7 +95,7 @@ public class VpnConnection implements Runnable, Closeable {
         this.mServerPort = mServerPort;
         this.proxyHost = proxyHost;
         this.proxyPort = proxyPort;
-        this.mReadPacketBuffer = ByteBuffer.allocate(MAX_PACKET_SIZE);
+        this.mReadPacketBuffer = new byte[MAX_PACKET_SIZE];
         this.mPacket = new Packet(mReadPacketBuffer);
         this.mLocalIpAddress = CommonUtil.ip2Int(LOCAL_IP_ADDRESS_STR);
         this.mLocalTcpProxyServer = new LocalTcpProxyServer(this, 8888);
@@ -104,7 +105,7 @@ public class VpnConnection implements Runnable, Closeable {
     @Override
     public void run() {
         ThreadManager.getInstance().execPoolFuture(mDnsProxy);
-//        ThreadManager.getInstance().execPoolFuture(mLocalTcpProxyServer);
+        ThreadManager.getInstance().execPoolFuture(mLocalTcpProxyServer);
         readVpnPacket();
     }
 
@@ -126,9 +127,7 @@ public class VpnConnection implements Runnable, Closeable {
             boolean idle = false;
             while (!Thread.interrupted() && !isStop) {
                 idle = true;
-                while ((readSize = mFis.read(mReadPacketBuffer.array())) > 0) {
-                    mReadPacketBuffer.clear();
-                    mReadPacketBuffer.limit(readSize);
+                while ((readSize = mFis.read(mReadPacketBuffer)) > 0) {
                     onIpPacketReceived(readSize);
                     idle = false;
                 }
@@ -148,8 +147,8 @@ public class VpnConnection implements Runnable, Closeable {
 
     public void  onIpPacketReceived(int readSize) throws IOException {
         IPHeader ipHeader = mPacket.mIpHeader;
-//        ipHeader.mData.limit(readSize);
-//        System.out.println("收到ip数据包 ： ip协议类型 = " + ipHeader.getProtocol());
+        ipHeader.mData.limit(readSize);
+        System.out.println("收到ip数据包 ： ip协议类型 = " + ipHeader.getProtocol() + "，长度为：" + readSize);
         if (ipHeader.getProtocol() == IPHeader.PROTOCOL_TCP) {
             receiveTcpPacket(ipHeader, readSize);
         } else if (ipHeader.getProtocol() == IPHeader.PROTOCOL_UDP) {
@@ -159,14 +158,16 @@ public class VpnConnection implements Runnable, Closeable {
 
     private void receiveTcpPacket(IPHeader ipHeader, int size) throws IOException {
         TCPHeader tcpHeader = mPacket.mTcpHeader;
+        tcpHeader.data().limit(size);
         LogUtils.info("解析Tcp数据包，源地址为："
                 + CommonUtil.int2Ip(ipHeader.getSourceIpAddress())
                 + ":" + tcpHeader.getSrcPort()
                 + "目标地址为：" + CommonUtil.int2Ip(ipHeader.getDestAddress()) + ":" + tcpHeader.getDestPort()
                 + ",校验ip数据是否正常：" + IPHeader.checkCrc(ipHeader)
                 + ",校验Tcp数据是否正常：" + TCPHeader.checkCrc(tcpHeader));
-//        LogUtils.error("IP数据报为：" + ipHeader);
-        Log.e(TAG, "修改前TCP数据报为 = " + tcpHeader);
+        LogUtils.error("IP数据报为：" + ipHeader);
+         Log.e(TAG, "修改前TCP数据报为 = " + tcpHeader);
+
         if (ipHeader.getSourceIpAddress() == mLocalIpAddress) {
 
         }
@@ -196,14 +197,14 @@ public class VpnConnection implements Runnable, Closeable {
                 return;
             }
 
-//            ipHeader.setSourceAddress(ipHeader.getDestAddress());
+            ipHeader.setSourceAddress(ipHeader.getDestAddress());
             ipHeader.setDestinationAddress(mLocalIpAddress);
             tcpHeader.setDestPort(mLocalTcpProxyServer.getProxyPort());
             Log.e(TAG, "修改后TCP数据报为 = " + tcpHeader);
 //            LogUtils.error("修改后IP数据报为：" + ipHeader);
-            Log.e(TAG, "检查数据包checkSum ： ip = " + IPHeader.checkCrc(ipHeader) + ",tcp = "+ TCPHeader.checkCrc(tcpHeader));
-            mFos.write(ipHeader.mData.array(), 0, size);
+            //Log.e(TAG, "检查数据包checkSum ： ip = " + IPHeader.checkCrc(ipHeader) + ",tcp = "+ TCPHeader.checkCrc(tcpHeader));
         }
+        mFos.write(mPacket.mData, 0, size);
     }
 
     private void receiveUdpPacket(IPHeader ipHeader) {

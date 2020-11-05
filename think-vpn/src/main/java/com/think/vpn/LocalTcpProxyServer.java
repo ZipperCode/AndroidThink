@@ -76,7 +76,8 @@ public class LocalTcpProxyServer implements Runnable {
             // 注册OnAccept事件
             mServerSocketChannel.register(mSelector, SelectionKey.OP_ACCEPT);
             mLocalServerPort = mServerSocketChannel.socket().getLocalPort();
-            Log.i(TAG, "正在监听端口：" + (mLocalServerPort & 0xFFFF));
+            Log.i(TAG, "正在监听" +mServerSocketChannel.socket().getInetAddress()
+                    .toString() + ":"+ (mLocalServerPort & 0xFFFF));
         } catch (IOException e) {
             e.printStackTrace();
             Log.i(TAG, "本地TCP服务器创建出现错误");
@@ -90,8 +91,11 @@ public class LocalTcpProxyServer implements Runnable {
     @Override
     public void run() {
         try {
+            Log.e(TAG,"run");
             while (!Thread.interrupted()) {
-                if (mSelector.select(1) > 0) {
+                Log.e(TAG,"while");
+                if (mSelector.select() > 0) {
+                    Log.e(TAG,"select");
                     Iterator<SelectionKey> iterator = mSelector.selectedKeys().iterator();
                     while (iterator.hasNext()) {
                         SelectionKey selectionKey = iterator.next();

@@ -78,8 +78,9 @@ public class TCPHeader {
     public static final int OPTION = 20;
 
     private ByteBuffer mData;
-    private int mIpHeaderOffset;
-    private int mDataOffset;
+    public int mIpHeaderOffset;
+    public int mDataOffset;
+    public int mSize;
 
     public TCPHeader(byte[] data, int dataOffset) {
         this.mData = ByteBuffer.wrap(data);
@@ -203,14 +204,16 @@ public class TCPHeader {
         while (psdHeader.hasRemaining()) {
             checkSum += psdHeader.getShort() & 0xFFFF;
         }
-        // 从ip头部偏移开始
-        this.mData.position(mIpHeaderOffset);
+        ByteBuffer newBuffer = ByteBuffer.wrap(mData.array());
+        newBuffer.position(mIpHeaderOffset);
+        newBuffer.limit(mSize);
+        newBuffer = newBuffer.slice();
         // 数据累加
-        while (mData.hasRemaining()) {
+        while (newBuffer.hasRemaining()) {
             try {
-                checkSum += mData.getShort() & 0xFFFF;
+                checkSum += newBuffer.getShort() & 0xFFFF;
             } catch (Exception e) {
-                checkSum += (mData.get() << 8) & 0xFFFF;
+                checkSum += (newBuffer.get() << 8) & 0xFFFF;
             }
         }
         while ((checkSum >> 16) > 0){
@@ -221,6 +224,10 @@ public class TCPHeader {
         return this;
     }
 
+    public void setCheckSum(short checkSum) {
+        mData.putShort(mIpHeaderOffset + CHECK_SUM_OFFSET,checkSum);
+    }
+
     public int getCheckSum() {
         return mData.getShort(mIpHeaderOffset + CHECK_SUM_OFFSET) & 0xFFFF;
     }
@@ -228,8 +235,7 @@ public class TCPHeader {
     public synchronized static boolean checkCrc(TCPHeader tcpHeader){
         long checkSum = 0;
         ByteBuffer newBuffer = ByteBuffer.wrap(tcpHeader.mData.array());
-        newBuffer.position(tcpHeader.mIpHeaderOffset);
-        ByteBuffer tcpBuffer = newBuffer.slice();
+
         ByteBuffer psdHeader = ByteBuffer.allocate(12);
         psdHeader.putInt(newBuffer.getInt(IPHeader.SRC_ADDRESS_OFFSET));
         psdHeader.putInt(newBuffer.getInt(IPHeader.DEST_ADDRESS_OFFSET));
@@ -242,7 +248,8 @@ public class TCPHeader {
         while (psdHeader.hasRemaining()) {
             checkSum += psdHeader.getShort() & 0xFFFF;
         }
-
+        newBuffer.position(tcpHeader.mIpHeaderOffset);
+        ByteBuffer tcpBuffer = newBuffer.slice();
         while (tcpBuffer.hasRemaining()) {
             try{
                 checkSum += tcpBuffer.getShort() & 0xFFFF;
@@ -299,7 +306,9 @@ public class TCPHeader {
 
         stringBuilder.append("窗口大小：").append(getWindowSize()).append("\t")
                 .append("校验和：").append(getCheckSum()).append(",")
-                .append("紧急指针：").append(getUrgentPointer()).append(" }");
+                .append("紧急指针：").append(getUrgentPointer())
+                .append(",\t").append(mData)
+                .append(" }");
 
 
         return stringBuilder.toString();
@@ -312,6 +321,5 @@ public class TCPHeader {
         public boolean RST;
         public boolean SYN;
         public boolean FIN;
-
     }
 }
