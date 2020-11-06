@@ -165,6 +165,13 @@ public class DnsPacket {
         buffer.put((byte) 0x00);
     }
 
+    public void println(){
+        System.err.println("println:");
+        for (Resource mAnswer : mAnswers) {
+            System.err.print(mAnswer.mDomain = "\t");
+        }
+    }
+
     @Override
     public String toString() {
         return "DnsPacket{" +

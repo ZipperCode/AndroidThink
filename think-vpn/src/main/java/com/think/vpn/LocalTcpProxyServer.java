@@ -23,8 +23,7 @@ import java.util.Iterator;
  * vpn网卡将收到的数据转发到接受的应用，也就是本地的Tcp代理服务器
  * 相当于应用Socket -> 本地TCP代理服务器，在本地TCP代理服务器响应数据的时候
  * 进行拦截（创建新的连接去请求真实数据），从而将数据由本地TCP服务器响应到真实的应用中
- * <p>方案一：在拦截到应用数据后直接创建socket进行转发，收到数据后进行网卡写入（待验证）</p>
- * <p>方案二：使用tcp本地代理转发，全部数据都经过tcp本地代理，在tcpServer中创建socket转发（当前实现）</p>
+ * <p>方案：使用tcp本地代理转发，全部数据都经过tcp本地代理，在tcpServer中创建socket转发（当前实现）</p>
  *
  * @author zzp
  * @date 2020-10-31
@@ -93,9 +92,7 @@ public class LocalTcpProxyServer implements Runnable {
         try {
             Log.e(TAG,"run");
             while (!Thread.interrupted()) {
-                Log.e(TAG,"while");
                 if (mSelector.select() > 0) {
-                    Log.e(TAG,"select");
                     Iterator<SelectionKey> iterator = mSelector.selectedKeys().iterator();
                     while (iterator.hasNext()) {
                         SelectionKey selectionKey = iterator.next();
@@ -138,7 +135,6 @@ public class LocalTcpProxyServer implements Runnable {
             // 创建一个隧道用于建立本地与远程的连接
             AbstractTunnel localTunnel = new RawTunnel(mVpnConnection,mSelector,localChannel);
             localTunnel.connect(getDestAddress(localChannel));
-            localChannel.register(mSelector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, this);
         } catch (Exception e) {
             e.printStackTrace();
         }

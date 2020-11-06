@@ -4,6 +4,7 @@ import android.net.VpnService;
 import android.util.Log;
 
 import com.think.core.util.IoUtils;
+import com.think.core.util.LogUtils;
 import com.think.core.util.ThreadManager;
 import com.think.vpn.LocalVpnService;
 import com.think.vpn.VpnConnection;
@@ -44,6 +45,8 @@ public abstract class AbstractTunnel implements Runnable, Closeable {
 
     private final Selector mSelector;
 
+    private final Selector mLocalSelector;
+
     private final VpnConnection mVpnConnection;
 
     private boolean isDisposed = false;
@@ -55,11 +58,12 @@ public abstract class AbstractTunnel implements Runnable, Closeable {
     public AbstractTunnel(VpnConnection vpnConnection, Selector selector, SocketChannel innerSocketChannel) throws Exception {
         this.mVpnConnection = vpnConnection;
         this.mSelector = Selector.open();
+        this.mLocalSelector = selector;
         this.mInnerSocketChannel = innerSocketChannel;
-        this.mInnerSocketChannel.configureBlocking(true);
-        this.mInnerSocketChannel.register(selector, SelectionKey.OP_READ, this);
+        this.mInnerSocketChannel.configureBlocking(false);
+        this.mInnerSocketChannel.register(mLocalSelector, SelectionKey.OP_READ, this);
         this.mRemoteSocketChannel = SocketChannel.open();
-        this.mRemoteSocketChannel.configureBlocking(true);
+        this.mRemoteSocketChannel.configureBlocking(false);
     }
 
     protected abstract void onConnected();
@@ -86,32 +90,18 @@ public abstract class AbstractTunnel implements Runnable, Closeable {
     public void run() {
         try {
             while (!Thread.interrupted() && !isDisposed) {
-                if (mSelector.select(5) > 0) {
+                if (mSelector.select() > 0) {
                     Iterator<SelectionKey> iterator = mSelector.selectedKeys().iterator();
                     while (iterator.hasNext()){
                         SelectionKey selectionKey = iterator.next();
                         if (selectionKey.isValid()) {
                             SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
                             if (selectionKey.isReadable()) {
-                                ByteBuffer readData = ByteBuffer.allocate(LocalVpnService.MTU_PACK_SIZE);
-                                int size = socketChannel.read(readData);
-                                readData.flip();
-                                if(size > 0){
-                                    // 子类数据处理
-                                    onRead(readData);
-                                    // 转发到本地TCP服务器
-                                    mInnerSocketChannel.write(readData);
-                                }
+                                onRemoteReadable(socketChannel);
                             } else if (selectionKey.isWritable()) {
-                                // 取出tcp发送的内容
-                                ByteBuffer peek = mWriteData.peek();
-                                if(peek != null){
-                                    ByteBuffer writeData = mWriteData.poll();
-                                    onWrite(writeData);
-                                    socketChannel.write(writeData);
-                                }
+                                onRemoteWritable(socketChannel);
                             } else if (selectionKey.isConnectable()) {
-                                onConnectable();
+                                onRemoteConnectable();
                             }
                         }
                     }
@@ -126,12 +116,19 @@ public abstract class AbstractTunnel implements Runnable, Closeable {
 
     }
 
+    /**
+     * 本地tcp服务器读取的数据
+     * @param selectionKey
+     * @throws IOException
+     */
     public void onReadable(SelectionKey selectionKey) throws IOException {
+        LogUtils.debug(TAG,"收到本地TCP服务器转发的数据，保存后转发到服务器");
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
         ByteBuffer buffer = ByteBuffer.allocate(LocalVpnService.MTU_PACK_SIZE);
         socketChannel.read(buffer);
         buffer.flip();
         mWriteData.offer(buffer);
+        // 将远程连接通道注册为写
         mRemoteSocketChannel.register(mSelector,SelectionKey.OP_WRITE);
     }
 
@@ -139,14 +136,46 @@ public abstract class AbstractTunnel implements Runnable, Closeable {
 
     }
 
-    public void onConnectable() {
+    /**
+     * 远程服务器连接成功
+     */
+    private void onRemoteConnectable() {
         try {
             if (mRemoteSocketChannel.finishConnect()) {
-                mRemoteSocketChannel.register(mSelector,SelectionKey.OP_READ|SelectionKey.OP_WRITE);
+                LogUtils.debug(TAG,"远程服务器连接成功,注册写事件");
+                mRemoteSocketChannel.register(mSelector,SelectionKey.OP_WRITE);
                 onConnected();
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void onRemoteReadable(SocketChannel socketChannel) throws IOException{
+        ByteBuffer readData = ByteBuffer.allocate(LocalVpnService.MTU_PACK_SIZE);
+        int size = socketChannel.read(readData);
+        readData.flip();
+        if(size > 0){
+            // 子类数据处理
+            onRead(readData);
+            // 转发到本地TCP服务器
+            mInnerSocketChannel.write(readData);
+        }
+    }
+
+    /**
+     * 本地客户端收到写事件，将娱本地服务器连接的客户端数据通过写到服务端
+     * @param socketChannel
+     */
+    private void onRemoteWritable(SocketChannel socketChannel) throws IOException {
+        // 取出本地tcp服务器转发的内容
+        ByteBuffer peek = mWriteData.peek();
+        if(peek != null){
+            ByteBuffer writeData = mWriteData.poll();
+            onWrite(writeData);
+            socketChannel.write(writeData);
+            // 数据发送到服务端后，注册为读事件，读取服务器返回的数据
+            mRemoteSocketChannel.register(mSelector,SelectionKey.OP_READ);
         }
     }
 

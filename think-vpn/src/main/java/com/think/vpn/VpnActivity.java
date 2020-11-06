@@ -120,7 +120,7 @@ public class VpnActivity extends AppCompatActivity {
                             OkHttpClient client = new OkHttpClient();
 
                             Request request = new Request.Builder()
-                                    .url("http://app.yeshen.com")
+                                    .url("http://www.baidu.com")
                                     .build();
 
                             try (Response response = client.newCall(request).execute()) {

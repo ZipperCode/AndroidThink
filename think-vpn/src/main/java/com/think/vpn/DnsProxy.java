@@ -36,7 +36,6 @@ public class DnsProxy implements Runnable {
     private final long QUERY_TIMEOUT_NS = 60 * 1000000000L;
     /* 数据报缓冲区 */
     private static final byte[] RECEIVE_BUFFER = new byte[2000];
-
     /**
      * 数据包发送者
      */

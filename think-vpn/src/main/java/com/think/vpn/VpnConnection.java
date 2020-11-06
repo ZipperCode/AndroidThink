@@ -119,7 +119,7 @@ public class VpnConnection implements Runnable, Closeable {
     }
 
     public void readVpnPacket() {
-        LogUtils.debug("读取数据包");
+        LogUtils.debug("读取VPN虚拟网卡数据包");
         try {
             int readSize = 0;
             mFis = new FileInputStream(mParcelFileDescriptor.getFileDescriptor());
@@ -152,7 +152,7 @@ public class VpnConnection implements Runnable, Closeable {
         if (ipHeader.getProtocol() == IPHeader.PROTOCOL_TCP) {
             receiveTcpPacket(ipHeader, readSize);
         } else if (ipHeader.getProtocol() == IPHeader.PROTOCOL_UDP) {
-            receiveUdpPacket(ipHeader);
+            receiveUdpPacket(ipHeader,readSize);
         }
     }
 
@@ -200,25 +200,26 @@ public class VpnConnection implements Runnable, Closeable {
             ipHeader.setSourceAddress(ipHeader.getDestAddress());
             ipHeader.setDestinationAddress(mLocalIpAddress);
             tcpHeader.setDestPort(mLocalTcpProxyServer.getProxyPort());
+            LogUtils.error("修改后IP数据报为：" + ipHeader);
             Log.e(TAG, "修改后TCP数据报为 = " + tcpHeader);
-//            LogUtils.error("修改后IP数据报为：" + ipHeader);
             //Log.e(TAG, "检查数据包checkSum ： ip = " + IPHeader.checkCrc(ipHeader) + ",tcp = "+ TCPHeader.checkCrc(tcpHeader));
         }
         mFos.write(mPacket.mData, 0, size);
     }
 
-    private void receiveUdpPacket(IPHeader ipHeader) {
+    private void receiveUdpPacket(IPHeader ipHeader,int size) {
         UDPHeader udpHeader = mPacket.mUdpHeader;
-        LogUtils.info("解析UDP数据包，源地址为："
-                + CommonUtil.int2Ip(ipHeader.getSourceIpAddress())
-                + ":" + udpHeader.getSrcPort()
-                + "目标地址为：" + CommonUtil.int2Ip(ipHeader.getDestAddress()) + ":" + udpHeader.getDestPort()
-                + ",校验ip数据是否正常：" + IPHeader.checkCrc(ipHeader)
-                + ",校验UDP数据是否正常：" + UDPHeader.checkCrc(udpHeader));
+//        LogUtils.info("解析UDP数据包，源地址为："
+//                + CommonUtil.int2Ip(ipHeader.getSourceIpAddress())
+//                + ":" + udpHeader.getSrcPort()
+//                + "目标地址为：" + CommonUtil.int2Ip(ipHeader.getDestAddress()) + ":" + udpHeader.getDestPort()
+//                + ",校验ip数据是否正常：" + IPHeader.checkCrc(ipHeader)
+//                + ",校验UDP数据是否正常：" + UDPHeader.checkCrc(udpHeader));
         if (ipHeader.getSourceIpAddress() == mLocalIpAddress && udpHeader.getDestPort() == 53) {
 //            LogUtils.info("本地发出的udp数据");
             // 获取udp数据，包括头和实际数据
             ByteBuffer data = udpHeader.data();
+            data.limit(size);
             // 设置位置到数据部分，后面发送的时候直接发送数据部分
             data.position(udpHeader.offset());
             // 将数据部分进行切分
