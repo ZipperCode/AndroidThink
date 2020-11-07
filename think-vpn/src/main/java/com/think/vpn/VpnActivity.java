@@ -9,7 +9,6 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.think.R;
-import com.think.core.util.ThreadManager;
 import com.think.vpn.packet.dns.DnsFlags;
 import com.think.vpn.packet.dns.DnsHeader;
 import com.think.vpn.packet.dns.DnsPacket;
@@ -20,17 +19,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import test.Server;
 
 public class VpnActivity extends AppCompatActivity {
 
