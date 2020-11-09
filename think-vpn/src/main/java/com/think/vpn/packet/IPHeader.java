@@ -3,7 +3,6 @@ package com.think.vpn.packet;
 import com.think.vpn.utils.CommonUtil;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class IPHeader {
 
@@ -67,120 +66,117 @@ public class IPHeader {
      */
     public static final int DEST_ADDRESS_OFFSET = 16;
 
-    public ByteBuffer mData;
+    private byte[] mData;
+    public ByteBuffer mHeaderBuffer;
     public int mDataOffset = 20;
-
     public int mSize;
 
     public IPHeader(byte[] data, int offset) {
-        this.mData = ByteBuffer.wrap(data);
-        this.mDataOffset = offset;
-    }
-
-    public IPHeader(ByteBuffer data, int dataOffset) {
         this.mData = data;
-        this.mDataOffset = dataOffset;
+        this.mHeaderBuffer = ByteBuffer.wrap(data);
+        this.mDataOffset = offset;
+        this.mHeaderBuffer.limit(mDataOffset);
     }
 
     public IPHeader setVersion(int versionCode) {
         // 前四位清零
-        byte clr = (byte) (mData.get(VER_NUM_AND_LEN_OFFSET) & 0x0F);
+        byte clr = (byte) (mHeaderBuffer.get(VER_NUM_AND_LEN_OFFSET) & 0x0F);
         // 填充版本号信息
-        clr |= ((versionCode & 0xFF) << 4);
-        this.mData.put(VER_NUM_AND_LEN_OFFSET, clr);
+        clr |= ((versionCode & 0x0F) << 4);
+        this.mHeaderBuffer.put(VER_NUM_AND_LEN_OFFSET, clr);
         return calcCheckSum();
     }
 
     public int getVersion() {
-        return mData.get(VER_NUM_AND_LEN_OFFSET) >> 4;
+        return mHeaderBuffer.get(VER_NUM_AND_LEN_OFFSET) >> 4;
     }
 
     public IPHeader setHeaderLength(int headerLength) {
         byte hl = (byte)(headerLength * 8 / 32);
         // 后四位清零
-        byte clr = (byte) (mData.get(VER_NUM_AND_LEN_OFFSET) & 0xF0);
+        byte clr = (byte) (mHeaderBuffer.get(VER_NUM_AND_LEN_OFFSET) & 0xF0);
         clr |= ((hl & 0x0F));
-        this.mData.put(VER_NUM_AND_LEN_OFFSET, clr);
+        this.mHeaderBuffer.put(VER_NUM_AND_LEN_OFFSET, clr);
         return calcCheckSum();
     }
 
     public int getHeaderLength() {
-        return mData.get(VER_NUM_AND_LEN_OFFSET) & 0x0F;
+        return mHeaderBuffer.get(VER_NUM_AND_LEN_OFFSET) & 0x0F;
     }
 
     public IPHeader setServiceType(int serviceType) {
-        this.mData.put(SERVICE_TYPE_OFFSET, (byte) (serviceType & 0xFF));
+        this.mHeaderBuffer.put(SERVICE_TYPE_OFFSET, (byte) (serviceType & 0xFF));
         return calcCheckSum();
     }
 
     public int getServiceType() {
-        return mData.get(SERVICE_TYPE_OFFSET) & 0xFF;
+        return mHeaderBuffer.get(SERVICE_TYPE_OFFSET) & 0xFF;
     }
 
     public IPHeader setTotalLen(int totalLen) {
-        this.mData.putShort(TOTAL_LEN_OFFSET, (short) (totalLen & 0xFFFF));
+        this.mHeaderBuffer.putShort(TOTAL_LEN_OFFSET, (short) (totalLen & 0xFFFF));
         return calcCheckSum();
     }
 
     public int getTotalLen() {
-        return mData.getShort(TOTAL_LEN_OFFSET) & 0xFFFF;
+        return mHeaderBuffer.getShort(TOTAL_LEN_OFFSET) & 0xFFFF;
     }
 
     public IPHeader setIdentifier(int identifier) {
-        this.mData.putShort(IDENTIFIER_OFFSET, (short) (identifier & 0xFFFF));
+        this.mHeaderBuffer.putShort(IDENTIFIER_OFFSET, (short) (identifier & 0xFFFF));
         return calcCheckSum();
     }
 
     public int getIdentifier() {
-        return mData.getShort(IDENTIFIER_OFFSET);
+        return mHeaderBuffer.getShort(IDENTIFIER_OFFSET);
     }
 
     public IPHeader setSliceFlag(int sliceFlag) {
-        this.mData.put(SLICE_OFFSET, (byte) ((sliceFlag & 0xF) << 5));
+        this.mHeaderBuffer.put(SLICE_OFFSET, (byte) ((sliceFlag & 0xF) << 5));
         return calcCheckSum();
     }
 
     public int getSliceFlag() {
-        return (mData.get(SLICE_OFFSET) >> 5);
+        return (mHeaderBuffer.get(SLICE_OFFSET) >> 5);
     }
 
     public IPHeader setSlice(int slice) {
-        byte temp = this.mData.get(SLICE_OFFSET);
+        byte temp = this.mHeaderBuffer.get(SLICE_OFFSET);
         temp &= 0xE0; // 0000 0000 1110 0000 取出前三位
         slice &= 0x1FFF; // 设置后十三位 num & 0001 1111 1111 1111
         temp <<= 8; // 1110 0000 0000 0000
-        this.mData.putShort((short) (temp | slice));
+        this.mHeaderBuffer.putShort((short) (temp | slice));
         return calcCheckSum();
     }
 
     public int getSlice() {
-        return mData.getShort(SLICE_OFFSET) & 0x1FFF;
+        return mHeaderBuffer.getShort(SLICE_OFFSET) & 0x1FFF;
     }
 
     public IPHeader setTtl(int ttl) {
-        this.mData.put(TTL_OFFSET, (byte) (ttl & 0xFF));
+        this.mHeaderBuffer.put(TTL_OFFSET, (byte) (ttl & 0xFF));
         return calcCheckSum();
     }
 
     public int getTtl() {
-        return mData.get(TTL_OFFSET);
+        return mHeaderBuffer.get(TTL_OFFSET);
     }
 
     public IPHeader setProtocol(int protocol) {
-        this.mData.put(PROTOCOL_OFFSET, (byte) (protocol & 0xFF));
+        this.mHeaderBuffer.put(PROTOCOL_OFFSET, (byte) (protocol & 0xFF));
         return calcCheckSum();
     }
 
     public int getProtocol() {
-        return this.mData.get(PROTOCOL_OFFSET);
+        return this.mHeaderBuffer.get(PROTOCOL_OFFSET);
     }
 
     public synchronized IPHeader calcCheckSum() {
         // 计算IP头部校验和
-        mData.putShort(CHECK_SUM_OFFSET, (short) 0);
-        ByteBuffer newBuffer = ByteBuffer.wrap(mData.array());
-        newBuffer.limit(Packet.IP4_HEADER_SIZE);
+        mHeaderBuffer.putShort(CHECK_SUM_OFFSET, (short) 0);
+        ByteBuffer newBuffer = ByteBuffer.wrap(mData);
         newBuffer.position(0);
+        newBuffer.limit(mDataOffset);
         long checkSum = 0;
         while (newBuffer.hasRemaining()) {
             try {
@@ -190,44 +186,43 @@ public class IPHeader {
             }
         }
         while ((checkSum >> 16) > 0){
-            checkSum = (checkSum >> 16) + (checkSum & 0xFFFF);
+            checkSum = ((checkSum >> 16) & 0xFFFF) + (checkSum & 0xFFFF);
         }
-        mData.putShort(CHECK_SUM_OFFSET, (short) ~(checkSum & 0xFFFF));
+        mHeaderBuffer.putShort(CHECK_SUM_OFFSET, (short) ~(checkSum & 0xFFFF));
         return this;
     }
     public void setCheckSum(short checkSum) {
-        mData.putShort(CHECK_SUM_OFFSET,checkSum);
+        mHeaderBuffer.putShort(CHECK_SUM_OFFSET,checkSum);
     }
 
-
     public int getCheckSum() {
-        return mData.getShort(CHECK_SUM_OFFSET) & 0xFFFF;
+        return mHeaderBuffer.getShort(CHECK_SUM_OFFSET) & 0xFFFF;
     }
 
     public IPHeader setSourceAddress(int sourceAddress) {
-        this.mData.putInt(SRC_ADDRESS_OFFSET, sourceAddress);
+        this.mHeaderBuffer.putInt(SRC_ADDRESS_OFFSET, sourceAddress);
         return calcCheckSum();
     }
 
     public int getSourceIpAddress() {
-        return mData.getInt(SRC_ADDRESS_OFFSET);
+        return mHeaderBuffer.getInt(SRC_ADDRESS_OFFSET);
     }
 
 
     public IPHeader setDestinationAddress(int destinationAddress) {
-        this.mData.putInt(DEST_ADDRESS_OFFSET, destinationAddress);
+        this.mHeaderBuffer.putInt(DEST_ADDRESS_OFFSET, destinationAddress);
         return calcCheckSum();
     }
 
     public int getDestAddress() {
-        return mData.getInt(DEST_ADDRESS_OFFSET);
+        return mHeaderBuffer.getInt(DEST_ADDRESS_OFFSET);
     }
 
     public synchronized static boolean checkCrc(IPHeader ipHeader){
-        ByteBuffer buffer = ByteBuffer.wrap(ipHeader.mData.array());
-        int originCheckSum = ipHeader.getCheckSum() & 0xFFFF;
-        buffer.limit(Packet.IP4_HEADER_SIZE);
+        ByteBuffer buffer = ByteBuffer.wrap(ipHeader.mData);
+        long originCheckSum = ipHeader.getCheckSum() & 0xFFFF;
         buffer.position(0);
+        buffer.limit(ipHeader.mDataOffset);
         long checkSum = 0;
         while (buffer.hasRemaining()) {
             try {
@@ -238,7 +233,7 @@ public class IPHeader {
         }
         checkSum -= originCheckSum;
         while ((checkSum >> 16) > 0){
-            checkSum = (checkSum >> 16) + (checkSum & 0xFFFF);
+            checkSum = ((checkSum >> 16) & 0xFFFF) + (checkSum & 0xFFFF);
         }
         int res =  (short) ~(checkSum & 0xFFFF);
         return res == originCheckSum;
@@ -247,23 +242,27 @@ public class IPHeader {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder
-                .append("IPHeader{").append("\r\n")
-                .append("4位版本号 ：").append(CommonUtil.getIpVersion(getVersion())).append(",\t")
-                .append("4为首部长度 ：").append(CommonUtil.getHeaderLength(getHeaderLength())).append(",\t")
-                .append("8位服务类型：").append(Integer.toBinaryString(getServiceType())).append(",\t")
-                .append("16位总长度：").append(getTotalLen()).append(",\t")
-                .append("16位标识：").append(getIdentifier()).append(",\t")
-                .append("3位标志：").append(Integer.toBinaryString(getSliceFlag())).append(",\t")
-                .append("13位片偏移：").append(getSlice()).append(",\t")
-                .append("8位生存时间：").append(getTtl()).append(",\t")
-                .append("8位协议：").append(CommonUtil.getProtocolString(getProtocol())).append(",\t")
-                .append("16位校验和：").append(Integer.toHexString(getCheckSum())).append(",\t")
-                .append("32位源IP地址:").append(CommonUtil.int2Ip(getSourceIpAddress())).append(",\t")
-                .append("32位目标IP地址:").append(CommonUtil.int2Ip(getDestAddress())).append(",\t")
-                .append("}\r\n");
+//        stringBuilder
+//                .append("IPHeader{").append("\r\n")
+//                .append("4位版本号 ：").append(CommonUtil.getIpVersion(getVersion())).append(",\t")
+//                .append("4为首部长度 ：").append(CommonUtil.getHeaderLength(getHeaderLength())).append(",\t")
+//                .append("8位服务类型：").append(Integer.toBinaryString(getServiceType())).append(",\t")
+//                .append("16位总长度：").append(getTotalLen()).append(",\t")
+//                .append("16位标识：").append(getIdentifier()).append(",\t")
+//                .append("3位标志：").append(Integer.toBinaryString(getSliceFlag())).append(",\t")
+//                .append("13位片偏移：").append(getSlice()).append(",\t")
+//                .append("8位生存时间：").append(getTtl()).append(",\t")
+//                .append("8位协议：").append(CommonUtil.getProtocolString(getProtocol())).append(",\t")
+//                .append("16位校验和：").append(Integer.toHexString(getCheckSum())).append(",\t")
+//                .append("32位源IP地址:").append(CommonUtil.int2Ip(getSourceIpAddress())).append(",\t")
+//                .append("32位目标IP地址:").append(CommonUtil.int2Ip(getDestAddress())).append(",\t")
+//                .append("}\r\n");
+        stringBuilder.append("IPHeader >> ").append(CommonUtil.getProtocolString(getProtocol())).append(":")
+                .append(CommonUtil.int2Ip(getSourceIpAddress())).append("->").append(CommonUtil.int2Ip(getDestAddress()));
         return stringBuilder.toString();
     }
+
+
 
     public void fullDefault() {
         setHeaderLength(20);
@@ -274,35 +273,4 @@ public class IPHeader {
         setProtocol(IP4);
         setTtl((byte) 64);
     }
-
-    public static void main(String[] args) {
-//        byte buff[] = new byte[]{0x45,0x00,0x00,0x31,
-//                (byte)0x89, (byte) 0xF5,0x00,0x00,
-//                0x6E,0x06,0x00,0x00,
-//                (byte) 0xDE, (byte) 0xB7,0x45,0x5D,
-//                (byte) 0xC0, (byte) 0xA8,0x00, (byte) 0xDC};
-//        IPHeader ipHeader = new IPHeader(buff,20);
-//        ipHeader.calcCheckSum();
-//        byte[] data = ipHeader.getData();
-//        System.out.println(IPHeader.checkCheckSum(data));
-
-        byte[] datas = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
-        ByteBuffer wrap = ByteBuffer.wrap(datas);
-        byte b = wrap.get();
-        System.out.println(b);
-        byte b1 = wrap.get();
-        System.out.println(b1);
-        byte b2 = wrap.get();
-        System.out.println(b2);
-        wrap.flip();
-        System.out.println("rewind : ");
-        while (wrap.hasRemaining()) {
-            System.out.print(wrap.get());
-        }
-        System.out.println();
-
-
-    }
-
-
 }

@@ -8,6 +8,7 @@ import com.think.core.util.LogUtils;
 import com.think.vpn.tunnel.AbstractTunnel;
 import com.think.vpn.tunnel.RawTunnel;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
@@ -28,7 +29,7 @@ import java.util.Iterator;
  * @author zzp
  * @date 2020-10-31
  */
-public class LocalTcpProxyServer implements Runnable {
+public class LocalTcpProxyServer implements Runnable , Closeable {
 
     private static final String TAG = LocalTcpProxyServer.class.getSimpleName();
 
@@ -63,6 +64,8 @@ public class LocalTcpProxyServer implements Runnable {
      */
     private final SparseArray<Session> mActiveSession = new SparseArray<Session>();
 
+    private boolean closed = false;
+
     public LocalTcpProxyServer(VpnConnection vpnConnection, int localServerPort) {
         this.mVpnConnection = vpnConnection;
         try {
@@ -91,7 +94,7 @@ public class LocalTcpProxyServer implements Runnable {
     public void run() {
         try {
             Log.e(TAG,"run");
-            while (!Thread.interrupted()) {
+            while (!Thread.interrupted() && !closed) {
                 if (mSelector.select() > 0) {
                     Iterator<SelectionKey> iterator = mSelector.selectedKeys().iterator();
                     while (iterator.hasNext()) {
@@ -149,14 +152,6 @@ public class LocalTcpProxyServer implements Runnable {
         return null;
     }
 
-    private void start() {
-
-    }
-
-    private void stop() {
-
-    }
-
     public Session createSession(int localPort, int remoteIp, int remotePort) {
         if (mActiveSession.size() > MAX_SESSION_SIZE) {
             clearExpiredSessions();
@@ -184,4 +179,9 @@ public class LocalTcpProxyServer implements Runnable {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        closed = true;
+        IoUtils.close(mServerSocketChannel,mSelector);
+    }
 }

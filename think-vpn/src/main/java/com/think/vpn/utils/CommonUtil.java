@@ -1,6 +1,7 @@
 package com.think.vpn.utils;
 
 import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class CommonUtil {
@@ -106,8 +107,17 @@ public class CommonUtil {
         }
     }
 
+    public static InetAddress getAddress(String ip) throws UnknownHostException {
+        return InetAddress.getByName(ip);
+    }
+
 
     public static void main(String[] args) {
-        System.out.println(getSliceFlag(2));
+        try {
+            InetAddress inetAddress = getAddress("163.177.30.147");
+            System.out.println(inetAddress);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
     }
 }

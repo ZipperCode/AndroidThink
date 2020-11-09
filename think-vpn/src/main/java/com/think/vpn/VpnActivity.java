@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -174,6 +175,11 @@ public class VpnActivity extends AppCompatActivity {
         if (result == RESULT_OK) {
             startService(getServiceIntent().setAction(LocalVpnService.ACTION_CONNECT));
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return super.dispatchTouchEvent(ev);
     }
 
     private Intent getServiceIntent() {

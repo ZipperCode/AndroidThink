@@ -77,80 +77,78 @@ public class TCPHeader {
      */
     public static final int OPTION = 20;
 
-    private ByteBuffer mData;
-    public int mIpHeaderOffset;
-    public int mDataOffset;
+    private final byte[] mData;
+    private final ByteBuffer mDataBuffer;
+    public final int mIpHeaderOffset;
+    public final int mDataOffset;
     public int mSize;
 
     public TCPHeader(byte[] data, int dataOffset) {
-        this.mData = ByteBuffer.wrap(data);
+        this.mData = data;
+        ByteBuffer buffer = ByteBuffer.wrap(data);
         this.mIpHeaderOffset = dataOffset;
+        buffer.position(mIpHeaderOffset);
+        this.mDataBuffer = buffer.slice();
         this.mDataOffset = mIpHeaderOffset + Packet.TCP_HEADER_SIZE;
     }
 
-    public TCPHeader(ByteBuffer data, int ipHeaderOffset) {
-        this.mData = data;
-        this.mIpHeaderOffset = ipHeaderOffset;
-        this.mDataOffset = mIpHeaderOffset + Packet.TCP_HEADER_SIZE;
-    }
 
     public TCPHeader setSrcPort(int srcPort) {
-        this.mData.putShort(mIpHeaderOffset + SRC_PORT_OFFSET, (short) (srcPort & 0xFFFF));
+        this.mDataBuffer.putShort(SRC_PORT_OFFSET, (short) (srcPort & 0xFFFF));
         return calcCheckSum();
     }
 
-
     public int getSrcPort() {
-        int srcPort = mData.getShort(mIpHeaderOffset + SRC_PORT_OFFSET) & 0xFFFF;
+        int srcPort = mDataBuffer.getShort(SRC_PORT_OFFSET) & 0xFFFF;
         return srcPort;
     }
 
     public TCPHeader setDestPort(int destPort) {
-        this.mData.putShort(mIpHeaderOffset + DEST_PORT_OFFSET, (short) (destPort & 0xFFFF));
+        this.mDataBuffer.putShort(DEST_PORT_OFFSET, (short) (destPort & 0xFFFF));
         return calcCheckSum();
     }
 
     public int getDestPort() {
-        int destPort = this.mData.getShort(mIpHeaderOffset + DEST_PORT_OFFSET) & 0xFFFF;
+        int destPort = this.mDataBuffer.getShort( DEST_PORT_OFFSET) & 0xFFFF;
         return destPort;
     }
 
     public TCPHeader setSeqNo(int seqNo) {
-        this.mData.putInt(mIpHeaderOffset + SEQ_NO_OFFSET, seqNo);
+        this.mDataBuffer.putInt( SEQ_NO_OFFSET, seqNo);
         return calcCheckSum();
     }
 
     public int getSeqNo() {
-        int seqNo = this.mData.getInt(mIpHeaderOffset + SEQ_NO_OFFSET);
+        int seqNo = this.mDataBuffer.getInt( SEQ_NO_OFFSET);
         return seqNo;
     }
 
     public TCPHeader setAckNo(int ackNo) {
-        this.mData.putInt(mIpHeaderOffset + ACK_NO_OFFSET, ackNo);
+        this.mDataBuffer.putInt( ACK_NO_OFFSET, ackNo);
         return calcCheckSum();
     }
 
     public int getAckNo() {
-        int ackNo = this.mData.getInt(mIpHeaderOffset + ACK_NO_OFFSET);
+        int ackNo = this.mDataBuffer.getInt( ACK_NO_OFFSET);
         return ackNo;
     }
 
-    public TCPHeader setHeaderLength(int headerLength){
+    public TCPHeader setHeaderLength(int headerLength) {
         int len = headerLength * 8 / 32;
-        this.mData.put(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET, (byte) ((len & 0xF) << 4));
+        this.mDataBuffer.put( HEADER_LEN_AND_FLAG_OFFSET, (byte) ((len & 0xF) << 4));
         return calcCheckSum();
     }
 
-    public TCPHeader setFlag(TcpFlag tcpFlag){
+    public TCPHeader setFlag(TcpFlag tcpFlag) {
         // 前两位保留，后六位为标志位
-        byte flag = mData.get(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET + 1);
-        if(tcpFlag.URG) flag |= 0x20; // 0010 0000
-        if(tcpFlag.ACK) flag |= 0x10; // 0001 0000
-        if(tcpFlag.PSH) flag |= 0x08; // 0000 1000
-        if(tcpFlag.RST) flag |= 0x04; // 0000 0100
-        if(tcpFlag.SYN) flag |= 0x02; // 0000 0010
-        if(tcpFlag.FIN) flag |= 0x01; // 0000 0001
-        this.mData.put(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET + 1, flag);
+        byte flag = mDataBuffer.get( HEADER_LEN_AND_FLAG_OFFSET + 1);
+        if (tcpFlag.URG) flag |= 0x20; // 0010 0000
+        if (tcpFlag.ACK) flag |= 0x10; // 0001 0000
+        if (tcpFlag.PSH) flag |= 0x08; // 0000 1000
+        if (tcpFlag.RST) flag |= 0x04; // 0000 0100
+        if (tcpFlag.SYN) flag |= 0x02; // 0000 0010
+        if (tcpFlag.FIN) flag |= 0x01; // 0000 0001
+        this.mDataBuffer.put( HEADER_LEN_AND_FLAG_OFFSET + 1, flag);
         return calcCheckSum();
     }
 
@@ -163,85 +161,83 @@ public class TCPHeader {
         //设置头部长度为20字节,设置为5
         // 20 * 8 = 160 / 32 = 5
         int len = Packet.TCP_HEADER_SIZE * 8 / 32;
-        this.mData.put(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET, (byte) ((len & 0xF) << 4));
-        this.mData.put(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET + 1, (byte) flag);
+        this.mDataBuffer.put( HEADER_LEN_AND_FLAG_OFFSET, (byte) ((len & 0xF) << 4));
+        this.mDataBuffer.put( HEADER_LEN_AND_FLAG_OFFSET + 1, (byte) flag);
         return calcCheckSum();
     }
 
     public int getHeaderLen() {
-        return ((mData.get(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET) >> 4) & 0x0F) * 32 / 8;
+        return ((mDataBuffer.get( HEADER_LEN_AND_FLAG_OFFSET) >> 4) & 0x0F) * 32 / 8;
     }
 
     public int getFlag() {
-        return this.mData.get(mIpHeaderOffset + HEADER_LEN_AND_FLAG_OFFSET + 1);
+        return this.mDataBuffer.get( HEADER_LEN_AND_FLAG_OFFSET + 1);
     }
 
     public TCPHeader setWindowSize(int windowSize) {
-        this.mData.putShort(mIpHeaderOffset + WINDOW_SIZE_OFFSET, (short) (windowSize & 0xFFFF));
+        this.mDataBuffer.putShort( WINDOW_SIZE_OFFSET, (short) (windowSize & 0xFFFF));
         return calcCheckSum();
     }
 
     public int getWindowSize() {
-        int size = this.mData.getShort(mIpHeaderOffset + WINDOW_SIZE_OFFSET) & 0xFFFF;
+        int size = this.mDataBuffer.getShort( WINDOW_SIZE_OFFSET) & 0xFFFF;
         return size;
     }
 
     public synchronized TCPHeader calcCheckSum() {
         // 首先校验位置零
-        this.mData.putShort(mIpHeaderOffset + CHECK_SUM_OFFSET, (short) 0);
+        this.mDataBuffer.putShort( CHECK_SUM_OFFSET, (short) 0);
         long checkSum = 0;
-
+        ByteBuffer buffer = ByteBuffer.wrap(mData);
         // 伪首部12字节 源地址、目标地址、标志、协议、tcp长度
         ByteBuffer psdHeader = ByteBuffer.allocate(12);
-        psdHeader.putInt(this.mData.getInt(IPHeader.SRC_ADDRESS_OFFSET));
-        psdHeader.putInt(this.mData.getInt(IPHeader.DEST_ADDRESS_OFFSET));
+        psdHeader.putInt(buffer.getInt(IPHeader.SRC_ADDRESS_OFFSET));
+        psdHeader.putInt(buffer.getInt(IPHeader.DEST_ADDRESS_OFFSET));
         psdHeader.put((byte) 0);
-        psdHeader.put(this.mData.get(IPHeader.PROTOCOL_OFFSET));
-        short tcpLength = (short) (this.mData.getShort(IPHeader.TOTAL_LEN_OFFSET) - Packet.IP4_HEADER_SIZE);
+        psdHeader.put(buffer.get(IPHeader.PROTOCOL_OFFSET));
+        short tcpLength = (short) (buffer.getShort(IPHeader.TOTAL_LEN_OFFSET) - mIpHeaderOffset);
         psdHeader.putShort(tcpLength);
         psdHeader.flip();
         // 伪首部累加
         while (psdHeader.hasRemaining()) {
             checkSum += psdHeader.getShort() & 0xFFFF;
         }
-        ByteBuffer newBuffer = ByteBuffer.wrap(mData.array());
-        newBuffer.position(mIpHeaderOffset);
-        newBuffer.limit(mSize);
-        newBuffer = newBuffer.slice();
+        buffer.position(mIpHeaderOffset);
+        buffer.limit(mDataBuffer.getShort(IPHeader.TOTAL_LEN_OFFSET));
+        ByteBuffer tcpBuffer = buffer.slice();
         // 数据累加
-        while (newBuffer.hasRemaining()) {
+        while (tcpBuffer.hasRemaining()) {
             try {
-                checkSum += newBuffer.getShort() & 0xFFFF;
+                checkSum += tcpBuffer.getShort() & 0xFFFF;
             } catch (Exception e) {
-                checkSum += (newBuffer.get() << 8) & 0xFFFF;
+                checkSum += (tcpBuffer.get() << 8) & 0xFFFF;
             }
         }
-        while ((checkSum >> 16) > 0){
-            checkSum = (checkSum >> 16) + checkSum & 0xFFFF;
+        while ((checkSum >> 16) > 0) {
+            checkSum = ((checkSum >> 16) & 0xFFFF) + checkSum & 0xFFFF;
         }
         short sum = (short) ~(checkSum & 0xFFFF);
-        mData.putShort(mIpHeaderOffset + CHECK_SUM_OFFSET, sum);
+        mDataBuffer.putShort( CHECK_SUM_OFFSET, sum);
         return this;
     }
 
     public void setCheckSum(short checkSum) {
-        mData.putShort(mIpHeaderOffset + CHECK_SUM_OFFSET,checkSum);
+        mDataBuffer.putShort( CHECK_SUM_OFFSET, checkSum);
     }
 
     public int getCheckSum() {
-        return mData.getShort(mIpHeaderOffset + CHECK_SUM_OFFSET) & 0xFFFF;
+        return mDataBuffer.getShort( CHECK_SUM_OFFSET) & 0xFFFF;
     }
 
-    public synchronized static boolean checkCrc(TCPHeader tcpHeader){
+    public synchronized static boolean checkCrc(TCPHeader tcpHeader) {
         long checkSum = 0;
-        ByteBuffer newBuffer = ByteBuffer.wrap(tcpHeader.mData.array());
-
+        ByteBuffer newBuffer = ByteBuffer.wrap(tcpHeader.mData);
         ByteBuffer psdHeader = ByteBuffer.allocate(12);
         psdHeader.putInt(newBuffer.getInt(IPHeader.SRC_ADDRESS_OFFSET));
         psdHeader.putInt(newBuffer.getInt(IPHeader.DEST_ADDRESS_OFFSET));
         psdHeader.put((byte) 0);
         psdHeader.put(newBuffer.get(IPHeader.PROTOCOL_OFFSET));
-        short tcpLength = (short) (newBuffer.getShort(IPHeader.TOTAL_LEN_OFFSET) - Packet.IP4_HEADER_SIZE);
+        short tcpLength = (short) (newBuffer.getShort(IPHeader.TOTAL_LEN_OFFSET) - tcpHeader.mIpHeaderOffset);
         psdHeader.putShort(tcpLength);
         psdHeader.flip();
         // 伪首部累加
@@ -251,33 +247,42 @@ public class TCPHeader {
         newBuffer.position(tcpHeader.mIpHeaderOffset);
         ByteBuffer tcpBuffer = newBuffer.slice();
         while (tcpBuffer.hasRemaining()) {
-            try{
+            try {
                 checkSum += tcpBuffer.getShort() & 0xFFFF;
-            }catch (Exception e){
+            } catch (Exception e) {
                 checkSum += ((tcpBuffer.get() << 8) & 0xFFFF);
             }
         }
         checkSum -= tcpHeader.getCheckSum();
-        while ((checkSum >> 16) > 0){
+        while ((checkSum >> 16) > 0) {
             // 前十六位和后十六位相加
             checkSum = (checkSum >> 16) + checkSum & 0xFFFF;
         }
 
         short sum = (short) ~(checkSum & 0xFFFF);
-        short packetCheckSum =  tcpHeader.mData.getShort(tcpHeader.mIpHeaderOffset + CHECK_SUM_OFFSET);
+        short packetCheckSum = tcpHeader.mDataBuffer.getShort( CHECK_SUM_OFFSET);
         return sum == packetCheckSum;
     }
 
     public TCPHeader setUrgentPoint(int urgentPoint) {
-        mData.putShort(mIpHeaderOffset + URGENT_POINTER_OFFSET, (short) urgentPoint);
+        mDataBuffer.putShort( URGENT_POINTER_OFFSET, (short) urgentPoint);
         return this;
     }
 
     public int getUrgentPointer() {
-        return mData.getShort(mIpHeaderOffset + URGENT_POINTER_OFFSET) & 0xFFFF;
+        return mDataBuffer.getShort(URGENT_POINTER_OFFSET) & 0xFFFF;
+    }
+
+    public void size(int size){
+        this.mSize = size;
+        this.mDataBuffer.limit(size);
     }
 
     public ByteBuffer data() {
+        return ByteBuffer.wrap(mData);
+    }
+
+    public byte[] bytes(){
         return mData;
     }
 
@@ -289,32 +294,31 @@ public class TCPHeader {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("TCPHeader {").append("\r\n")
-                .append("源端口为：").append(getSrcPort()).append(",\t")
-                .append("目的端口为：").append(getDestPort()).append(",\t")
-                .append("序列号为：").append(getSeqNo()).append(",\t")
-                .append("确认号为：").append(getAckNo()).append(",\t")
-                .append("TCP首部长度为：").append(getHeaderLen()).append(",\t")
-                .append("标志位：[");
-        int flag = getFlag();
-        stringBuilder.append("URG=").append((flag & URG) == 0 ? 0 : 1).append(",")
-                .append("ACK=").append((flag & ACK) == 0 ? 0 : 1).append(",")
-                .append("PSH=").append((flag & PSH) == 0 ? 0 : 1).append(",")
-                .append("RST=").append((flag & RST) == 0 ? 0 : 1).append(",")
-                .append("SYN=").append((flag & SYN) == 0 ? 0 : 1).append(",")
-                .append("FIN=").append((flag & FIN) == 0 ? 0 : 1).append("],\t");
-
-        stringBuilder.append("窗口大小：").append(getWindowSize()).append("\t")
-                .append("校验和：").append(getCheckSum()).append(",")
-                .append("紧急指针：").append(getUrgentPointer())
-                .append(",\t").append(mData)
-                .append(" }");
-
-
+//        stringBuilder.append("TCPHeader {").append("\r\n")
+//                .append("源端口为：").append(getSrcPort()).append(",\t")
+//                .append("目的端口为：").append(getDestPort()).append(",\t")
+//                .append("序列号为：").append(getSeqNo()).append(",\t")
+//                .append("确认号为：").append(getAckNo()).append(",\t")
+//                .append("TCP首部长度为：").append(getHeaderLen()).append(",\t")
+//                .append("标志位：[");
+//        int flag = getFlag();
+//        stringBuilder.append("URG=").append((flag & URG) == 0 ? 0 : 1).append(",")
+//                .append("ACK=").append((flag & ACK) == 0 ? 0 : 1).append(",")
+//                .append("PSH=").append((flag & PSH) == 0 ? 0 : 1).append(",")
+//                .append("RST=").append((flag & RST) == 0 ? 0 : 1).append(",")
+//                .append("SYN=").append((flag & SYN) == 0 ? 0 : 1).append(",")
+//                .append("FIN=").append((flag & FIN) == 0 ? 0 : 1).append("],\t");
+//
+//        stringBuilder.append("窗口大小：").append(getWindowSize()).append("\t")
+//                .append("校验和：").append(getCheckSum()).append(",")
+//                .append("紧急指针：").append(getUrgentPointer())
+//                .append(" }");
+        stringBuilder.append("TCPHeader >> ").append("srcPort = ").append(getSrcPort()).append("->")
+                .append("destPort = ").append(getDestPort());
         return stringBuilder.toString();
     }
 
-    public static class TcpFlag{
+    public static class TcpFlag {
         public boolean URG;
         public boolean ACK;
         public boolean PSH;
