@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -178,9 +179,49 @@ public class VpnActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        return super.dispatchKeyEvent(event) | check(null);
+    }
+
+    public boolean check(MotionEvent motionEvent){
+        return false;
+    }
+
+    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        Log.d(TAG,"dispatchTouchEvent");
         return super.dispatchTouchEvent(ev);
     }
+
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+//        Log.d(TAG,"onTouchEvent");
+        return super.onTouchEvent(motionEvent) | a.a(motionEvent);
+    }
+
+
+    public boolean onGenericMotionEvent(MotionEvent motionEvent) {
+//        Log.d(TAG,"onGenericMotionEvent");
+        return super.onGenericMotionEvent(motionEvent);
+    }
+
+    public boolean onKeyDown(int i, KeyEvent keyEvent) {
+//        Log.d(TAG,"onKeyDown");
+        return super.onKeyDown(i,keyEvent);
+    }
+
+    public boolean onKeyUp(int i, KeyEvent keyEvent) {
+//        Log.d(TAG,"onKeyUp");
+        return super.onKeyUp(i,keyEvent);
+    }
+
+    private A a = new A();
+
+    class A {
+        public boolean a(MotionEvent motionEvent){
+            return false;
+        }
+    }
+
 
     private Intent getServiceIntent() {
         return new Intent(this, LocalVpnService.class);
