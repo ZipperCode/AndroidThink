@@ -25,6 +25,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.RelativeLayout;
 
 public class FloatWindow extends RelativeLayout {
@@ -56,7 +58,6 @@ public class FloatWindow extends RelativeLayout {
     private int inViewY;
 
     private int inScreenX;
-
     private int inScreenY;
 
     private int downScreenX;
@@ -65,19 +66,6 @@ public class FloatWindow extends RelativeLayout {
      * 最小的移动间隔，小于此间隔及响应事件
      */
     private int touchSlop;
-    /**
-     * 应该偏移的方向
-     */
-    private FloatIcon.Direction mDirection = FloatIcon.Direction.UNKNOWN;
-
-    private final Paint mShadowPaint = new Paint();
-
-    private final GradientDrawable mShadowDrawable
-            = new GradientDrawable(Orientation.LEFT_RIGHT, SHADOWS_COLOR);
-
-    private final int shaDowRadius = 10;
-
-    private RectF mRectF = new RectF();
 
     private int mStatusBarHeight = 0;
 
@@ -86,6 +74,15 @@ public class FloatWindow extends RelativeLayout {
     private WindowManager.LayoutParams mLayoutParams;
 
     private boolean mMoved;
+
+    private int mRadius;
+
+    private final Runnable mDelayAlphaAnim = new Runnable() {
+        @Override
+        public void run() {
+            processAlpha(true);
+        }
+    };
 
     public FloatWindow(Context context) {
         super(context);
@@ -113,26 +110,23 @@ public class FloatWindow extends RelativeLayout {
             mStatusBarHeight = getResources().getDimensionPixelSize(resId);
         }
         processScale(false);
-        resetTouch(screenHPixel / 2, screenHPixel / 2);
-        initPaint();
+        resetTouch(0, screenHPixel / 2);
     }
 
-
-    private void initPaint() {
-        mShadowPaint.setShadowLayer(shaDowRadius, 1, 1, SHADOWS_COLOR[0]);
-        mShadowPaint.setMaskFilter(new BlurMaskFilter(shaDowRadius, BlurMaskFilter.Blur.NORMAL));
-        mShadowPaint.setColor(SHADOWS_COLOR[0]);
-        mShadowPaint.setAntiAlias(true);
-        mShadowPaint.setAlpha(50);
-        mShadowPaint.setStyle(Paint.Style.STROKE);
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        Log.e(TAG,"onLayout >>> change = " + changed + ", l = " + l + ",t = " + t + ",r = " + r + ",b = " + b);
+        super.onLayout(changed, l, t, r, b);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.makeMeasureSpec(ScreenUtils.dp2px(getContext(), viewW), MeasureSpec.AT_MOST);
         int height = MeasureSpec.makeMeasureSpec(ScreenUtils.dp2px(getContext(), viewH), MeasureSpec.AT_MOST);
-        super.onMeasure(width, height);
-//        Log.d(TAG, "onMeasure >>> with = " + MeasureSpec.getSize(width) + ",height = " + MeasureSpec.getSize(height));
+        int result = Math.min(width,height);
+        mRadius = result / 2;
+        super.onMeasure(result, result);
+        Log.d(TAG, "onMeasure >>> with = " + MeasureSpec.getSize(width) + ",height = " + MeasureSpec.getSize(height));
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -173,6 +167,8 @@ public class FloatWindow extends RelativeLayout {
         inScreenY = (int) event.getRawY();
         setPressed(true);
         processScale(true);
+        removeCallbacks(mDelayAlphaAnim);
+        processAlpha(false);
         return true;
     }
 
@@ -181,8 +177,6 @@ public class FloatWindow extends RelativeLayout {
         inScreenY = (int) event.getRawY();
         mMoved = Math.abs(inScreenX - downScreenX) >= touchSlop || Math.abs(inScreenY - downScreenY) >= touchSlop;
         Log.d(TAG, "inScreenX = " + inScreenX + ",inScreenY = " + inScreenY + ", downScreenX = " + downScreenX + ",downScreenY = " + downScreenY);
-//        setX(Math.min(Math.max(0, (moveX - viewWPixel / 2)), screenWPixel - viewWPixel));
-//        setY(Math.min(Math.max(mStatusBarHeight, (moveY - viewHPixel / 2)), screenHPixel - viewHPixel));
         update();
         return true;
     }
@@ -192,11 +186,10 @@ public class FloatWindow extends RelativeLayout {
         if (!mMoved) {
             performClick();
         }
-        mDirection = inScreenX < screenWPixel / 2 ? FloatIcon.Direction.LEFT : FloatIcon.Direction.RIGHT;
-        processTranslate(mDirection == FloatIcon.Direction.LEFT);
+        processTranslate(inScreenX < screenWPixel / 2);
         setPressed(false);
         processScale(false);
-        postInvalidateDelayed(100);
+        postDelayed(mDelayAlphaAnim,3000);
         return true;
     }
 
@@ -209,7 +202,6 @@ public class FloatWindow extends RelativeLayout {
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         Log.e(TAG,"drawChild  child = " + child);
-        drawShadow(canvas);
         return super.drawChild(canvas, child, drawingTime);
     }
 
@@ -235,18 +227,10 @@ public class FloatWindow extends RelativeLayout {
         }
     }
 
-    private void drawShadow(Canvas canvas) {
-        int left = getLeft();
-        int right = getRight();
-        int top = getTop();
-        int bottom = getBottom();
-        mRectF.set(left, top, right, bottom);
-        Log.d(TAG, "drawShadow == >" + mRectF);
-        canvas.drawRect(mRectF, mShadowPaint);
-    }
-
     private void resetTouch(int x, int y) {
-        mDirection = FloatIcon.Direction.UNKNOWN;
+        inScreenX = x;
+        inScreenY = y;
+        update();
     }
 
     private void processScale(boolean isDown) {
@@ -254,11 +238,17 @@ public class FloatWindow extends RelativeLayout {
         animate().scaleX(value).scaleY(value).setDuration(100).start();
     }
 
+    private void processAlpha(boolean process){
+        float value = process ? 0.5f:1f;
+        animate().alpha(value).setDuration(500).start();
+    }
+
     private void processTranslate(boolean isLeft) {
         ValueAnimator mStartAnim = ValueAnimator.ofInt(inScreenX, isLeft ? 0 : screenWPixel);
-        mStartAnim.setInterpolator(new AccelerateInterpolator(1.2f));
-        mStartAnim.setDuration(400);
-        mStartAnim.setRepeatMode(ValueAnimator.REVERSE);
+        mStartAnim.setInterpolator(new AccelerateInterpolator());
+//        mStartAnim.setInterpolator(new OvershootInterpolator());
+        mStartAnim.setDuration(500);
+//        mStartAnim.setRepeatMode(ValueAnimator.REVERSE);
         mStartAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
