@@ -1,17 +1,15 @@
-package com.example.myapplication;
+package com.think.ui;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -25,9 +23,10 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AnticipateOvershootInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.RelativeLayout;
+
+import com.think.core.util.ScreenUtils;
+
 
 public class FloatWindow extends RelativeLayout {
 
@@ -37,8 +36,6 @@ public class FloatWindow extends RelativeLayout {
      */
     private static final int DEFAULT_VIEW_W = 50;
     private static final int DEFAULT_VIEW_H = 50;
-
-    private static final int[] SHADOWS_COLOR = new int[]{0xFFFFFFFF, 0x00FFFFFF, 0x00FFFFFF};
 
     /**
      * 屏幕的宽高
@@ -50,39 +47,61 @@ public class FloatWindow extends RelativeLayout {
      */
     private int viewW;
     private int viewH;
-
-//    private int viewWPixel;
-//    private int viewHPixel;
-
+    /**
+     * 当前view在父容器中的坐标
+     */
     private int inViewX;
     private int inViewY;
-
+    /**
+     * 当前view在屏幕中的坐标
+     */
     private int inScreenX;
     private int inScreenY;
-
+    /**
+     * 手指按下时当前view在屏幕中的坐标
+     */
     private int downScreenX;
     private int downScreenY;
     /**
      * 最小的移动间隔，小于此间隔及响应事件
      */
     private int touchSlop;
-
+    /**
+     * 状态栏的高度
+     */
     private int mStatusBarHeight = 0;
-
+    /**
+     * 窗口管理器
+     */
     private final WindowManager mWindowManager;
-
+    /**
+     * 布局参数，当前view在窗口中的位置
+     */
     private WindowManager.LayoutParams mLayoutParams;
-
+    /**
+     * 是否处于移动的状态
+     */
     private boolean mMoved;
-
-    private int mRadius;
-
+    /**
+     * 延迟进行透明度变化
+     */
     private final Runnable mDelayAlphaAnim = new Runnable() {
         @Override
         public void run() {
             processAlpha(true);
         }
     };
+    /**
+     * 平移属性动画
+     */
+    private ValueAnimator mTranslateAnim;
+
+    private final RectF mRectF = new RectF();
+
+    private final Path mPath = new Path();
+
+    private final Paint mPaint = new Paint();
+
 
     public FloatWindow(Context context) {
         super(context);
@@ -102,7 +121,6 @@ public class FloatWindow extends RelativeLayout {
         screenWPixel = displayMetrics.widthPixels;
         screenHPixel = displayMetrics.heightPixels;
         touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-//        Log.d(TAG, "init >>> screenW = " + screenWPixel + ",screenH = " + screenHPixel + ",touchSlop = " + touchSlop);
         viewW = DEFAULT_VIEW_W;
         viewH = DEFAULT_VIEW_H;
         int resId = getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -114,19 +132,18 @@ public class FloatWindow extends RelativeLayout {
     }
 
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        Log.e(TAG,"onLayout >>> change = " + changed + ", l = " + l + ",t = " + t + ",r = " + r + ",b = " + b);
-        super.onLayout(changed, l, t, r, b);
-    }
-
-    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.makeMeasureSpec(ScreenUtils.dp2px(getContext(), viewW), MeasureSpec.AT_MOST);
         int height = MeasureSpec.makeMeasureSpec(ScreenUtils.dp2px(getContext(), viewH), MeasureSpec.AT_MOST);
-        int result = Math.min(width,height);
-        mRadius = result / 2;
+        int result = Math.min(width, height);
         super.onMeasure(result, result);
         Log.d(TAG, "onMeasure >>> with = " + MeasureSpec.getSize(width) + ",height = " + MeasureSpec.getSize(height));
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mRectF.set(0, 0, w, h);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -138,13 +155,13 @@ public class FloatWindow extends RelativeLayout {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.e(TAG, "down");
+//                Log.e(TAG, "down");
                 return doDown(event);
             case MotionEvent.ACTION_MOVE:
-                Log.e(TAG, "move");
+//                Log.e(TAG, "move");
                 return doMove(event);
             case MotionEvent.ACTION_UP:
-                Log.e(TAG, "up");
+//                Log.e(TAG, "up");
                 return doUp(event);
             default:
                 break;
@@ -169,6 +186,7 @@ public class FloatWindow extends RelativeLayout {
         processScale(true);
         removeCallbacks(mDelayAlphaAnim);
         processAlpha(false);
+        cancelTranslate();
         return true;
     }
 
@@ -176,7 +194,7 @@ public class FloatWindow extends RelativeLayout {
         inScreenX = (int) event.getRawX();
         inScreenY = (int) event.getRawY();
         mMoved = Math.abs(inScreenX - downScreenX) >= touchSlop || Math.abs(inScreenY - downScreenY) >= touchSlop;
-        Log.d(TAG, "inScreenX = " + inScreenX + ",inScreenY = " + inScreenY + ", downScreenX = " + downScreenX + ",downScreenY = " + downScreenY);
+//        Log.d(TAG, "inScreenX = " + inScreenX + ",inScreenY = " + inScreenY + ", downScreenX = " + downScreenX + ",downScreenY = " + downScreenY);
         update();
         return true;
     }
@@ -189,19 +207,30 @@ public class FloatWindow extends RelativeLayout {
         processTranslate(inScreenX < screenWPixel / 2);
         setPressed(false);
         processScale(false);
-        postDelayed(mDelayAlphaAnim,3000);
+        postDelayed(mDelayAlphaAnim, 3000);
         return true;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Log.e(TAG,"onDraw");
+        Log.e(TAG, "onDraw");
         super.onDraw(canvas);
     }
 
     @Override
+    protected void dispatchDraw(Canvas canvas) {
+        Log.e(TAG, "dispatchDraw");
+        canvas.save();
+        mPath.reset();
+        mPath.addRoundRect(mRectF,getMeasuredWidth() / 2f,getMeasuredHeight() / 2f, Path.Direction.CW);
+        canvas.drawPath(mPath, mPaint);
+        super.dispatchDraw(canvas);
+        canvas.restore();
+    }
+
+    @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        Log.e(TAG,"drawChild  child = " + child);
+        Log.e(TAG, "drawChild  child = " + child);
         return super.drawChild(canvas, child, drawingTime);
     }
 
@@ -219,6 +248,7 @@ public class FloatWindow extends RelativeLayout {
         if (checkLayoutParam()) {
             return;
         }
+
         mLayoutParams.gravity = Gravity.START | Gravity.TOP;
         mLayoutParams.x = inScreenX - inViewX;
         mLayoutParams.y = inScreenY - inViewY - mStatusBarHeight;
@@ -226,6 +256,7 @@ public class FloatWindow extends RelativeLayout {
             mWindowManager.updateViewLayout(this, mLayoutParams);
         }
     }
+
 
     private void resetTouch(int x, int y) {
         inScreenX = x;
@@ -238,28 +269,34 @@ public class FloatWindow extends RelativeLayout {
         animate().scaleX(value).scaleY(value).setDuration(100).start();
     }
 
-    private void processAlpha(boolean process){
-        float value = process ? 0.5f:1f;
+    private void processAlpha(boolean process) {
+        float value = process ? 0.5f : 1f;
         animate().alpha(value).setDuration(500).start();
     }
 
     private void processTranslate(boolean isLeft) {
-        ValueAnimator mStartAnim = ValueAnimator.ofInt(inScreenX, isLeft ? 0 : screenWPixel);
-        mStartAnim.setInterpolator(new AccelerateInterpolator());
+        mTranslateAnim = ValueAnimator.ofInt(inScreenX, isLeft ? 0 : screenWPixel);
+        mTranslateAnim.setInterpolator(new AccelerateInterpolator());
 //        mStartAnim.setInterpolator(new OvershootInterpolator());
-        mStartAnim.setDuration(500);
+        mTranslateAnim.setDuration(500);
 //        mStartAnim.setRepeatMode(ValueAnimator.REVERSE);
-        mStartAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        mTranslateAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 inScreenX = (int) valueAnimator.getAnimatedValue();
                 update();
             }
         });
-        mStartAnim.start();
+        mTranslateAnim.start();
     }
 
-    public static boolean checkPermission(Activity activity){
+    private void cancelTranslate() {
+        if (mTranslateAnim != null && mTranslateAnim.isRunning()) {
+            mTranslateAnim.cancel();
+        }
+    }
+
+    public static boolean checkPermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= 23 && activity.getApplicationInfo().targetSdkVersion >= 23) {
             try {
                 if (!Settings.canDrawOverlays(activity)) {
@@ -277,7 +314,7 @@ public class FloatWindow extends RelativeLayout {
 
     public static FloatWindow getInstance(Activity context) {
         FloatWindow floatWindow = new FloatWindow(context.getApplicationContext());
-        if(!checkPermission(context)){
+        if (!checkPermission(context)) {
             return floatWindow;
         }
         WindowManager mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);

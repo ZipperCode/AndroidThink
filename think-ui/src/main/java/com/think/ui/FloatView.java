@@ -1,38 +1,22 @@
-package com.example.myapplication;
+package com.think.ui;
 
-import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
-import android.graphics.Region;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
+
+import com.think.core.util.ScreenUtils;
 
 public class FloatView extends RelativeLayout {
 
     private static final String TAG = FloatView.class.getSimpleName();
-    /**
-     * 当前view父容器的宽高
-     */
-    private int parentViewW;
-    private int parentViewH;
 
     /**
      * 屏幕的宽高
@@ -87,7 +71,7 @@ public class FloatView extends RelativeLayout {
         init();
     }
 
-    public FloatView(Context context, int viewW,int viewH){
+    public FloatView(Context context, int viewW, int viewH) {
         this(context);
         this.viewW = viewW;
         this.viewH = viewH;
@@ -99,10 +83,10 @@ public class FloatView extends RelativeLayout {
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         screenWPixel = displayMetrics.widthPixels;
         screenHPixel = displayMetrics.heightPixels;
-        if(viewW == 0){
+        if (viewW == 0) {
             viewW = 50;
         }
-        if(viewH == 0){
+        if (viewH == 0) {
             viewH = 50;
         }
         int resId = getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -122,7 +106,7 @@ public class FloatView extends RelativeLayout {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        Log.d(TAG,"onSizeChanged >>> w = " + w + ",h = " + "oldw = " + oldw + ",oldh = " + oldh);
+        Log.d(TAG, "onSizeChanged >>> w = " + w + ",h = " + "oldw = " + oldw + ",oldh = " + oldh);
     }
 
     @Override
@@ -137,7 +121,6 @@ public class FloatView extends RelativeLayout {
         Log.d(TAG, "onMeasure >>> with = " + MeasureSpec.getSize(width) + ",height = " + MeasureSpec.getSize(height));
         Log.d(TAG, "onMeasure >>> viewWPixel = " + viewWPixel + ",viewHPixel = " + viewHPixel);
     }
-
 
 
     @Override
@@ -186,7 +169,7 @@ public class FloatView extends RelativeLayout {
     private boolean doUp(MotionEvent event) {
         setPressed(false);
         processScale(false);
-        postDelayed(mDelayAlphaAnim,3000);
+        postDelayed(mDelayAlphaAnim, 3000);
         if (!mMoved) {
             performClick();
         }
@@ -196,7 +179,7 @@ public class FloatView extends RelativeLayout {
 
     @Override
     public boolean performClick() {
-        Log.d(TAG,"performClick");
+        Log.d(TAG, "performClick");
         return super.performClick();
     }
 
@@ -205,13 +188,13 @@ public class FloatView extends RelativeLayout {
         animate().scaleX(value).scaleY(value).setDuration(100).start();
     }
 
-    private void processAlpha(boolean process){
-        float value = process ? 0.5f:1f;
+    private void processAlpha(boolean process) {
+        float value = process ? 0.5f : 1f;
         animate().alpha(value).start();
     }
 
     private void processTranslate(boolean isLeft) {
-        Log.d(TAG,"processTranslate >>> isLeft = " + isLeft + ", lastX = " + lastX + ",viewWPixel = " + viewWPixel);
+        Log.d(TAG, "processTranslate >>> isLeft = " + isLeft + ", lastX = " + lastX + ",viewWPixel = " + viewWPixel);
         mTranslateAnim = ValueAnimator.ofInt(lastX, isLeft ? 0 : screenWPixel);
         mTranslateAnim.setInterpolator(new AccelerateInterpolator());
         mTranslateAnim.setDuration(500);
@@ -227,8 +210,8 @@ public class FloatView extends RelativeLayout {
         mTranslateAnim.start();
     }
 
-    private void cancelTranslate(){
-        if(mTranslateAnim != null && mTranslateAnim.isRunning()){
+    private void cancelTranslate() {
+        if (mTranslateAnim != null && mTranslateAnim.isRunning()) {
             mTranslateAnim.cancel();
         }
     }
