@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AndroidThink</string>
+    <string name="describe_name">辅助工具</string>
+    <string name="describe">辅助工具,获取获取接受焦点的顶层Activity</string>
 </resources>

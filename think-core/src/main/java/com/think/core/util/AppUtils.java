@@ -1,5 +1,6 @@
 package com.think.core.util;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -13,10 +14,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.accessibility.AccessibilityManager;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 
@@ -37,22 +39,79 @@ import java.util.concurrent.TimeUnit;
 public class AppUtils {
 
     /**
+     * 检查无障碍服务是否开启
+     *
+     * @param context     当前上下文
+     * @param serviceName 服务名：包名/类名 可能包含全类名也可能不包含
+     * @return 开启为true
+     */
+    public static boolean checkAccessibilityOn1(Context context, String serviceName) {
+        if (context == null || serviceName == null) {
+            return false;
+        }
+
+        boolean isStarted = false;
+        AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        List<AccessibilityServiceInfo> enabledAccessibilityServiceList =
+                am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+        for (int i = 0; i < enabledAccessibilityServiceList.size(); i++) {
+            if (enabledAccessibilityServiceList.get(i).getId().equals(serviceName)) {
+                isStarted = true;
+                break;
+            }
+        }
+        return isStarted;
+    }
+
+    public static boolean checkAccessibilityOn2(Context context, String serviceName) {
+        if (context == null || serviceName == null) {
+            return false;
+        }
+        int ok = 0;
+        try {
+            ok = Settings.Secure.getInt(context.getApplicationContext().getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_ENABLED);
+        } catch (Settings.SettingNotFoundException e) {
+            // TODO Ignore
+        }
+
+        TextUtils.SimpleStringSplitter ms = new TextUtils.SimpleStringSplitter(':');
+        if (ok == 1) {
+            String settingValue = Settings.Secure.getString(context.getApplicationContext().getContentResolver(),
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            if (settingValue != null) {
+                ms.setString(settingValue);
+                while (ms.hasNext()) {
+                    String accessibilityService = ms.next();
+                    if (accessibilityService.equalsIgnoreCase(serviceName)) {
+                        return true;
+                    }
+
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * 通过Context获取Activity
+     *
      * @param context 上下文
      * @return 如果context为空，则返回空
      */
-    public static Activity getActivity(Context context){
-        if(context == null){
+    public static Activity getActivity(Context context) {
+        if (context == null) {
             return null;
         }
-        if(context instanceof Activity && isActivityAlive((Activity)context)){
-            return (Activity)context;
+        if (context instanceof Activity && isActivityAlive((Activity) context)) {
+            return (Activity) context;
         }
-        return getActivity(((ContextWrapper)context).getBaseContext());
+        return getActivity(((ContextWrapper) context).getBaseContext());
     }
 
     /**
      * 判断Activity是否存活
+     *
      * @param activity Activity对象
      * @return true为存活
      */
@@ -60,20 +119,21 @@ public class AppUtils {
         return activity != null && !activity.isFinishing() && !activity.isDestroyed();
     }
 
-    public static List<PackageInfo> getPackages(Context context){
+    public static List<PackageInfo> getPackages(Context context) {
         PackageManager packageManager = context.getPackageManager();
         List<PackageInfo> installedPackages = packageManager.getInstalledPackages(0);
         return installedPackages;
     }
 
-    public static Set<String> getPackageNames(Context context){
+    public static Set<String> getPackageNames(Context context) {
         List<PackageInfo> packages = getPackages(context);
         Set<String> packageNames = new HashSet<>();
-        for (PackageInfo info : packages){
+        for (PackageInfo info : packages) {
             packageNames.add(info.packageName);
         }
         return packageNames;
     }
+
     /**
      * 通过包名检查手机是否安装了某一款app
      *

@@ -1,14 +1,21 @@
 package com.think.demo;
 
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -28,51 +35,28 @@ public class MainActivity extends AppCompatActivity {
 //        //去除状态栏
 ////        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 ////                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-//        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
 //        System.out.println(BarUtils.getNavigationBarHeight(this));
 //        System.out.println(BarUtils.getStatusBarHeight(this));
 //        System.out.println("是否全屏 = " + ScreenUtils.isFullScreen(this));
 //        System.out.println(ViewScreenHelper.getInstance().toString());
-//
-        new AsyncTask<String, String, String>() {
+//        Runtime.getRuntime().exec("adb")
+//        if(isAccessibilitySettingsOn(this,MyAccessibilityService.class)){
+//            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+//        }
+//        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+//        startService(new Intent(this,MyAccessibilityService.class));
 
-            private int i = 0;
+        if(!isAccessibilitySettingsOn(this,MyAccessibilityService.class)){
+            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+        }
 
+        findViewById(R.id.textView).setOnClickListener(new View.OnClickListener() {
             @Override
-            protected void onPreExecute() {
-                // 1
-                Log.d(TAG,"onPreExecute");
-                super.onPreExecute();
+            public void onClick(View v) {
+                Log.e(TAG,"点击了");
             }
-
-
-            @Override
-            protected String doInBackground(String... strings) {
-                // 2
-                Log.d(TAG,"doInBackground");
-                try {
-                    TimeUnit.SECONDS.sleep(5);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                publishProgress("123123123123123");
-
-                return String.valueOf(i++);
-            }
-
-            @Override
-            protected void onProgressUpdate(String... values) {
-                Log.d(TAG,"onProgressUpdate");
-                super.onProgressUpdate(values);
-            }
-            @Override
-            protected void onPostExecute(String s) {
-                // 3
-                Log.d(TAG,"onPostExecute");
-                super.onPostExecute(s);
-            }
-
-        }.execute();
+        });
     }
 
     @Override
@@ -83,5 +67,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+
+    public static boolean isAccessibilitySettingsOn(Context mContext, Class<? extends AccessibilityService> clazz) {
+        int accessibilityEnabled = 0;
+        final String service = mContext.getPackageName() + "/" + clazz.getCanonicalName();
+        try {
+            accessibilityEnabled = Settings.Secure.getInt(mContext.getApplicationContext().getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_ENABLED);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+        TextUtils.SimpleStringSplitter mStringColonSplitter = new TextUtils.SimpleStringSplitter(':');
+        if (accessibilityEnabled == 1) {
+            String settingValue = Settings.Secure.getString(mContext.getApplicationContext().getContentResolver(),
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            if (settingValue != null) {
+                mStringColonSplitter.setString(settingValue);
+                while (mStringColonSplitter.hasNext()) {
+                    String accessibilityService = mStringColonSplitter.next();
+                    if (accessibilityService.equalsIgnoreCase(service)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
