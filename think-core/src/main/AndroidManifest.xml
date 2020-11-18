@@ -22,7 +22,7 @@
 <!--            android:enabled="true"-->
 <!--            android:exported="false"-->
 <!--            android:process=":alive" />-->
-        <receiver android:name=".util.ViewScreenHelper"/>
+<!--        <receiver android:name=".util.ViewScreenHelper"/>-->
         <!-- 用于文件共享使用 -->
         <provider
             android:name="androidx.core.content.FileProvider"

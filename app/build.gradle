@@ -42,4 +42,5 @@ dependencies {
 
 //    implementation project(":think-study")
 //    implementation project(":think-vpn")
+    implementation project(":think-ui")
 }
