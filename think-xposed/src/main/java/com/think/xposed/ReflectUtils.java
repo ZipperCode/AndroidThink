@@ -1,4 +1,4 @@
-package com.think.core.util;
+package com.think.xposed;
 
 import android.util.Log;
 import android.util.Pair;
@@ -81,8 +81,8 @@ public final class ReflectUtils {
         Method getDeclaredMethods = Class.class.getDeclaredMethod("getDeclaredMethods");
         Method getMethods = Class.class.getDeclaredMethod("getMethods");
         Method[] methods = (Method[]) getMethods.invoke(targetClass);
-        for (Method method : methods) {
-            Log.e("getMethods", ">>> name = " + method.getName());
+        for (int i = 0; i < methods.length; i++) {
+            Log.e("getMethods",">>> name = " + methods[i].getName());
         }
         Method[] declaredMethods = (Method[]) getDeclaredMethods.invoke(targetClass);
 

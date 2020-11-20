@@ -1,11 +1,8 @@
 package com.think.core.service.accessibility;
 
-import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageInfo;
-import android.content.pm.ResolveInfo;
 import android.view.accessibility.AccessibilityEvent;
 
 import java.util.ArrayList;
@@ -15,7 +12,6 @@ import java.util.List;
 
 public final class AccessibilityConfigManager {
 
-    @SuppressLint("StaticFieldLeak")
     private static AccessibilityConfigManager Instance = null;
 
     private final List<String> useAccessibilityServicePackages;
@@ -34,7 +30,7 @@ public final class AccessibilityConfigManager {
     /**
      * 包名和窗口的映射关系，使用LRU缓存
      */
-    private LinkedHashMap<String,VisibleWindowInfo> mWindowCache = new LinkedHashMap<>(10,0.75f,true);
+    private final LinkedHashMap<String,VisibleWindowInfo> mWindowCache = new LinkedHashMap<>(10,0.75f,true);
 
     private AccessibilityConfigManager(){
         useAccessibilityServicePackages = new ArrayList<>();

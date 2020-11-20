@@ -43,6 +43,7 @@ public class VisibleWindowInfo {
         ViewInfo viewInfo = new ViewInfo();
         viewInfo.mClassName = String.valueOf(nodeInfo.getClassName());
         viewInfo.mViewInScreen = rect;
+        viewInfo.clickable = nodeInfo.isClickable();
         viewInfo.viewIdName = nodeInfo.getViewIdResourceName();
         if (mPackageContext != null && !TextUtils.isEmpty(viewInfo.viewIdName)) {
             viewInfo.viewId = mPackageContext

@@ -40,13 +40,13 @@ public class CustomAccessibilityService extends AccessibilityService {
                 clickedNode.getBoundsInScreen(rect);
                 ViewInfo viewInfo = cacheVisibleWindowInfo.getViewInfo(rect);
                 Log.e(TAG, "当前点击的View的信息为 = " + viewInfo);
+                if(Build.VERSION.SDK_INT > 24){
+                    onClick(viewInfo.mViewInScreen);
+                }
                 if(viewInfo.clickable){
-                    viewInfo.clickable = false;
-
+//                    viewInfo.clickable = false;
 
                 }
-
-
                 break;
         }
     }
@@ -54,19 +54,51 @@ public class CustomAccessibilityService extends AccessibilityService {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void onClick(Rect rect){
-        Path path = new Path();
-
         GestureDescription.Builder builder = new GestureDescription.Builder();
+        /*
+         * StrokeDescription参数，path：参数路径，startTime：从开始到手势到画笔遍历的时间，duration：画笔遍历路径的持续时间
+         */
+        GestureDescription gestureDescription = builder.addStroke(new GestureDescription.
+                StrokeDescription(getRandomPath(rect), 0, 500)).build();
+        dispatchGesture(gestureDescription, new GestureResultCallback() {
+            @Override
+            public void onCompleted(GestureDescription gestureDescription) {
+                super.onCompleted(gestureDescription);
+                Log.e(TAG,"GestureDescription >>> onCompleted");
+            }
 
+            @Override
+            public void onCancelled(GestureDescription gestureDescription) {
+                super.onCancelled(gestureDescription);
+                Log.e(TAG,"GestureDescription >>> onCancelled");
+            }
+        },null);
     }
 
     private Path getRandomPath(Rect rect){
-        Region region = new Region(rect);
         Path path = new Path();
-//        region.getBoundaryPath()
+
+        Point point = new Point(getRandomPoint(rect.left,rect.right),getRandomPoint(rect.top, rect.bottom));
+        path.moveTo((float) point.x, (float) point.y);
+//        path.lineTo((float) point.x + 1, (float) point.y + 1);
+        Log.d(TAG,rect.toString());
+        Log.d(TAG,point.toString());
         return path;
     }
 
+    private static int getRandomPoint(int start, int end){
+        return (int) ((Math.random() * (end - start)) + start);
+    }
+
+
+    public static void main(String[] args) {
+        //Rect(0, 183 - 480, 258)
+        //Point(480, 163)
+        for (int i = 0; i < 50 ; i++) {
+            System.out.println("x = " + getRandomPoint(0,-480) +", y = " + getRandomPoint(183,258));
+        }
+
+    }
     /**
      * 递归方式获取每一个view节点的信息
      * @param rootNode 根节点

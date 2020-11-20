@@ -20,4 +20,18 @@
         <attr name="text_size" format="dimension|reference"/>
         <attr name="text_color_state" format="reference"/>
     </declare-styleable>
+
+    <attr name="border_radius" format="dimension|reference"/>
+    <attr name="left_top_radius" format="dimension|reference"/>
+    <attr name="right_top_radius" format="dimension|reference"/>
+    <attr name="left_bottom_radius" format="dimension|reference"/>
+    <attr name="right_bottom_radius" format="dimension|reference"/>
+    <declare-styleable name="RadiusFrameLayout">
+        <attr name="left_top_radius" />
+        <attr name="right_top_radius" />
+        <attr name="left_bottom_radius" />
+        <attr name="right_bottom_radius"/>
+        <attr name="border_radius"/>
+        <attr name="transparent" format="float"/>
+    </declare-styleable>
 </resources>

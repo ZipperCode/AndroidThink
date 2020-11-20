@@ -1,6 +1,4 @@
-package com.think.ui;
-
-import android.net.Uri;
+package com.think.xposed;
 
 import org.junit.Test;
 

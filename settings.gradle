@@ -1,3 +1,4 @@
+include ':think-xposed'
 include ':app'
 include ':think-core'
 //include ':think-study'

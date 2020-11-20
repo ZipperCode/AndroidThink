@@ -1,7 +1,6 @@
-package com.think.ui;
+package com.think.xposed;
 
 import android.content.Context;
-import android.net.Uri;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -22,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.think.ui.test", appContext.getPackageName());
+        assertEquals("com.think.xposed", appContext.getPackageName());
     }
 }
