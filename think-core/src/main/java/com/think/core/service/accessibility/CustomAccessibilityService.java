@@ -79,7 +79,7 @@ public class CustomAccessibilityService extends AccessibilityService {
         Path path = new Path();
 
         Point point = new Point(getRandomPoint(rect.left,rect.right),getRandomPoint(rect.top, rect.bottom));
-        path.moveTo((float) point.x, (float) point.y);
+        path.moveTo(point.x, point.y);
 //        path.lineTo((float) point.x + 1, (float) point.y + 1);
         Log.d(TAG,rect.toString());
         Log.d(TAG,point.toString());
