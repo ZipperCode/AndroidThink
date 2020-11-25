@@ -1,7 +1,7 @@
 include ':think-xposed'
 include ':app'
 include ':think-core'
-//include ':think-study'
+include ':think-study'
 include ':think-ui'
 include "think-vpn"
 //include ':think-business'

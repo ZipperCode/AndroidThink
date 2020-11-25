@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.think.core.service.accessibility.CustomAccessibilityService;
+import com.think.core.util.security.MessageUtil;
 
 import java.util.List;
 
@@ -51,8 +52,12 @@ public class MainActivity extends AppCompatActivity {
 //        startService(new Intent(this,MyAccessibilityService.class));
 
         if(!isAccessibilitySettingsOn(this, CustomAccessibilityService.class)){
-            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+//            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
         }
+
+        String s = MessageUtil.md5Crypt("哈哈，我是原文");
+
+        System.out.println("密文为：" + s);
 
         findViewById(R.id.textView).setOnClickListener(new View.OnClickListener() {
             @Override
