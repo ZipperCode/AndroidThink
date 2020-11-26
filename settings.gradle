@@ -5,4 +5,5 @@ include ':think-study'
 include ':think-ui'
 include "think-vpn"
 //include ':think-business'
+include ':think-xposed'
 rootProject.name='AndroidThink'

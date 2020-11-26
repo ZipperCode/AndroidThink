@@ -5,6 +5,10 @@ import android.app.AndroidAppHelper;
 
 import java.io.File;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 public class Utils {
 
     public static String rename(String srcFileName){
@@ -38,6 +42,15 @@ public class Utils {
         return stringBuilder.toString();
     }
 
+
+    public static String byteHexToString(byte [] data,int offset, int len){
+        StringBuilder stringBuilder = new StringBuilder(data.length * 2);
+        int length = offset + len;
+        for (int i = offset; i < offset + len && length < data.length; i++) {
+            stringBuilder.append(String.format("%02X",data[i]));
+        }
+        return stringBuilder.toString();
+    }
 
     public static void writeData(String fileName, byte data[]){
         File file = new File("/data/data/" + AndroidAppHelper.currentPackageName() + "/files",fileName);
