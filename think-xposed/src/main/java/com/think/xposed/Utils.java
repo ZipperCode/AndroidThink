@@ -1,5 +1,8 @@
 package com.think.xposed;
 
+import android.annotation.SuppressLint;
+import android.app.AndroidAppHelper;
+
 import java.io.File;
 
 public class Utils {
@@ -25,5 +28,18 @@ public class Utils {
             fileName = fileName + "(" +(++index)+ ")";
         }
         return appendFileName(parentPath + File.separator + fileName +"."+ ext,index);
+    }
+
+    public static String byteHexToString(byte [] data){
+        StringBuilder stringBuilder = new StringBuilder(data.length * 2);
+        for (byte b : data){
+            stringBuilder.append(String.format("%02X ",b));
+        }
+        return stringBuilder.toString();
+    }
+
+
+    public static void writeData(String fileName, byte data[]){
+        File file = new File("/data/data/" + AndroidAppHelper.currentPackageName() + "/files",fileName);
     }
 }
