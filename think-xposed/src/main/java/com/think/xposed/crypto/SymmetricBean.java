@@ -47,7 +47,7 @@ public class SymmetricBean {
                         Utils.byteHexToString(mInitSecretKey.getEncoded()) : "null").append("\n")
                 .append("算法IV向量为：").append(mInitIvParameterSpec != null ?
                         Utils.byteHexToString(((IvParameterSpec) mInitIvParameterSpec).getIV()) : "").append("\n")
-                .append("mInitCertificate：").append(mInitCertificate).append("\n")
+                .append("mInitCertificate：").append( mInitCertificate == null ? "" : mInitCertificate).append("\n")
                 .append("update方法添加的参数为：").append(mUpdateData != null ? mUpdateLength == 0 ?
                         Utils.byteHexToString(mUpdateData) :
                         Utils.byteHexToString(mUpdateData, mUpdateOffset, mUpdateLength) : "null").append("\n")
@@ -62,7 +62,7 @@ public class SymmetricBean {
                 .append("doFinal方法参数字符为：").append(mDoFinalData != null ? mDoFinalLength == 0 ?
                         new String(mDoFinalData) :
                         new String(mDoFinalData, mDoFinalOffset, mDoFinalLength) : "null").append("\n")
-                .append("doFinal返回的结果为：").append(Utils.byteHexToString(mDoFinalResult))
+                .append("doFinal返回的结果为：").append(Utils.byteHexToString(mDoFinalResult)).append("\n")
                 .append("doFinal返回的结果字符为：").append(new String(mDoFinalResult))
                 .toString();
     }
