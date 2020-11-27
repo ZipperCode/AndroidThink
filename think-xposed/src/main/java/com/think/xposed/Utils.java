@@ -3,7 +3,12 @@ package com.think.xposed;
 import android.annotation.SuppressLint;
 import android.app.AndroidAppHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.nio.ByteBuffer;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -35,9 +40,21 @@ public class Utils {
     }
 
     public static String byteHexToString(byte [] data){
+        if(data == null){
+            return "null";
+        }
         StringBuilder stringBuilder = new StringBuilder(data.length * 2);
         for (byte b : data){
-            stringBuilder.append(String.format("%02X ",b));
+            stringBuilder.append(String.format("%02X",b));
+        }
+        return stringBuilder.toString();
+    }
+
+    public static String byteToHexString(ByteBuffer byteBuffer){
+        ByteBuffer slice = byteBuffer.slice();
+        StringBuilder stringBuilder = new StringBuilder(slice.limit() * 2);
+        for (int i = 0; i < slice.limit(); i++) {
+            stringBuilder.append(String.format("%02X",byteBuffer.get()));
         }
         return stringBuilder.toString();
     }
@@ -50,6 +67,28 @@ public class Utils {
             stringBuilder.append(String.format("%02X",data[i]));
         }
         return stringBuilder.toString();
+    }
+
+    public static String serialToString(Serializable serializable){
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream =  null;
+        try {
+            objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+            objectOutputStream.writeObject(serializable);
+            return byteHexToString(byteArrayOutputStream.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }finally {
+            try{
+                if(objectOutputStream != null){
+                    objectOutputStream.close();
+                }
+                byteArrayOutputStream.close();
+            }catch (IOException ee){
+                ee.printStackTrace();
+            }
+        }
     }
 
     public static void writeData(String fileName, byte data[]){

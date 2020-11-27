@@ -3,11 +3,15 @@ package com.think.xposed;
 
 import android.annotation.SuppressLint;
 
+import com.think.xposed.crypto.SymmetricHook;
+
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -24,9 +28,9 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class AHook implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 
-    String[] pks = {"com.bet007.mobile.score","com.caiyu.qqsd"};
+    String[] pks = {"com.bet007.mobile.score"};
 
-    private static final List<String> mCanCloseDialogPackageName = new ArrayList<>();
+    private final Map<String,SymmetricHook> stringSymmetricHookMap = new HashMap<>();
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
@@ -37,8 +41,9 @@ public class AHook implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         for (int i = 0; i < pks.length; i++) {
             if (pks[i].equals(packageName)) {
-                hookMessageDigest(lpparam.classLoader);
-                hookSymmetric(lpparam.classLoader);
+//                hookMessageDigest(lpparam.classLoader);
+//                hookSymmetric(lpparam.classLoader);
+                stringSymmetricHookMap.put(packageName,new SymmetricHook(50,lpparam.classLoader));
             }
         }
     }
