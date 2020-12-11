@@ -1,3 +1,4 @@
+include ':think-jetpack'
 include ':think-xposed'
 include ':app'
 include ':think-core'

@@ -70,9 +70,9 @@ public class SymmetricHook {
                             decryptMode +"\t\t" + "1 -- 加密， 2 -- 解密");
                     if (param.args[1] instanceof SecretKeySpec) {
                         symmetricBean.mInitSecretKey = (SecretKeySpec) param.args[1];
-                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,SecretKeySpec,..)]  afterHookedMethod ====> 对称算法秘钥为 ： "
+                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,SecretKeySpec,..)]  afterHookedMethod-1 ====> 对称算法秘钥为 ： "
                                 + Utils.byteHexToString(((SecretKeySpec) param.args[1]).getEncoded()));
-                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,SecretKeySpec,..)]  afterHookedMethod ====> 对称算法秘钥SecretKeySpec序列化值为 ： "
+                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,SecretKeySpec,..)]  afterHookedMethod-2 ====> 对称算法秘钥SecretKeySpec序列化值为 ： "
                                 + Utils.serialToString(((SecretKeySpec) param.args[1])));
                     } else if (param.args[1] instanceof Certificate) {
                         symmetricBean.mInitCertificate = (Certificate) param.args[1];
@@ -81,15 +81,15 @@ public class SymmetricHook {
                                 Utils.serialToString((Certificate) param.args[1])));
                     }else if(param.args[0] instanceof PublicKey){
                         symmetricBean.mInitSecretKey = (PublicKey) param.args[1];
-                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,PublicKey,..)]  afterHookedMethod ====> 非对称算法公钥为 ： "
+                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,PublicKey,..)]  afterHookedMethod-1 ====> 非对称算法公钥为 ： "
                                 + Utils.byteHexToString(((PublicKey) param.args[1]).getEncoded()));
-                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,PublicKey,..)]  afterHookedMethod ====> 非对称算法公钥PublicKey序列化值为 ： "
+                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,PublicKey,..)]  afterHookedMethod-2 ====> 非对称算法公钥PublicKey序列化值为 ： "
                                 + Utils.serialToString(((PublicKey) param.args[1])));
                     }else if(param.args[0] instanceof PrivateKey){
                         symmetricBean.mInitSecretKey = (PrivateKey) param.args[1];
-                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,PrivateKey,..)]  afterHookedMethod ====> 非对称算法私钥为 ： "
+                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,PrivateKey,..)]  afterHookedMethod-1 ====> 非对称算法私钥为 ： "
                                 + Utils.byteHexToString(((PrivateKey) param.args[1]).getEncoded()));
-                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,PrivateKey,..)]  afterHookedMethod ====> 非对称算法私钥PrivateKey序列化值为 ： "
+                        XposedBridge.log("AHook >> [" + param.thisObject + "][init(int,PrivateKey,..)]  afterHookedMethod-2 ====> 非对称算法私钥PrivateKey序列化值为 ： "
                                 + Utils.serialToString(((PrivateKey) param.args[1])));
                     }
                     if (param.args.length > 2) {

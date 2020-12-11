@@ -25,8 +25,6 @@ public class UnSymmetricUtil {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(encryptType);
         keyPairGenerator.initialize(len);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        PrivateKey aPrivate = keyPair.getPrivate();
-        keyPair.getPublic()
         byte[] pri = keyPair.getPrivate().getEncoded();
         byte[] pub = keyPair.getPublic().getEncoded();
         return new Pair<>(pri, pub);
