@@ -126,6 +126,7 @@ public class RequestEngine implements LifecycleCallback,
             return value;
         }
 
+
         // 外部加载资源
         value = new LoadDataManager().loadResources(url, this, context);
 

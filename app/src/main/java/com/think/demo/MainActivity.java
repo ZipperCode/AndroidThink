@@ -1,25 +1,14 @@
 package com.think.demo;
 
 import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.View;
-import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.think.core.service.accessibility.CustomAccessibilityService;
-import com.think.core.util.security.MessageUtil;
-
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -51,31 +40,31 @@ public class MainActivity extends AppCompatActivity {
 //        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
 //        startService(new Intent(this,MyAccessibilityService.class));
 
-        if(!isAccessibilitySettingsOn(this, CustomAccessibilityService.class)){
-//            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-        }
-
-        String s = MessageUtil.md5Crypt("哈哈，我是原文");
-
-        System.out.println("密文为：" + s);
-
-        findViewById(R.id.textView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.e(TAG,"点击了");
-
-                try {
-                    Context packageContext = createPackageContext("com.think", CONTEXT_RESTRICTED);
-                    System.out.println(packageContext);
-                    if(packageContext != null){
-                        int resId = packageContext.getResources().getIdentifier("activity_vpn","layout",packageContext.getPackageName());
-                        System.out.println("resId = " + resId);
-                    }
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+//        if(!isAccessibilitySettingsOn(this, CustomAccessibilityService.class)){
+////            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+//        }
+//
+//        String s = MessageUtil.md5Crypt("哈哈，我是原文");
+//
+//        System.out.println("密文为：" + s);
+//
+//        findViewById(R.id.textView).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.e(TAG,"点击了");
+//
+//                try {
+//                    Context packageContext = createPackageContext("com.think", CONTEXT_RESTRICTED);
+//                    System.out.println(packageContext);
+//                    if(packageContext != null){
+//                        int resId = packageContext.getResources().getIdentifier("activity_vpn","layout",packageContext.getPackageName());
+//                        System.out.println("resId = " + resId);
+//                    }
+//                } catch (PackageManager.NameNotFoundException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
     }
 
     @Override

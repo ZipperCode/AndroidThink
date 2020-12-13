@@ -21,18 +21,18 @@
         android:text="TextView"/>
 
 
-    <com.think.ui.RadiusFrameLayout
-        android:id="@+id/radiusFrameLayout"
-        android:layout_width="300dp"
-        android:layout_height="200dp"
-        app:left_top_radius="50dp"
-        android:background="#000"
-        app:transparent="0.5">
+<!--    <com.think.ui.RadiusFrameLayout-->
+<!--        android:id="@+id/radiusFrameLayout"-->
+<!--        android:layout_width="300dp"-->
+<!--        android:layout_height="200dp"-->
+<!--        app:left_top_radius="50dp"-->
+<!--        android:background="#000"-->
+<!--        app:transparent="0.5">-->
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="#F00" />
-    </com.think.ui.RadiusFrameLayout>
+<!--        <ImageView-->
+<!--            android:id="@+id/imageView"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:src="#F00" />-->
+<!--    </com.think.ui.RadiusFrameLayout>-->
 </LinearLayout>
