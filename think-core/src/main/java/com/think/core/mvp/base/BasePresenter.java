@@ -24,4 +24,11 @@ public abstract class BasePresenter<M extends BaseContract.IModel, V extends Bas
     public M getModel(){
         return model;
     }
+
+    @Override
+    public void onDestroy() {
+        if(viewReference != null){
+            viewReference.clear();
+        }
+    }
 }

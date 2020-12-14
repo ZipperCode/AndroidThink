@@ -1,28 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.think.core">
-
     <!-- 访问网络状态 -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- 访问网路 -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!-- 访问存储 -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />;
-    <!-- 安装时，未知软件来源 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- 访问网路 -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- 访问存储 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- 安装时，未知软件来源 -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <application
 
-        >
-<!--        <service-->
-<!--            android:name=".alive.MainService"-->
-<!--            android:enabled="true"-->
-<!--            android:exported="false" />-->
-<!--        <service-->
-<!--            android:name=".alive.GuardService"-->
-<!--            android:enabled="true"-->
-<!--            android:exported="false"-->
-<!--            android:process=":alive" />-->
-<!--        <receiver android:name=".util.ViewScreenHelper"/>-->
+    <application>
+        <activity android:name=".mvp.sample.MainMvpActivity"></activity>
+        <!-- <service -->
+        <!-- android:name=".alive.MainService" -->
+        <!-- android:enabled="true" -->
+        <!-- android:exported="false" /> -->
+        <!-- <service -->
+        <!-- android:name=".alive.GuardService" -->
+        <!-- android:enabled="true" -->
+        <!-- android:exported="false" -->
+        <!-- android:process=":alive" /> -->
+        <!-- <receiver android:name=".util.ViewScreenHelper"/> -->
         <!-- 用于文件共享使用 -->
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -34,14 +30,16 @@
                 android:resource="@xml/file_provider_path" />
         </provider>
 
-        <service android:name="com.think.core.service.accessibility.CustomAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="true"
+        <service
+            android:name=".service.accessibility.CustomAccessibilityService"
             android:enabled="true"
-            android:label="@string/accessibility_service_describe_title">
+            android:exported="true"
+            android:label="@string/accessibility_service_describe_title"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/custom_accessibility_service" />
