@@ -1,0 +1,50 @@
+plugins {
+    id 'java-library'
+    id 'groovy'
+    id 'maven'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation gradleApi()              // gradle sdk
+    implementation localGroovy()            // groovy sdk
+    implementation "com.android.tools.build:gradle:4.0.1"
+    // javassist
+    implementation group: 'org.javassist', name: 'javassist', version: '3.25.0-GA'
+    // ASM处理
+    //    implementation 'org.ow2.asm:asm:7.0'
+    //    implementation 'org.ow2.asm:asm-commons:7.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// 上传到仓库task
+uploadArchives {
+    // 仓库
+    repositories {
+        mavenDeployer {
+            //设置插件的GAV参数
+            pom.groupId = 'com.tibnk.gradle_plugin'
+            pom.artifactId = 'plugin'// 这个如果不设置，发布之后应该是com.com.gradle_plugin.plugin.customPlugin
+            pom.version = '1.0.0'
+            //文件发布到下面目录
+            repository(url: uri('./repo'))
+        }
+    }
+}
+
+
+// 项目的根目录build.gradle设置
+//buildscript{
+//    respositories{
+//        // ...
+//        maven{
+//            // 如果repo目录与gradle_plugin模块同级
+//            url uri('./repo')
+//        }
+//    }
+//}

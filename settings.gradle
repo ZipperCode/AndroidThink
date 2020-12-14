@@ -1,3 +1,4 @@
+include ':gradle-plugin'
 include ':think-eventbus'
 //include ':think-bsdiff'
 //include ':think-jetpack'
