@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 
 public abstract class BaseActivity<
         M extends IModel,
-        P extends BasePresenter<IView,M>
+        P extends BasePresenter<M,IView>
         > extends Activity implements IView{
 
     private P presenter;

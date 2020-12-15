@@ -4,7 +4,7 @@ import android.content.Context;
 
 import java.lang.ref.WeakReference;
 
-public abstract class BasePresenter<V,M> {
+public abstract class BasePresenter<M,V extends IView> {
 
     private WeakReference<V> mContextRef;
 
@@ -21,5 +21,12 @@ public abstract class BasePresenter<V,M> {
         if(mContextRef != null){
             mContextRef.clear();
         }
+    }
+
+    protected Context getContext(){
+        if(mContextRef.get() != null){
+            return mContextRef.get().getContext();
+        }
+        return null;
     }
 }
