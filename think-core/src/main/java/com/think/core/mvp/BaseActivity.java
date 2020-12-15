@@ -6,21 +6,22 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 
-public abstract class BaseActivity<
-        M extends IModel,
-        P extends BasePresenter<M,IView>
-        > extends Activity implements IView{
+public abstract class BaseActivity<M extends IModel,V extends IView,P extends BasePresenter<M,V>> extends Activity implements IView{
 
-    private P presenter;
+    protected P presenter;
 
     protected abstract P createPresenter();
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        presenter = createPresenter();
+        presenter.attach((V)this);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = createPresenter();
-        presenter.attach(this);
     }
 
     @Override

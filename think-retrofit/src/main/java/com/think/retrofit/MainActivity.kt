@@ -2,6 +2,8 @@ package com.think.retrofit
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import retrofit2.Call
 import retrofit2.Callback
@@ -47,6 +49,7 @@ class MainActivity : AppCompatActivity() {
                     t?.message.let { it1 -> Log.e(TAG, it1!!) }
                 }
             });
+           Handler()
         }
         httpclient.post("post", "abc","admin","admin").also {
             it.enqueue(object : Callback<HttpResponse>{

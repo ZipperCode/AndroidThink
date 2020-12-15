@@ -4,15 +4,15 @@ import android.content.Context;
 
 import java.lang.ref.WeakReference;
 
-public abstract class BasePresenter<M,V extends IView> {
+public abstract class BasePresenter<M extends IModel,V extends IView>{
 
-    private WeakReference<V> mContextRef;
+    protected WeakReference<V> mContextRef;
 
-    private M model;
+    protected M mModel;
 
     public void attach(V view){
         mContextRef = new WeakReference<>(view);
-        model = createModel();
+        mModel = createModel();
     }
 
     protected abstract M createModel();
@@ -22,6 +22,7 @@ public abstract class BasePresenter<M,V extends IView> {
             mContextRef.clear();
         }
     }
+
 
     protected Context getContext(){
         if(mContextRef.get() != null){

@@ -2,6 +2,7 @@ package com.think.core.mvp.base;
 
 public interface BaseContract {
     interface IView{
+        
     }
 
     interface IModel{

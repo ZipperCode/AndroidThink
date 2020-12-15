@@ -7,8 +7,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public abstract class BaseMvpActivity<
         M extends BaseContract.IModel,
-        P extends BaseContract.IPresenter>
-        extends AppCompatActivity implements BaseMVP<M, BaseContract.IView, P>, BaseContract.IView {
+        V extends BaseContract.IView,
+        P extends BaseContract.IPresenter<M,V>
+        > extends AppCompatActivity
+        implements BaseContract.IView {
 
     protected P mPresenter;
 
@@ -17,10 +19,13 @@ public abstract class BaseMvpActivity<
         super.onCreate(savedInstanceState);
         mPresenter = createPresenter();
         if(mPresenter != null){
-            mPresenter.registerModel(createModel());
             mPresenter.registerView(createView());
         }
     }
+
+    protected abstract V createView();
+
+    protected abstract P createPresenter();
 
     @Override
     protected void onDestroy() {

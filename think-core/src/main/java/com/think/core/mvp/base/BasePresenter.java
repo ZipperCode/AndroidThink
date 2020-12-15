@@ -18,7 +18,7 @@ public abstract class BasePresenter<M extends BaseContract.IModel, V extends Bas
     }
 
     public V getView(){
-        return viewReference.get() == null? null:viewReference.get();
+        return viewReference.get();
     }
 
     public M getModel(){
