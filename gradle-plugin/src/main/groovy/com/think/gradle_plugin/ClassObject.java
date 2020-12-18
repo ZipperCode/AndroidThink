@@ -2,16 +2,29 @@ package com.think.gradle_plugin;
 
 import java.util.Objects;
 
+/**
+ * 保存类的一些文件信息
+ */
 public class ClassObject {
-
+    /**
+     * 构建当前类工程的版本
+     */
     String version;
-
+    /**
+     * 类名，全限定名
+     */
     String className;
-
+    /**
+     * 路径，类文件存放的目录
+     */
     String path;
-
+    /**
+     * 绝对目录
+     */
     String absolutePath;
-
+    /**
+     * 文件的md5值，方便不同版本的比对
+     */
     String md5;
 
     public ClassObject(String absolutePath, String md5){

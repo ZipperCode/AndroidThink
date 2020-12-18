@@ -1,12 +1,19 @@
 package com.think.gradle_plugin
 
-
+import com.android.build.api.transform.DirectoryInput
+import com.android.build.api.transform.JarInput
+import com.android.build.api.transform.QualifiedContent
+import com.android.build.api.transform.Transform
+import com.android.build.api.transform.TransformInput
+import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
-import com.inject.ext.ClassExtension
-import com.inject.ext.FixExtension
+import com.think.gradle_plugin.ext.ClassExtension
+import com.think.gradle_plugin.ext.FixExtension
 import javassist.ClassPool
 import org.gradle.api.Project
+
+import javax.xml.crypto.dsig.TransformException
 
 class ClassTransform extends Transform {
 

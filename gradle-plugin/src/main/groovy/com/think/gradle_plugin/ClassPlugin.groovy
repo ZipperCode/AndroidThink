@@ -1,9 +1,7 @@
 package com.think.gradle_plugin
 
 import com.android.build.gradle.AppExtension
-import com.inject.ext.ClassExtension
-import com.inject.task.CopyClassesTask
-import com.inject.task.MargeTask
+import com.think.gradle_plugin.ext.ClassExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
