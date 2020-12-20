@@ -28,29 +28,4 @@ public class StringUtils {
         return appendFileName(parentPath + File.separator + fileName +"."+ ext,index);
     }
 
-    public static int ip2Int(String ip) {
-        String[] arrStrings = ip.split("\\.");
-        int r = (Integer.parseInt(arrStrings[0]) << 24)
-                | (Integer.parseInt(arrStrings[1]) << 16)
-                | (Integer.parseInt(arrStrings[2]) << 8)
-                | Integer.parseInt(arrStrings[3]);
-        return r;
-    }
-
-    public static String int2Ip(int ip) {
-        return ((ip >> 24) & 0xFF) + "." +
-                ((ip >> 16) & 0xFF) + "." +
-                ((ip >> 8) & 0xFF) + "." +
-                (ip & 0xFF);
-    }
-
-    public static String byteHexToString(byte [] data){
-        StringBuilder stringBuilder = new StringBuilder(data.length * 2);
-        for (byte b : data){
-            stringBuilder.append(String.format("%02X ",b));
-        }
-        System.out.println(stringBuilder.toString());
-        return stringBuilder.toString();
-    }
-
 }

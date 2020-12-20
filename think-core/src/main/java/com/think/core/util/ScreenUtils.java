@@ -27,18 +27,39 @@ public class ScreenUtils {
 
     public static float mAppScaleDensity = 0;
 
+    /**
+     * px 转化为 dp
+     * @param context 上下文
+     * @param px px 像素
+     * @return dp值
+     */
     public static int px2dp(Context context, float px) {
         return (int) (px / getDensity(context) + 0.5f);
     }
-
+    /**
+     * dp 单位 转换为像素
+     * @param context 上下文
+     * @param dp dp值
+     * @return px值
+     */
     public static int dp2px(Context context, float dp) {
         return (int) (dp * getDensity(context) + 0.5f);
     }
-
+    /**
+     * px 转化为 sp
+     * @param context 上下文
+     * @param px px 像素
+     * @return sp
+     */
     public static int px2sp(Context context, float px) {
         return (int) (px / getScaledDensity(context) + 0.5f);
     }
-
+    /**
+     * sp 转化 为像素
+     * @param context 上下文
+     * @param sp sp值
+     * @return px值
+     */
     public static int sp2px(Context context, float sp) {
         return (int) (sp * getScaledDensity(context) + sp);
     }

@@ -1,4 +1,4 @@
-package com.think.core.util;
+package com.think.core.util.network;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

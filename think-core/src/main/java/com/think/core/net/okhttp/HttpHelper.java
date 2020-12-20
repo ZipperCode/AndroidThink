@@ -4,8 +4,7 @@ package com.think.core.net.okhttp;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.think.core.util.FileUtils;
-import com.think.core.util.StringUtils;
+import com.think.core.util.store.FileUtils;
 
 import org.jetbrains.annotations.NotNull;
 

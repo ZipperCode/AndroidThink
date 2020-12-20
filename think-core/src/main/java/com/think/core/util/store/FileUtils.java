@@ -1,8 +1,10 @@
-package com.think.core.util;
+package com.think.core.util.store;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+
+import com.think.core.util.IoUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +34,8 @@ public class FileUtils {
 
     private static final String TAG = FileUtils.class.getSimpleName();
 
+    public final static String LOG_DIR = "log";
+
     /**
      * 存储卡根目录 /mnt/sdcard
      */
@@ -48,6 +52,29 @@ public class FileUtils {
      */
     public static final String CACHE_ROOT_PATH = Environment.getDownloadCacheDirectory()
             .getAbsolutePath() + File.separator;
+
+    /**
+     * 向文件中写入内容
+     * @param filePath  文件路径
+     * @param content   文件内容
+     * @param append    是否追加
+     */
+    public static void writeString(String filePath, String content, boolean append) {
+        File file = new File(filePath);
+        FileOutputStream fos = null;
+        try{
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            fos = new FileOutputStream(file, append);
+            fos.write(content.getBytes());
+            fos.flush();
+        }catch (IOException ioe){
+            ioe.printStackTrace();
+        }finally {
+            IoUtils.close(fos);
+        }
+    }
 
     /**
      * 判断外部存储是否可以写

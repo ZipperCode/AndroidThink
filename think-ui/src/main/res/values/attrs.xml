@@ -34,4 +34,41 @@
         <attr name="border_radius"/>
         <attr name="transparent" format="float"/>
     </declare-styleable>
+
+    <!-- 自定义验证码输入框-->
+    <declare-styleable name="VerificationCodeView">
+        <!--输入框的数量-->
+        <attr name="child_number" format="integer" />
+        <!--输入类型-->
+        <attr name="child_inputType">
+            <enum name="number" value="0" />
+            <enum name="text" value="1" />
+            <enum name="password" value="2" />
+        </attr>
+        <!--输入框的宽度-->
+        <attr name="child_width" format="dimension|reference" />
+        <!--输入框的宽度-->
+        <attr name="child_height" format="dimension|reference" />
+        <!--输入框文字颜色-->
+        <attr name="child_text_color" format="color|reference" />
+        <!--输入框文字大小-->
+        <attr name="child_text_size" format="dimension|reference" />
+        <!--输入框背景-->
+        <attr name="child_style" format="reference" />
+        <!--光标样式-->
+        <attr name="child_input_cursor" format="reference" />
+        <!--是否隐藏光标-->
+        <attr name="child_cursor_visible" format="boolean" />
+        <!--输入框间距-->
+        <attr name="child_spacing" format="dimension|reference" />
+        <!--输入框水平间隔-->
+        <attr name="child_horizontal_spacing" format="dimension"/>
+        <!--输入框垂直间隔-->
+        <attr name="child_vertical_spacing" format="dimension"/>
+        <!--输入框获得焦点的样式-->
+        <attr name="child_focus_style" format="reference"/>
+        <!--输入框失去焦点的样式-->
+        <attr name="child_normal_style" format="reference"/>
+
+    </declare-styleable>
 </resources>
