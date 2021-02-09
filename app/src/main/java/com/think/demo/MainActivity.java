@@ -3,6 +3,8 @@ package com.think.demo;
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Matrix;
+import android.graphics.Path;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -18,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 //        ScreenUtils.adjustDensity(getApplication(),this);
 //        IntentFilter intentFilter = new IntentFilter();
 //        intentFilter.addAction(ViewScreenHelper.FULL_SCREEN_ACTION);
