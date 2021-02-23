@@ -1,4 +1,4 @@
-package com.think.accessibilityservice;
+package com.think.accessibility;
 
 import android.graphics.Path;
 import android.graphics.Rect;

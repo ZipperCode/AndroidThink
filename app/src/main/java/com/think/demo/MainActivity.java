@@ -2,6 +2,7 @@ package com.think.demo;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.Path;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 ////        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 ////                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 //        System.out.println(BarUtils.getNavigationBarHeight(this));
 //        System.out.println(BarUtils.getStatusBarHeight(this));
 //        System.out.println("是否全屏 = " + ScreenUtils.isFullScreen(this));

@@ -1,4 +1,4 @@
-package com.think.accessibilityservice
+package com.think.accessibility
 
 import org.junit.Test
 

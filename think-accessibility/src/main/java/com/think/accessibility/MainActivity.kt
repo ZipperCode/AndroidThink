@@ -1,4 +1,4 @@
-package com.think.accessibilityservice
+package com.think.accessibility
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

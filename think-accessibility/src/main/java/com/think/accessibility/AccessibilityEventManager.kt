@@ -1,9 +1,8 @@
-package com.think.accessibilityservice
+package com.think.accessibility
 
 import android.view.accessibility.AccessibilityEvent
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
-import io.reactivex.ObservableOnSubscribe
 import io.reactivex.Observer
 
 

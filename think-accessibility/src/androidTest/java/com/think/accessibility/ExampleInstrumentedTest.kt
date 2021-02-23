@@ -1,4 +1,4 @@
-package com.think.accessibilityservice
+package com.think.accessibility
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

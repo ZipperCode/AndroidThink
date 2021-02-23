@@ -1,4 +1,4 @@
-package com.think.accessibilityservice;
+package com.think.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.pm.PackageInfo;

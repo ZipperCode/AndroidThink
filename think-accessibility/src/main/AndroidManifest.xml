@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.think.accessibilityservice">
+    package="com.think.accessibility">
 
     <application
         android:allowBackup="true"
@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidThink">
-        <activity android:name=".MainActivity">
+        <activity android:name="com.think.accessibility.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,7 +29,7 @@
         </provider>
 
         <service
-            android:name=".CustomAccessibilityService"
+            android:name="com.think.accessibility.CustomAccessibilityService"
             android:enabled="true"
             android:exported="true"
             android:label="@string/accessibility_service_describe_title"
