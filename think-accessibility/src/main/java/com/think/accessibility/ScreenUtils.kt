@@ -1,31 +1,27 @@
-package com.think.accessibility;
+package com.think.accessibility
 
-import android.app.Activity;
-import android.app.Application;
-import android.content.ComponentCallbacks;
-import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.Point;
-import android.util.DisplayMetrics;
-import android.view.Display;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
+import android.app.Activity
+import android.app.Application
+import android.content.ComponentCallbacks
+import android.content.Context
+import android.content.res.Configuration
+import android.graphics.Point
+import android.os.Build
+import android.util.DisplayMetrics
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import java.util.*
 
-import java.util.Arrays;
-
-public class ScreenUtils {
-
+object ScreenUtils {
     /**
      * 应用的dpi
      */
-    public static final float APP_DENSITY_DPI = 400f;
-
-    public static float mAppDensity = 0;
-
-    public static float mAppScaleDensity = 0;
+    const val APP_DENSITY_DPI = 400f
+    var mAppDensity = 0f
+    var mAppScaleDensity = 0f
 
     /**
      * px 转化为 dp
@@ -33,43 +29,47 @@ public class ScreenUtils {
      * @param px px 像素
      * @return dp值
      */
-    public static int px2dp(Context context, float px) {
-        return (int) (px / getDensity(context) + 0.5f);
+    fun px2dp(context: Context, px: Float): Int {
+        return (px / getDensity(context) + 0.5f).toInt()
     }
+
     /**
      * dp 单位 转换为像素
      * @param context 上下文
      * @param dp dp值
      * @return px值
      */
-    public static int dp2px(Context context, float dp) {
-        return (int) (dp * getDensity(context) + 0.5f);
+    @JvmStatic
+    fun dp2px(context: Context, dp: Float): Int {
+        return (dp * getDensity(context) + 0.5f).toInt()
     }
+
     /**
      * px 转化为 sp
      * @param context 上下文
      * @param px px 像素
      * @return sp
      */
-    public static int px2sp(Context context, float px) {
-        return (int) (px / getScaledDensity(context) + 0.5f);
+    fun px2sp(context: Context, px: Float): Int {
+        return (px / getScaledDensity(context) + 0.5f).toInt()
     }
+
     /**
      * sp 转化 为像素
      * @param context 上下文
      * @param sp sp值
      * @return px值
      */
-    public static int sp2px(Context context, float sp) {
-        return (int) (sp * getScaledDensity(context) + sp);
+    fun sp2px(context: Context, sp: Float): Int {
+        return (sp * getScaledDensity(context) + sp).toInt()
     }
 
-    public static float getDensity(Context context) {
-        return context.getResources().getDisplayMetrics().density;
+    fun getDensity(context: Context): Float {
+        return context.resources.displayMetrics.density
     }
 
-    public static float getScaledDensity(Context context) {
-        return context.getResources().getDisplayMetrics().scaledDensity;
+    fun getScaledDensity(context: Context): Float {
+        return context.resources.displayMetrics.scaledDensity
     }
 
     /**
@@ -78,13 +78,12 @@ public class ScreenUtils {
      * @param context 上下文
      * @return true 是， false 否
      */
-    public static boolean getCurrentOrientation(Context context) {
+    fun getCurrentOrientation(context: Context): Boolean {
         // 获取设置的配置信息
-        Configuration mConfiguration = context.getResources().getConfiguration();
-        if (mConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            return true;
-        }
-        return false;
+        val mConfiguration = context.resources.configuration
+        return if (mConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            true
+        } else false
     }
 
     /**
@@ -92,11 +91,11 @@ public class ScreenUtils {
      *
      * @param activity act
      */
-    public static void closeKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+    fun closeKeyboard(activity: Activity) {
+        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         if (imm != null) {
-            if (imm.isActive()) {
-                imm.hideSoftInputFromWindow(activity.getWindow().getDecorView().getWindowToken(), 0);
+            if (imm.isActive) {
+                imm.hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
             }
         }
     }
@@ -108,78 +107,75 @@ public class ScreenUtils {
      * @param motionEvent 事件
      * @return true 隐藏
      */
-    public static boolean isHideKeyBoard(View view, MotionEvent motionEvent) {
-        if (view instanceof EditText) {
-            int[] location = new int[2];
-            view.getLocationInWindow(location);
-            int left = location[0],
-                    top = location[1],
-                    bottom = top + view.getHeight(),
-                    right = left + view.getWidth();
+    fun isHideKeyBoard(view: View, motionEvent: MotionEvent): Boolean {
+        if (view is EditText) {
+            val location = IntArray(2)
+            view.getLocationInWindow(location)
+            val left = location[0]
+            val top = location[1]
+            val bottom = top + view.getHeight()
+            val right = left + view.getWidth()
             // 点击EditText的事件，忽略它。
-            return !(motionEvent.getX() > left && motionEvent.getX() < right
-                    && motionEvent.getY() > top && motionEvent.getY() < bottom);
+            return !(motionEvent.x > left && motionEvent.x < right && motionEvent.y > top && motionEvent.y < bottom)
         }
-        return false;
+        return false
     }
 
-
-    public static boolean isFullScreen(Context context) {
-        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+    fun isFullScreen(context: Context): Boolean {
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         if (windowManager != null) {
-            Display defaultDisplay = windowManager.getDefaultDisplay();
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            defaultDisplay.getMetrics(displayMetrics);
+            val defaultDisplay = windowManager.defaultDisplay
+            val displayMetrics = DisplayMetrics()
+            defaultDisplay.getMetrics(displayMetrics)
             // 应用宽高
-            System.out.println("displayMetrics.heightPixels = " + displayMetrics.heightPixels);
-            System.out.println("displayMetrics.widthPixels = " + displayMetrics.widthPixels);
-            DisplayMetrics displayRealMetrics = new DisplayMetrics();
+            println("displayMetrics.heightPixels = " + displayMetrics.heightPixels)
+            println("displayMetrics.widthPixels = " + displayMetrics.widthPixels)
+            val displayRealMetrics = DisplayMetrics()
             // 实际宽高
-            defaultDisplay.getRealMetrics(displayRealMetrics);
-            System.out.println("displayMetrics1.heightPixels = " + displayRealMetrics.heightPixels);
-            System.out.println("displayMetrics1.widthPixels = " + displayRealMetrics.widthPixels);
+            defaultDisplay.getRealMetrics(displayRealMetrics)
+            println("displayMetrics1.heightPixels = " + displayRealMetrics.heightPixels)
+            println("displayMetrics1.widthPixels = " + displayRealMetrics.widthPixels)
 
 
             // 真实的手机屏幕宽高
-            Point outSize = new Point();
-            defaultDisplay.getRealSize(outSize);
-            System.out.println("outSize.x = " + outSize.x);
-            System.out.println("outSize.y = " + outSize.y);
+            val outSize = Point()
+            defaultDisplay.getRealSize(outSize)
+            println("outSize.x = " + outSize.x)
+            println("outSize.y = " + outSize.y)
             // 应用宽高
-            Point outSize1 = new Point();
-            defaultDisplay.getSize(outSize1);
-            System.out.println("outSize1.x = " + outSize1.x);
-            System.out.println("outSize1.y = " + outSize1.y);
+            val outSize1 = Point()
+            defaultDisplay.getSize(outSize1)
+            println("outSize1.x = " + outSize1.x)
+            println("outSize1.y = " + outSize1.y)
             // 实际宽高
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                Display.Mode mode = defaultDisplay.getMode();
-                System.out.println("mode.getPhysicalWidth = " + mode.getPhysicalWidth());
-                System.out.println("mode.getPhysicalHeight = " + mode.getPhysicalHeight());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val mode = defaultDisplay.mode
+                println("mode.getPhysicalWidth = " + mode.physicalWidth)
+                println("mode.getPhysicalHeight = " + mode.physicalHeight)
             }
-
             return (displayMetrics.widthPixels == displayRealMetrics.widthPixels
-                    && displayMetrics.heightPixels == displayRealMetrics.heightPixels);
+                    && displayMetrics.heightPixels == displayRealMetrics.heightPixels)
         }
-        return false;
+        return false
     }
 
-    public static int[] getScreenWh(Context context){
-        int[] screenWh = new int[4];
-        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+    fun getScreenWh(context: Context): IntArray {
+        val screenWh = IntArray(4)
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         if (windowManager != null) {
-            Display defaultDisplay = windowManager.getDefaultDisplay();
-            DisplayMetrics displayMetrics = new DisplayMetrics();
+            val defaultDisplay = windowManager.defaultDisplay
+            val displayMetrics = DisplayMetrics()
             // 应用宽高
-            defaultDisplay.getMetrics(displayMetrics);
-            DisplayMetrics displayRealMetrics = new DisplayMetrics();
+            defaultDisplay.getMetrics(displayMetrics)
+            val displayRealMetrics = DisplayMetrics()
             // 实际宽高
-            defaultDisplay.getRealMetrics(displayRealMetrics);
-            screenWh[0] = displayRealMetrics.widthPixels;
-            screenWh[1] = displayRealMetrics.heightPixels;
-            screenWh[2] = displayMetrics.widthPixels;
-            screenWh[3] = displayMetrics.heightPixels;
+            defaultDisplay.getRealMetrics(displayRealMetrics)
+            screenWh[0] = displayRealMetrics.widthPixels
+            screenWh[1] = displayRealMetrics.heightPixels
+            screenWh[2] = displayMetrics.widthPixels
+            screenWh[3] = displayMetrics.heightPixels
         }
-        return screenWh;
+        return screenWh
     }
 
     /**
@@ -187,16 +183,17 @@ public class ScreenUtils {
      * @param context 上下文
      * @return int数组 0：宽，1：高
      */
-    public static int[] getSysScreenWH(Context context) {
-        return Arrays.copyOf(getScreenWh(context),2);
+    fun getSysScreenWH(context: Context): IntArray {
+        return Arrays.copyOf(getScreenWh(context), 2)
     }
+
     /**
      * 获取当前应用显示的屏幕宽高
      * @param context 上下文
      * @return int数组 0：宽，1：高
      */
-    public static int[] getAppScreenWH(Context context){
-        return Arrays.copyOfRange(getScreenWh(context),1,3);
+    fun getAppScreenWH(context: Context): IntArray {
+        return Arrays.copyOfRange(getScreenWh(context), 1, 3)
     }
 
     /**
@@ -208,46 +205,37 @@ public class ScreenUtils {
      * @param application 上下文
      * @param activity 要设置的窗口
      */
-    public static void adjustDensity(final Application application,Activity activity){
-        DisplayMetrics displayMetrics = application.getResources().getDisplayMetrics();
-        if(mAppDensity == 0){
-            System.out.println("App : density = " +displayMetrics.density);
-            System.out.println("App : scaledDensity = " +displayMetrics.scaledDensity);
-            System.out.println("App : densityDpi = " +displayMetrics.densityDpi);
-            mAppDensity = displayMetrics.density;
-            mAppScaleDensity = displayMetrics.scaledDensity;
-            application.registerComponentCallbacks(new ComponentCallbacks() {
-                @Override
-                public void onConfigurationChanged(Configuration newConfig) {
+    fun adjustDensity(application: Application, activity: Activity) {
+        val displayMetrics = application.resources.displayMetrics
+        if (mAppDensity == 0f) {
+            println("App : density = " + displayMetrics.density)
+            println("App : scaledDensity = " + displayMetrics.scaledDensity)
+            println("App : densityDpi = " + displayMetrics.densityDpi)
+            mAppDensity = displayMetrics.density
+            mAppScaleDensity = displayMetrics.scaledDensity
+            application.registerComponentCallbacks(object : ComponentCallbacks {
+                override fun onConfigurationChanged(newConfig: Configuration) {
                     if (newConfig != null && newConfig.fontScale > 0) {
-                        mAppScaleDensity = application.getResources().getDisplayMetrics().scaledDensity;
+                        mAppScaleDensity = application.resources.displayMetrics.scaledDensity
                     }
                 }
 
-                @Override
-                public void onLowMemory() {
-
-                }
-            });
+                override fun onLowMemory() {}
+            })
         }
-
-
-        float targetDensity = displayMetrics.widthPixels / APP_DENSITY_DPI;
-        float targetScaledDensity = targetDensity * (mAppScaleDensity / mAppDensity);
-        int targetDpi = (int) (targetDensity * 160);
-
-        System.out.println("target : targetDensity = " + targetDensity);
-        System.out.println("target : targetScaledDensity = " + targetScaledDensity);
-        System.out.println("target : targetDpi = " + targetDpi);
+        val targetDensity = displayMetrics.widthPixels / APP_DENSITY_DPI
+        val targetScaledDensity = targetDensity * (mAppScaleDensity / mAppDensity)
+        val targetDpi = (targetDensity * 160).toInt()
+        println("target : targetDensity = $targetDensity")
+        println("target : targetScaledDensity = $targetScaledDensity")
+        println("target : targetDpi = $targetDpi")
 
 //        displayMetrics.density = targetDensity;
 //        displayMetrics.scaledDensity = targetScaledDensity;
 //        displayMetrics.densityDpi = targetDpi;
-
-        DisplayMetrics activityDisplayMetrics = activity.getResources().getDisplayMetrics();
-        activityDisplayMetrics.density = targetDensity;
-        activityDisplayMetrics.scaledDensity = targetScaledDensity;
-        activityDisplayMetrics.densityDpi = targetDpi;
+        val activityDisplayMetrics = activity.resources.displayMetrics
+        activityDisplayMetrics.density = targetDensity
+        activityDisplayMetrics.scaledDensity = targetScaledDensity
+        activityDisplayMetrics.densityDpi = targetDpi
     }
-
 }
