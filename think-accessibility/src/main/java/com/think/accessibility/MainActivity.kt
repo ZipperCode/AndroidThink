@@ -11,14 +11,27 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
 
-    private var list: List<String> = ArrayList()
+    private var mAppInfoList: List<AppInfo> = ArrayList()
+
+    private lateinit var recyclerView: RecyclerView
+
+    private lateinit var mAppInAdapter: AppInfoAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        recyclerView = findViewById(R.id.rv_list)
+        AppUtils.getPackages(this).forEach {
+            mAppInfoList.plus(AppInfo(it.applicationInfo.loadIcon(packageManager), it.applicationInfo.name))
+        }
+        mAppInAdapter = AppInfoAdapter(this,mAppInfoList)
+        recyclerView.adapter = mAppInAdapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
     }
 
     override fun onResume() {
