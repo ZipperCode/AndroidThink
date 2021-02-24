@@ -12,12 +12,12 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        externalNativeBuild{
-            cmake{
-                cppFlags ""
-                abiFilters 'arm64-v8a',"armeabi-v7a","x86","x86_64"
-            }
-        }
+//        externalNativeBuild{
+//            cmake{
+//                cppFlags ""
+//                abiFilters 'arm64-v8a',"armeabi-v7a","x86","x86_64"
+//            }
+//        }
     }
     buildTypes {
         release {
@@ -45,5 +45,5 @@ dependencies {
 //    implementation project(":think-study")
 //    implementation project(":think-vpn")
 //    implementation project(":think-ui")
-    implementation project(":think-core")
+//    implementation project(":think-core")
 }

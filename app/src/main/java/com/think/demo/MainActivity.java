@@ -1,7 +1,10 @@
 package com.think.demo;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
@@ -12,6 +15,8 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -33,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
 ////        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 ////                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 //        System.out.println(BarUtils.getNavigationBarHeight(this));
 //        System.out.println(BarUtils.getStatusBarHeight(this));
 //        System.out.println("是否全屏 = " + ScreenUtils.isFullScreen(this));
@@ -45,10 +49,10 @@ public class MainActivity extends AppCompatActivity {
 //        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
 //        startService(new Intent(this,MyAccessibilityService.class));
 
-//        if(!isAccessibilitySettingsOn(this, CustomAccessibilityService.class)){
-////            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-//        }
-//
+        if(!isAccessibilitySettingsOn(this, getPackageName() + ".CustomAccessibilityService")){
+            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+        }
+
 //        String s = MessageUtil.md5Crypt("哈哈，我是原文");
 //
 //        System.out.println("密文为：" + s);
@@ -83,27 +87,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public static boolean isAccessibilitySettingsOn(Context mContext, Class<? extends AccessibilityService> clazz) {
-        int accessibilityEnabled = 0;
-        final String service = mContext.getPackageName() + "/" + clazz.getCanonicalName();
-        try {
-            accessibilityEnabled = Settings.Secure.getInt(mContext.getApplicationContext().getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_ENABLED);
-        } catch (Settings.SettingNotFoundException e) {
-            e.printStackTrace();
+    public static boolean isAccessibilitySettingsOn(Context context,String className){
+        if (context == null){
+            return false;
         }
-        TextUtils.SimpleStringSplitter mStringColonSplitter = new TextUtils.SimpleStringSplitter(':');
-        if (accessibilityEnabled == 1) {
-            String settingValue = Settings.Secure.getString(mContext.getApplicationContext().getContentResolver(),
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-            if (settingValue != null) {
-                mStringColonSplitter.setString(settingValue);
-                while (mStringColonSplitter.hasNext()) {
-                    String accessibilityService = mStringColonSplitter.next();
-                    if (accessibilityService.equalsIgnoreCase(service)) {
-                        return true;
-                    }
-                }
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> runningServices =
+                activityManager.getRunningServices(100);// 获取正在运行的服务列表
+        if (runningServices.size()<0){
+            return false;
+        }
+        for (int i=0;i<runningServices.size();i++){
+            ComponentName service = runningServices.get(i).service;
+            if (service.getClassName().equals(className)){
+                return true;
             }
         }
         return false;

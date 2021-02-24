@@ -3,12 +3,13 @@ package com.think.accessibility
 import android.view.accessibility.AccessibilityEvent
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
+import io.reactivex.ObservableOnSubscribe
 import io.reactivex.Observer
 
 
-object AccessibilityEventManager {
+object AccessibilityEventManager: ObservableOnSubscribe<AccessibilityEvent> {
 
-    private var mObservable: Observable<AccessibilityEvent> = Observable.create { mEmitter = it }
+    private var mObservable: Observable<AccessibilityEvent> = Observable.create(this)
 
     private lateinit var mEmitter: ObservableEmitter<AccessibilityEvent>
 
@@ -16,9 +17,10 @@ object AccessibilityEventManager {
         mObservable.subscribe(observer)
     }
 
-    fun onNext(event: AccessibilityEvent) {
-        if (!mEmitter.isDisposed)
+    fun dispatcher(event: AccessibilityEvent) {
+        if (!mEmitter.isDisposed){
             mEmitter.onNext(event)
+        }
     }
 
     fun onError(error: Throwable) {
@@ -30,5 +32,9 @@ object AccessibilityEventManager {
         if (!mEmitter.isDisposed) {
             mEmitter.onComplete()
         }
+    }
+
+    override fun subscribe(emitter: ObservableEmitter<AccessibilityEvent>) {
+        mEmitter = emitter;
     }
 }

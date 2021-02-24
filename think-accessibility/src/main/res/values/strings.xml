@@ -1,4 +1,5 @@
 <resources>
-    <string name="app_name">think-accessibilityservice</string>
+    <string name="app_name">无障碍辅助工具</string>
     <string name="accessibility_service_describe_title">无障碍辅助工具</string>
+    <string name="accessibility_service_describe_content">无障碍辅助工具</string>
 </resources>

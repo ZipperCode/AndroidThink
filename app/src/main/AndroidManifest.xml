@@ -32,6 +32,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name="com.think.demo.MyAccessibilityService"
+            android:enabled="true"
+            android:exported="true"
+            android:label="hshs"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibility"
+                android:resource="@xml/custom_service" />
+        </service>
     </application>
 
 </manifest>
