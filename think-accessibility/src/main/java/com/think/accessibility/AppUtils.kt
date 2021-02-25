@@ -17,6 +17,7 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
+import io.reactivex.Observer
 import java.io.File
 import java.lang.Exception
 import java.util.*
@@ -103,21 +104,50 @@ object AppUtils {
         return packageNames
     }
 
+    fun getLaunchActivity(context: Context): List<PackageInfo> {
+        val pks = getPackages(context)
+        return pks.filter {
+            val intent = Intent(Intent.ACTION_MAIN)
+            intent.addCategory(Intent.CATEGORY_LAUNCHER)
+            intent.setPackage(it.packageName)
+            val aaa = context.packageManager.resolveActivity(intent,0)
+            val resolveInfo = context.packageManager.queryIntentActivities(intent, 0)
+            resolveInfo.size > 0
+        }.toList()
+    }
 
-    fun getLaunchActivity(context: Context): Map<String,String>{
-        val pks = getPackageNames(context)
-        val map = HashMap<String,String>(pks.size);
+    fun getLaunch(context: Context, list: MutableList<AppInfo>){
+        val pks = getPackages(context)
         pks.forEach {
             val intent = Intent(Intent.ACTION_MAIN)
             intent.addCategory(Intent.CATEGORY_LAUNCHER)
-            intent.setPackage(it)
+            intent.setPackage(it.packageName)
             val resolveInfo = context.packageManager.queryIntentActivities(intent, 0)
-            if(resolveInfo.size > 0 ){
-                map[it] = resolveInfo[0]?.activityInfo?.name ?: ""
+            if(resolveInfo.size > 0){
+                val icon = it.applicationInfo.loadIcon(context.packageManager)
+                val name = context.packageManager.getApplicationLabel(it.applicationInfo)
+                if (!TextUtils.isEmpty(name) and (icon != null)){
+                    list.add(AppInfo(icon, name.toString()))
+                }
             }
         }
-        return map
     }
+
+//
+//    fun getLaunchActivity(context: Context): Map<String,String>{
+//        val pks = getPackageNames(context)
+//        val map = HashMap<String,String>(pks.size);
+//        pks.forEach {
+//            val intent = Intent(Intent.ACTION_MAIN)
+//            intent.addCategory(Intent.CATEGORY_LAUNCHER)
+//            intent.setPackage(it)
+//            val resolveInfo = context.packageManager.queryIntentActivities(intent, 0)
+//            if(resolveInfo.size > 0 ){
+//                map[it] = resolveInfo[0]?.activityInfo?.name ?: ""
+//            }
+//        }
+//        return map
+//    }
 
     fun launchActivity(context: Context, map: HashMap<String,String>){
         val pks = getPackageNames(context)

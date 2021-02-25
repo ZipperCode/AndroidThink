@@ -34,6 +34,7 @@ class MyAccessibilityService : AccessibilityService() {
                             val findAccessibilityNodeInfosByText =
                                     rootInActiveWindow?.findAccessibilityNodeInfosByText("跳过")
                             Log.d(TAG, "找到跳过的元素个数：${findAccessibilityNodeInfosByText?.size ?: 0}")
+                            Log.d(TAG, "找到跳过的元素：${rootInActiveWindow?.findAccessibilityNodeInfosByText("跳过")}")
                             findAccessibilityNodeInfosByText?.distinct()?.forEach {
                                 if (it.isClickable) {
                                     performAction(it)

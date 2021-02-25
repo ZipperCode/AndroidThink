@@ -8,7 +8,7 @@ include ':think-accessibility'//include ':think-retrofit'
 include ':app'
 include ':think-core'
 //include ':think-study'
-include ':think-ui'
+//include ':think-ui'
 //include "think-vpn"
 //include ':think-business'
 //include ':think-xposed'
