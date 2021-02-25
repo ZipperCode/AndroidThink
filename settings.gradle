@@ -1,3 +1,4 @@
+include ':think-audioplayer'
 include ':think-accessibility'//include ':think-retrofit'
 //include ':gradle-plugin'
 //include ':think-eventbus'

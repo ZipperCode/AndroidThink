@@ -1,27 +1,32 @@
 package com.think.accessibility
 
-import android.accessibilityservice.AccessibilityButtonController
 import android.accessibilityservice.AccessibilityService
-import android.accessibilityservice.AccessibilityServiceInfo
-import android.accessibilityservice.FingerprintGestureController
-import android.accessibilityservice.FingerprintGestureController.*
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityEventSource
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 class MyAccessibilityService : AccessibilityService() {
 
+    private val poolExecutor: ExecutorService = ThreadPoolExecutor(
+            CPU_CORE_SIZE,
+            CPU_CORE_SIZE * 2 + 1,
+            60,
+            TimeUnit.SECONDS,
+            LinkedBlockingDeque<Runnable>(256)
+    )
+
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-
-        when(AccessibilityConfig.mode){
+        when (AccessibilityConfig.mode) {
             RunMode.DUMP_SPLASH -> {
                 when (event?.eventType) {
                     AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
@@ -40,7 +45,7 @@ class MyAccessibilityService : AccessibilityService() {
                     }
                 }
             }
-            RunMode.CLOSE ->{
+            RunMode.CLOSE -> {
                 Toast.makeText(this, "服务关闭，不运行跳过", Toast.LENGTH_LONG).show();
             }
         }
@@ -48,10 +53,10 @@ class MyAccessibilityService : AccessibilityService() {
 
     }
 
-    private fun performAction(nodeInfo: AccessibilityNodeInfo){
-        try{
+    private fun performAction(nodeInfo: AccessibilityNodeInfo) {
+        try {
             nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-        }finally {
+        } finally {
             nodeInfo.recycle()
         }
     }
@@ -81,6 +86,8 @@ class MyAccessibilityService : AccessibilityService() {
 
     companion object {
         private val TAG = MyAccessibilityService::class.java.simpleName
+
+        val CPU_CORE_SIZE: Int = Runtime.getRuntime().availableProcessors()
     }
 
 }
