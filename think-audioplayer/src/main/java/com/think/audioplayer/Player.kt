@@ -6,38 +6,33 @@ import android.media.MediaPlayer
 import android.media.SoundPool
 import android.os.Build
 
-class Player {
+abstract class Player {
 
-    private var isLoading: Boolean = false
+    /**
+     * 是否处于暂停
+     */
+    protected var isPaused: Boolean = false
 
-    private var isPlaying: Boolean = false
+    /**
+     * 是否释放了资源
+     */
+    protected var isRelease: Boolean = false
 
-    private var isPause: Boolean = false
-
-    private var isStop: Boolean = false
-
-    private var isRelease: Boolean = false
-
-    private var mShortPlayer: SoundPool
-
-    private var mLongPlayer: MediaPlayer
-
-    init {
-        mShortPlayer = if (Build.VERSION.SDK_INT > 21) {
-            SoundPool.Builder()
-                    .setMaxStreams(100)
-                    .setAudioAttributes(
-                            AudioAttributes.Builder()
-                                    .setLegacyStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE)
-                                    .build()
-                    ).build()
-        } else {
-            SoundPool(50, AudioManager.USE_DEFAULT_STREAM_TYPE, 0)
+    /**
+     * 声道
+     */
+    protected var volume: Float = 1.0F
+        set(value){
+            if((value >= 0.0F) and (value <= 1.0F)){
+                field = value
+            }
         }
-    }
 
+    abstract fun play(assetPath: String)
 
+    abstract fun resume()
 
+    abstract fun pause()
 
-
+    abstract fun release()
 }

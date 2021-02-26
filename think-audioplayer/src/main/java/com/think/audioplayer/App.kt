@@ -6,10 +6,10 @@ import android.content.Context
 class App: Application() {
     override fun onCreate() {
         super.onCreate()
-        context = this
+        plugin = AudioPlayerPlugin(this)
     }
 
     companion object{
-        var context: Context? = null
+        lateinit var plugin: AudioPlayerPlugin
     }
 }

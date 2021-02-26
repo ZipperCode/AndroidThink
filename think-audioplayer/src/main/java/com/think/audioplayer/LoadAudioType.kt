@@ -22,5 +22,10 @@ enum class LoadAudioType {
     /**
      * Asset目录读取的文件描述符
      */
-    ASSET_FILE_DESCRIPTOR
+    ASSET_FILE_DESCRIPTOR,
+
+    /**
+     * url加载
+     */
+    URL
 }
