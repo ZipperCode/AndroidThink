@@ -1,13 +1,16 @@
-package com.think.accessibility
+package com.think.accessibility.utils
 
+import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.accessibilityservice.GestureDescription
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.KeyguardManager
 import android.content.ComponentName
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageInfo
+import android.graphics.Path
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
@@ -15,9 +18,8 @@ import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
-import io.reactivex.Observer
+import com.think.accessibility.bean.AppInfo
 import java.io.File
 import java.lang.Exception
 import java.util.*
@@ -79,6 +81,32 @@ object AppUtils {
         return false
     }
 
+
+    fun isAccessibilitySettingsOn(mContext: Context, clazz: Class<out AccessibilityService?>): Boolean {
+        var accessibilityEnabled = 0
+        val service = mContext.packageName + "/" + clazz.canonicalName
+        try {
+            accessibilityEnabled = Settings.Secure.getInt(mContext.applicationContext.contentResolver,
+                    Settings.Secure.ACCESSIBILITY_ENABLED)
+        } catch (e: Settings.SettingNotFoundException) {
+            e.printStackTrace()
+        }
+        val mStringColonSplitter = TextUtils.SimpleStringSplitter(':')
+        if (accessibilityEnabled == 1) {
+            val settingValue = Settings.Secure.getString(mContext.applicationContext.contentResolver,
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+            if (settingValue != null) {
+                mStringColonSplitter.setString(settingValue)
+                while (mStringColonSplitter.hasNext()) {
+                    val accessibilityService = mStringColonSplitter.next()
+                    if (accessibilityService.equals(service, ignoreCase = true)) {
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
 
     /**
      * 判断Activity是否存活
@@ -177,7 +205,6 @@ object AppUtils {
         val resolveInfos = packageManager.queryIntentActivities(intent, 0)
         if (resolveInfos.size > 0) {
             val resolveInfo = resolveInfos[0]
-            val actPackageName = resolveInfo.activityInfo.packageName
             val actClassName = resolveInfo.activityInfo.name
             val componentName = ComponentName(packageName!!, actClassName)
             intent.component = componentName
@@ -186,7 +213,14 @@ object AppUtils {
             return
         }
         Toast.makeText(context, "启动APP失败，请重试", Toast.LENGTH_LONG).show()
-        context.startActivity(intent)
+    }
+
+    fun checkAppInstall(context: Context, packageName: String): Boolean{
+        return try {
+            return context.packageManager.getPackageInfo(packageName,0) != null
+        }catch (e: Exception){
+            false
+        }
     }
 
     /**
@@ -242,5 +276,46 @@ object AppUtils {
                 e.printStackTrace()
             }
         }
+    }
+
+    /**
+     * 唤醒屏幕
+     */
+    fun wakeUpScreen(context: Context, timeout: Long = 60 * 1000L){
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val wakeLock = powerManager.newWakeLock(
+                PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.SCREEN_DIM_WAKE_LOCK,
+                AppUtils::class.java.simpleName
+        )
+        wakeLock.acquire(timeout)
+    }
+
+
+    fun unLock(context: Context, service: AccessibilityService): Boolean{
+        val wh = ScreenUtils.getSysScreenWH(context)
+        val w = wh[0]
+        val h = wh[1]
+        if((w <= 0) or (h <= 0)){
+            return false
+        }
+        // 起始位置
+        val startX = w / 2
+        val startY = h / 10 * 8
+        // 要移动到的位置
+        val toY = h / 10 * 6
+        val path = Path()
+        path.moveTo(startX.toFloat(),startY.toFloat())
+        path.lineTo(startX.toFloat(), toY.toFloat())
+        if(Build.VERSION.SDK_INT >= 24){
+            AccessibilityUtil.gestureScroll(service, path, 1000, 500,
+                    object : AccessibilityService.GestureResultCallback() {
+                        override fun onCompleted(gestureDescription: GestureDescription?) {
+                            val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+                            val newKeyguardLock = keyguardManager.newKeyguardLock(AppUtils::class.java.simpleName)
+                            newKeyguardLock.disableKeyguard()
+                        }
+                    })
+        }
+        return true
     }
 }

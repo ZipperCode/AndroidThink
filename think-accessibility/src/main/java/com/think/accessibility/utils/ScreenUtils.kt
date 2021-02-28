@@ -1,4 +1,4 @@
-package com.think.accessibility
+package com.think.accessibility.utils
 
 import android.app.Activity
 import android.app.Application

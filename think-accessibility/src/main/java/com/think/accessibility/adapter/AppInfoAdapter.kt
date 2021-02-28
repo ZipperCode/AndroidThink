@@ -1,4 +1,4 @@
-package com.think.accessibility
+package com.think.accessibility.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.think.accessibility.R
+import com.think.accessibility.bean.AppInfo
 
 class AppInfoAdapter(context: Context, appList: List<AppInfo>): RecyclerView.Adapter<AppInfoAdapter.Companion.AppHolder>() {
 
