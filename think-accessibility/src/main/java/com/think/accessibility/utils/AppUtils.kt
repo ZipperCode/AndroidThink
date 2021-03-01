@@ -154,8 +154,27 @@ object AppUtils {
             if(resolveInfo.size > 0){
                 val icon = it.applicationInfo.loadIcon(context.packageManager)
                 val name = context.packageManager.getApplicationLabel(it.applicationInfo)
+                val packageName = resolveInfo[0].resolvePackageName
+                val launchActivity = resolveInfo[0].activityInfo.targetActivity
                 if (!TextUtils.isEmpty(name) and (icon != null)){
-                    list.add(AppInfo(icon, name.toString()))
+                    list.add(AppInfo(icon, name.toString(), packageName, launchActivity))
+                }
+            }
+        }
+    }
+
+    fun getLaunch(context: Context, map: MutableMap<String, String>){
+        val pks = getPackages(context)
+        pks.forEach {
+            val intent = Intent(Intent.ACTION_MAIN)
+            intent.addCategory(Intent.CATEGORY_LAUNCHER)
+            intent.setPackage(it.packageName)
+            val resolveInfo = context.packageManager.queryIntentActivities(intent, 0)
+            if(resolveInfo.size > 0){
+                val packageName = resolveInfo[0].resolvePackageName
+                val launchActivity = resolveInfo[0].activityInfo.targetActivity
+                if (!TextUtils.isEmpty(packageName) and !TextUtils.isEmpty(launchActivity)){
+                    map[packageName] =  launchActivity
                 }
             }
         }

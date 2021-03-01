@@ -7,16 +7,20 @@ object DumpManager {
 
     private val mSplashMap:MutableMap<String, DumpAppInfo> = HashMap()
 
+    val mLaunchActivity:MutableMap<String, String> = HashMap()
+
     /**
      * 收到AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED事件时将启动窗口类名传入
-     *
      */
     fun put(pks: String, activityName: String){
         if(mSplashMap.containsKey(pks)){
             val dumpAppInfo = mSplashMap[pks]!!
             // 判断是否是闪屏页
-
-            dumpAppInfo.isDump = false
+            if(mLaunchActivity.contains(pks)){
+                if(mLaunchActivity[pks] == activityName){
+                    dumpAppInfo.isDump = false
+                }
+            }
         }else{
             mSplashMap[pks] = DumpAppInfo(pks, activityName, false)
         }

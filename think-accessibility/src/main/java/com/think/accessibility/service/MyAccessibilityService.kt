@@ -15,6 +15,8 @@ import com.think.accessibility.Const
 import com.think.accessibility.DumpManager
 import com.think.accessibility.utils.AccessibilityUtil
 import com.think.accessibility.RunMode
+import com.think.accessibility.bean.AppInfo
+import com.think.accessibility.utils.AppUtils
 import com.think.accessibility.utils.ThreadManager
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingDeque
@@ -150,6 +152,11 @@ class MyAccessibilityService : AccessibilityService() {
 //
 //        }
         AccessibilityUtil.mAccessibilityService = this
+
+        ThreadManager.getInstance().runOnSub(Runnable {
+            AppUtils.getLaunch(this, DumpManager.mLaunchActivity)
+        })
+
 //        startService(Intent(this, GuardService::class.java))
     }
 
@@ -162,8 +169,6 @@ class MyAccessibilityService : AccessibilityService() {
 
     companion object {
         private val TAG = MyAccessibilityService::class.java.simpleName
-
-        val CPU_CORE_SIZE: Int = Runtime.getRuntime().availableProcessors()
     }
 
 }
