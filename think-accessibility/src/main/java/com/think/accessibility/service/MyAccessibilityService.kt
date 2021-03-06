@@ -41,22 +41,12 @@ class MyAccessibilityService : AccessibilityService() {
             RunMode.DUMP_SPLASH -> {
                 when (event?.eventType) {
                     AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
-//                        if ((rootInActiveWindow != null) and DumpManager.canDump(packageName)) {
-//
-//
-//                            if ((event.packageName ?: "") == "com.think.accessibility") {
-//                                val webview = AccessibilityUtil.findWebViewNode(rootInActiveWindow)
-//                                val node = AccessibilityUtil.findWebViewContent(webview, "百度一下")
-//                                Log.d(TAG, "webview = $webview node = $node")
-//                                if (node != null) {
-//                                    AccessibilityUtil.click(node)
-//                                }
-//                            }
-//                        }
                         rootInActiveWindow?.run {
-                            ThreadManager.getInstance().runOnSub(Runnable {
-                                dumpSplash(this, packageName, className)
-                            })
+                            if(DumpManager.canDump(packageName)){
+                                ThreadManager.getInstance().runOnSub(Runnable {
+                                    dumpSplash(this, packageName, className)
+                                })
+                            }
                         }
                     }
                     AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
@@ -84,11 +74,23 @@ class MyAccessibilityService : AccessibilityService() {
             pks: String,
             className: String
     ) {
-        Log.d(TAG, "[dumpSplash] rootNodeInfo = $rootNodeInfo pks = $pks className = $className")
-        if (DumpManager.canDump(pks)) {
-            // 能查找到[跳过]的组件
-            var clicked = AccessibilityUtil
-                    .findNodeByText(rootNodeInfo, Const.DUMP_AD_TEXT_1)
+
+        // 能查找到[跳过]的组件
+        var clicked = AccessibilityUtil
+                .findNodeByText(rootNodeInfo, Const.DUMP_AD_TEXT_1)
+                ?.let {
+                    return@let if (it.isClickable) {
+                        AccessibilityUtil.click(it)
+                    } else {
+                        AccessibilityUtil.deepClick(it)
+                    }
+                } ?: false
+
+
+        if (!clicked) {
+            Log.d(TAG, "未找到[跳过]的组件, 继续查找[跳过广告]的组件")
+            clicked = AccessibilityUtil
+                    .findNodeByText(rootNodeInfo, Const.DUMP_AD_TEXT_2)
                     ?.let {
                         return@let if (it.isClickable) {
                             AccessibilityUtil.click(it)
@@ -96,45 +98,29 @@ class MyAccessibilityService : AccessibilityService() {
                             AccessibilityUtil.deepClick(it)
                         }
                     } ?: false
-            if (!clicked) {
-                Log.d(TAG, "未找到[跳过]的组件, 继续查找[跳过广告]的组件")
-                clicked = AccessibilityUtil
-                        .findNodeByText(rootNodeInfo, Const.DUMP_AD_TEXT_2)
-                        ?.let {
-                            return@let if (it.isClickable) {
-                                AccessibilityUtil.click(it)
-                            } else {
-                                AccessibilityUtil.deepClick(it)
-                            }
-                        } ?: false
-            } else {
-                DumpManager.dumped(pks)
-            }
-
-            if (!clicked) {
-                Log.d(TAG, "以上都没有跳过，可能组件是webview的，继续查找webview的组件")
-                val webViewNode = AccessibilityUtil.findWebViewNode(rootNodeInfo)
-                Log.d(TAG, "webViewNode = $webViewNode")
-                if (webViewNode != null) {
-                    clicked = AccessibilityUtil
-                            .findWebViewContent(webViewNode, Const.DUMP_AD_TEXT_1)
-                            ?.let {
-                                return@let if (it.isClickable) {
-                                    AccessibilityUtil.click(it)
-                                } else {
-                                    AccessibilityUtil.deepClick(it)
-                                }
-                            } ?: false
-                    if (clicked) {
-                        DumpManager.dumped(pks)
-                    }
-                }
-            } else {
-                DumpManager.dumped(pks)
-            }
-        } else {
-            Log.d(TAG, "canDump == false， 已经处理过跳过了")
         }
+
+//            if (!clicked) {
+//                Log.d(TAG, "以上都没有跳过，可能组件是webview的，继续查找webview的组件")
+//                val webViewNode = AccessibilityUtil.findWebViewNode(rootNodeInfo)
+//                Log.d(TAG, "webViewNode = $webViewNode")
+//                if (webViewNode != null) {
+//                    clicked = AccessibilityUtil
+//                            .findWebViewContent(webViewNode, Const.DUMP_AD_TEXT_1)
+//                            ?.let {
+//                                return@let if (it.isClickable) {
+//                                    AccessibilityUtil.click(it)
+//                                } else {
+//                                    AccessibilityUtil.deepClick(it)
+//                                }
+//                            } ?: false
+//                    if (clicked) {
+//                        DumpManager.dumped(pks)
+//                    }
+//                }
+//            } else {
+//                DumpManager.dumped(pks)
+//            }
     }
 
     override fun onInterrupt() {

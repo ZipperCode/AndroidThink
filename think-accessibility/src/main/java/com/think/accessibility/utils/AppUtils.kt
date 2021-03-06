@@ -157,7 +157,7 @@ object AppUtils {
                 val packageName = resolveInfo[0].resolvePackageName
                 val launchActivity = resolveInfo[0].activityInfo.targetActivity
                 if (!TextUtils.isEmpty(name) and (icon != null)){
-                    list.add(AppInfo(icon, name.toString(), packageName, launchActivity))
+                    list.add(AppInfo(icon, name.toString()))
                 }
             }
         }
@@ -169,12 +169,12 @@ object AppUtils {
             val intent = Intent(Intent.ACTION_MAIN)
             intent.addCategory(Intent.CATEGORY_LAUNCHER)
             intent.setPackage(it.packageName)
-            val resolveInfo = context.packageManager.queryIntentActivities(intent, 0)
-            if(resolveInfo.size > 0){
-                val packageName = resolveInfo[0].resolvePackageName
-                val launchActivity = resolveInfo[0].activityInfo.targetActivity
-                if (!TextUtils.isEmpty(packageName) and !TextUtils.isEmpty(launchActivity)){
-                    map[packageName] =  launchActivity
+            val launchIntent = context.packageManager.getLaunchIntentForPackage(it.packageName)
+            launchIntent?.run {
+                val packageName = component?.packageName?:""
+                val launchActivity = component?.className?:""
+                if (!TextUtils.isEmpty(packageName) and !TextUtils.isEmpty(launchActivity)) {
+                    map[packageName] = launchActivity
                 }
             }
         }
