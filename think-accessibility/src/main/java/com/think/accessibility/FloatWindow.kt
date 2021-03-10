@@ -14,7 +14,7 @@ import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.widget.RelativeLayout
-import com.think.accessibility.ScreenUtils.dp2px
+import com.think.accessibility.utils.ScreenUtils.dp2px
 
 class FloatWindow : RelativeLayout {
     /**

@@ -1,5 +1,6 @@
-package com.think.accessibility
+package com.think.accessibility.bean
 
+import android.app.LauncherActivity
 import android.graphics.drawable.Drawable
 
 data class AppInfo(

@@ -2,4 +2,7 @@
     <string name="app_name">跳广告</string>
     <string name="accessibility_service_describe_title">无障碍辅助工具</string>
     <string name="accessibility_service_describe_content">无障碍辅助工具</string>
+
+    <string name="main_setting_name">设置</string>
+    <string name="main_help_name">帮助</string>
 </resources>
