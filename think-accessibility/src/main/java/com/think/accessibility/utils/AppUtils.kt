@@ -154,10 +154,9 @@ object AppUtils {
             if(resolveInfo.size > 0){
                 val icon = it.applicationInfo.loadIcon(context.packageManager)
                 val name = context.packageManager.getApplicationLabel(it.applicationInfo)
-                val packageName = resolveInfo[0].resolvePackageName
                 val launchActivity = resolveInfo[0].activityInfo.targetActivity
                 if (!TextUtils.isEmpty(name) and (icon != null)){
-                    list.add(AppInfo(icon, name.toString()))
+                    list.add(AppInfo(icon, name.toString(),it.packageName))
                 }
             }
         }

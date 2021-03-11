@@ -142,7 +142,7 @@ class MyAccessibilityService : AccessibilityService() {
         ThreadManager.getInstance().runOnSub(Runnable {
             AppUtils.getLaunch(this, DumpManager.mLaunchActivity)
         })
-
+        AccessibilityUtil.pksInit(this)
 //        startService(Intent(this, GuardService::class.java))
     }
 

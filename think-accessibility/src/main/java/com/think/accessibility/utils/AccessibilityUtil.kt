@@ -2,6 +2,7 @@ package com.think.accessibility.utils
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
+import android.content.Context
 import android.graphics.Path
 import android.graphics.Point
 import android.graphics.Rect
@@ -17,9 +18,34 @@ import java.util.concurrent.TimeUnit
 
 object AccessibilityUtil {
 
-    val TAG: String = AccessibilityUtil::class.java.simpleName
+    private val TAG: String = AccessibilityUtil::class.java.simpleName
+
+    private const val SP_PKS_LIST_KEY = "name_list"
 
     var mAccessibilityService: AccessibilityService? = null
+
+    val mNameList:MutableSet<String> = HashSet()
+
+    fun pksInit(context: Context){
+        SpHelper.init(context)
+        val pks = SpHelper.loadStringArray(SP_PKS_LIST_KEY)
+        mNameList.addAll(pks)
+    }
+
+    fun addPks(pks: Collection<String>){
+        mNameList.addAll(pks)
+        SpHelper.saveStringArray(SP_PKS_LIST_KEY, mNameList)
+    }
+
+    fun addPks(pks: String){
+        mNameList.add(pks)
+        SpHelper.saveStringArray(SP_PKS_LIST_KEY, mNameList)
+    }
+
+    fun delPks(pks: String){
+        mNameList.remove(pks)
+        SpHelper.saveStringArray(SP_PKS_LIST_KEY, mNameList)
+    }
 
     /**
      * 进行手势滑动操作，需要Android N以上版本

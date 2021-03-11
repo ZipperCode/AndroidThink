@@ -1,8 +1,15 @@
 <resources>
     <string name="app_name">跳广告</string>
     <string name="accessibility_service_describe_title">无障碍辅助工具</string>
-    <string name="accessibility_service_describe_content">无障碍辅助工具</string>
+    <string name="accessibility_service_describe_content">当然是跳广告啦，个别App依旧无法跳过</string>
 
+    <string name="main_search_name">搜索</string>
     <string name="main_setting_name">设置</string>
     <string name="main_help_name">帮助</string>
+    <string name="main_exit_app">退出</string>
+
+    <string name="list_app_dump_text">跳不跳</string>
+
+    <string name="switch_dump_text_on">跳</string>
+    <string name="switch_dump_text_off">不跳</string>
 </resources>
