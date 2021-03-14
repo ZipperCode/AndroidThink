@@ -9,6 +9,7 @@ import io.reactivex.Observer
 
 object AccessibilityEventManager: ObservableOnSubscribe<AccessibilityEvent> {
 
+
     private var mObservable: Observable<AccessibilityEvent> = Observable.create(this)
 
     private lateinit var mEmitter: ObservableEmitter<AccessibilityEvent>

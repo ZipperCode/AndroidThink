@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -17,7 +20,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidThink">
-        <activity android:name=".activity.TestWebActivity"></activity>
+        <activity android:name=".activity.TranslucentActivity"
+            android:theme="@style/Translucent"
+            android:launchMode="singleInstance"
+            android:taskAffinity="com.think.accessibility.drawScreenTask"/>
+        <activity android:name=".activity.TestWebActivity" />
 
         <service
             android:name=".service.JobSchedulerService"

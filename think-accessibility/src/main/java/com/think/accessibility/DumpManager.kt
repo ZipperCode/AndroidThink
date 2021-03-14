@@ -3,6 +3,7 @@ package com.think.accessibility
 import android.util.Log
 import com.think.accessibility.bean.DumpAppInfo
 
+@Deprecated("")
 object DumpManager {
 
     private val mSplashMap:MutableMap<String, DumpAppInfo> = HashMap()

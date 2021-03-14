@@ -7,14 +7,21 @@ import android.graphics.Path
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.Build
+import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
+import android.util.LruCache
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.IntRange
 import androidx.annotation.RequiresApi
-import java.lang.Exception
-import java.lang.IllegalArgumentException
+import com.think.accessibility.bean.ViewInfo
+import com.think.accessibility.room.DBHelper
+import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
+import kotlin.collections.LinkedHashMap
 
 object AccessibilityUtil {
 
@@ -24,11 +31,33 @@ object AccessibilityUtil {
 
     var mAccessibilityService: AccessibilityService? = null
 
-    val mNameList:MutableSet<String> = HashSet()
+    /**
+     * 保存需要过滤的包名
+     */
+    private val mNameList:MutableSet<String> = HashSet()
 
-    fun pksInit(context: Context){
+
+    /**
+     * 是否执行绘制view
+     */
+    var mDrawViewBound: Boolean = false
+
+    /**
+     * 选中跳过的view
+     */
+    val mDumpViewInfo: MutableList<ViewInfo> = ArrayList()
+
+    val isMainThread:Boolean get() = Looper.getMainLooper() != Looper.myLooper()
+
+    fun init(context: Context){
+        pksInit(context)
+        viewInfoInit(context)
+    }
+
+    private fun pksInit(context: Context){
         SpHelper.init(context)
         val pks = SpHelper.loadStringArray(SP_PKS_LIST_KEY)
+        mNameList.clear()
         mNameList.addAll(pks)
     }
 
@@ -45,6 +74,51 @@ object AccessibilityUtil {
     fun delPks(pks: String){
         mNameList.remove(pks)
         SpHelper.saveStringArray(SP_PKS_LIST_KEY, mNameList)
+    }
+
+    fun pksContains(pks: String): Boolean{
+        return mNameList.contains(pks)
+    }
+
+    /**
+     * 从数据库中查找所有保存的view信息
+     */
+    private fun viewInfoInit(context: Context){
+        val db = DBHelper.openViewInfoDatabase(context.applicationContext)
+        mDumpViewInfo.clear()
+        try {
+            mDumpViewInfo.addAll(db.getViewInfoDao().getAll())
+        }catch (e:java.lang.Exception){
+            e.printStackTrace()
+        }
+    }
+
+    fun addViewInfo(viewInfo: ViewInfo){
+        val dao = DBHelper.getViewInfoDao()
+        try{
+            dao.insert(viewInfo)
+        }catch (e: java.lang.Exception){
+            e.printStackTrace()
+        }
+    }
+
+    fun deleteViewInfo(viewInfo: ViewInfo){
+        if(Looper.getMainLooper() != Looper.myLooper()){
+            Log.e(TAG,"[addViewInfo] 非主线程")
+        }
+        val dao = DBHelper.getViewInfoDao()
+        try{
+            dao.delete(viewInfo)
+        }catch (e: java.lang.Exception){
+            e.printStackTrace()
+        }
+    }
+
+    fun viewInfoListIds(packageName: String): List<String>{
+        return mDumpViewInfo
+                .filter { (it.packageName == packageName) and !TextUtils.isEmpty(it.viewId) }
+                .map { it.viewId!! }.distinct()
+
     }
 
     /**
@@ -401,6 +475,21 @@ object AccessibilityUtil {
                 findWebViewContentList(child, contentDescription, list)
             }
         }
+    }
+
+    fun collectViewInfo(viewNodeInfo: AccessibilityNodeInfo?, viewInfoList: MutableList<ViewInfo>){
+        if (viewNodeInfo == null){
+            return
+        }
+        val screenRect = Rect()
+        viewNodeInfo.getBoundsInScreen(screenRect)
+        viewNodeInfo.refresh()
+        viewInfoList.add(ViewInfo(0, viewNodeInfo.packageName.toString(), "", viewNodeInfo.viewIdResourceName, screenRect))
+        for (i in 0 until viewNodeInfo.childCount) {
+            val child = viewNodeInfo.getChild(i)
+            collectViewInfo(child, viewInfoList)
+        }
+
     }
 
     fun getRandomPath(rect: Rect): Path {

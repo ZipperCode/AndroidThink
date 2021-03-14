@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.think.accessibility.R
 import com.think.accessibility.bean.AppInfo
 import com.think.accessibility.utils.AccessibilityUtil
+import com.think.accessibility.utils.ThreadManager
+import java.util.logging.Handler
 
 class AppInfoAdapter(context: Context, appList: MutableList<AppInfo>):
         RecyclerView.Adapter<AppInfoAdapter.Companion.AppHolder>(),
@@ -32,7 +34,7 @@ class AppInfoAdapter(context: Context, appList: MutableList<AppInfo>):
         mFilterList.clear()
         mAppList.addAll(data)
         mFilterList.addAll(mAppList)
-        notifyDataSetChanged()
+        ThreadManager.getInstance().runOnMain(Runnable { notifyDataSetChanged() })
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppHolder {
@@ -44,7 +46,7 @@ class AppInfoAdapter(context: Context, appList: MutableList<AppInfo>):
     override fun onBindViewHolder(holder: AppHolder, position: Int) {
         holder.ivAppIcon.setImageDrawable(mFilterList[position].icon)
         holder.tvAppName.text = mFilterList[position].appName
-        val enableStatus = AccessibilityUtil.mNameList.contains(mFilterList[position].pks)
+        val enableStatus = AccessibilityUtil.pksContains(mFilterList[position].pks)
         holder.swDump.isChecked = enableStatus
         holder.tvStatus.text = if(enableStatus) "Dump运行中" else "未运行"
 
@@ -57,6 +59,11 @@ class AppInfoAdapter(context: Context, appList: MutableList<AppInfo>):
                     AccessibilityUtil.delPks(mFilterList[position].pks )
                 }
             }
+        }
+
+        holder.itemView.setOnLongClickListener{
+            Toast.makeText(mContext,"列表项长按",Toast.LENGTH_LONG).show()
+            true
         }
     }
 

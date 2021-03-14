@@ -15,6 +15,7 @@ import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.widget.RelativeLayout
 import com.think.accessibility.utils.ScreenUtils.dp2px
+import kotlin.math.abs
 
 class FloatWindow : RelativeLayout {
     /**
@@ -155,6 +156,7 @@ class FloatWindow : RelativeLayout {
         inScreenX = event.rawX.toInt()
         inScreenY = event.rawY.toInt()
         isPressed = true
+        mMoved = false
         processScale(true)
         removeCallbacks(mDelayAlphaAnim)
         processAlpha(false)
@@ -165,8 +167,8 @@ class FloatWindow : RelativeLayout {
     private fun doMove(event: MotionEvent): Boolean {
         inScreenX = event.rawX.toInt()
         inScreenY = event.rawY.toInt()
-        mMoved = Math.abs(inScreenX - downScreenX) >= touchSlop || Math.abs(inScreenY - downScreenY) >= touchSlop
-        //        Log.d(TAG, "inScreenX = " + inScreenX + ",inScreenY = " + inScreenY + ", downScreenX = " + downScreenX + ",downScreenY = " + downScreenY);
+        mMoved = abs(inScreenX - downScreenX) >= touchSlop || abs(inScreenY - downScreenY) >= touchSlop
+        Log.d(TAG, "inScreenX = $inScreenX,inScreenY = $inScreenY, downScreenX = $downScreenX,downScreenY = $downScreenY, touchSlop = $touchSlop");
         update()
         return true
     }
@@ -243,9 +245,9 @@ class FloatWindow : RelativeLayout {
 
     private fun processTranslate(isLeft: Boolean) {
         mTranslateAnim = ValueAnimator.ofInt(inScreenX, if (isLeft) 0 else screenWPixel)
-        mTranslateAnim?.setInterpolator(AccelerateInterpolator())
+        mTranslateAnim?.interpolator = AccelerateInterpolator()
         //        mStartAnim.setInterpolator(new OvershootInterpolator());
-        mTranslateAnim?.setDuration(500)
+        mTranslateAnim?.duration = 500
         //        mStartAnim.setRepeatMode(ValueAnimator.REVERSE);
         mTranslateAnim?.addUpdateListener(ValueAnimator.AnimatorUpdateListener { valueAnimator ->
             inScreenX = valueAnimator.animatedValue as Int
@@ -268,6 +270,46 @@ class FloatWindow : RelativeLayout {
          */
         private const val DEFAULT_VIEW_W = 50
         private const val DEFAULT_VIEW_H = 50
+        // 单独实例
+        private var mFloatWindow:FloatWindow? = null
+
+        val floatWindowIsShow get() =  mFloatWindow != null
+
+        @JvmStatic
+        fun getInstance(context: Activity): FloatWindow {
+            return getInstance(context as Context)
+        }
+
+        @JvmStatic
+        fun getInstance(context: Context): FloatWindow {
+            val floatWindow = mFloatWindow?: FloatWindow(context.applicationContext)
+            if (!checkPermission(context)) {
+                return floatWindow
+            }
+            val mWindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            val layoutParams = WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                    } else {
+                        WindowManager.LayoutParams.TYPE_PHONE;
+                    },
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.RGBA_8888)
+            mWindowManager.addView(floatWindow, layoutParams)
+            mFloatWindow = floatWindow
+            return floatWindow
+        }
+
+        @JvmStatic
+        fun removeInstance(context: Context){
+            if(mFloatWindow == null)
+                return
+            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            windowManager.removeView(mFloatWindow)
+            mFloatWindow = null
+        }
+
 
         @JvmStatic
         private fun checkPermission(context: Context): Boolean {
@@ -285,38 +327,6 @@ class FloatWindow : RelativeLayout {
                 }
             }
             return true
-        }
-
-        @JvmStatic
-        fun getInstance(context: Activity): FloatWindow {
-            val floatWindow = FloatWindow(context.applicationContext)
-            if (!checkPermission(context)) {
-                return floatWindow
-            }
-            val mWindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val layoutParams = WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.TYPE_PHONE,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                    PixelFormat.RGBA_8888)
-            mWindowManager.addView(floatWindow, layoutParams)
-            return floatWindow
-        }
-
-        @JvmStatic
-        fun getInstance(context: Context): FloatWindow {
-            val floatWindow = FloatWindow(context.applicationContext)
-            if (!checkPermission(context)) {
-                return floatWindow
-            }
-            val mWindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val layoutParams = WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.TYPE_PHONE,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                    PixelFormat.RGBA_8888)
-            mWindowManager.addView(floatWindow, layoutParams)
-            return floatWindow
         }
     }
 }
