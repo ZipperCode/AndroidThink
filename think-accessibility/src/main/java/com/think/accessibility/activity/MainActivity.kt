@@ -1,26 +1,26 @@
 package com.think.accessibility.activity
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.ViewGroup
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.think.accessibility.AppHelper
 import com.think.accessibility.FloatWindow
-import com.think.accessibility.bean.AppInfo
-import com.think.accessibility.adapter.AppInfoAdapter
-import com.think.accessibility.utils.AppUtils
 import com.think.accessibility.R
+import com.think.accessibility.adapter.AppInfoAdapter
+import com.think.accessibility.bean.AppInfo
+import com.think.accessibility.bean.ViewInfo
 import com.think.accessibility.service.MyAccessibilityService
 import com.think.accessibility.utils.AccessibilityUtil
+import com.think.accessibility.utils.AppUtils
 import com.think.accessibility.utils.ThreadManager
 
 class MainActivity : AppCompatActivity() {
@@ -43,20 +43,32 @@ class MainActivity : AppCompatActivity() {
         mAppInAdapter = AppInfoAdapter(this, mAppInfoList)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = mAppInAdapter
-
         flControl.setOnClickListener {
             if(FloatWindow.floatWindowIsShow){
                 FloatWindow.removeInstance(this)
             }else{
                 FloatWindow.getInstance(this).setOnClickListener{
                     Toast.makeText(this,"开启视图显示",Toast.LENGTH_LONG).show()
-                    AccessibilityUtil.mDrawViewBound = true
+                    AccessibilityUtil.mAccessibilityService?.run {
+                        ThreadManager.runOnSub{
+                            val viewInfoList: MutableList<ViewInfo> = ArrayList()
+                            AccessibilityUtil.collectViewInfo(rootInActiveWindow, viewInfoList)
+                            Log.d(TAG, "收集到的ViewInfo有size = ${viewInfoList.size}")
+
+                            // 保存全局，不使用参数传递
+                            AccessibilityUtil.mCollectViewInfoList = viewInfoList
+
+                            val intent = Intent(this, TranslucentActivity::class.java)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            startActivity(intent)
+                        }
+                    }
                 }
             }
 
         }
 
-        ThreadManager.getInstance().runOnSub(Runnable {
+        ThreadManager.runOnSub(Runnable {
             AccessibilityUtil.init(this)
             val appList = ArrayList<AppInfo>()
             AppUtils.getLaunch(this, appList)
@@ -98,7 +110,20 @@ class MainActivity : AppCompatActivity() {
                 if (!AppUtils.isAccessibilitySettingsOn(this, MyAccessibilityService::class.java)) {
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                 }else{
-                    Toast.makeText(this,"您已经拥有权限了",Toast.LENGTH_LONG).show()
+//                    Toast.makeText(this,"您已经拥有权限了",Toast.LENGTH_LONG).show()
+                    AlertDialog.Builder(this)
+                            .setTitle("提示信息")
+                            .setCancelable(true)
+                            .setMessage("您当前已经拥有无障碍权限了，是否还需要跳转设置")
+                            .setPositiveButton(
+                                    "确定"
+                            ) { dialog, _ ->
+                                dialog.dismiss()
+                                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                            }.setNegativeButton("取消"){ dialog, _ ->
+                                dialog.dismiss()
+                            }
+                            .show()
                 }
             }
             R.id.menu_help ->{

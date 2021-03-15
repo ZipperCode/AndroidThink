@@ -12,14 +12,11 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.think.accessibility.AccessibilityConfig
 import com.think.accessibility.Const
-import com.think.accessibility.DumpManager
 import com.think.accessibility.RunMode
 import com.think.accessibility.activity.TranslucentActivity
 import com.think.accessibility.bean.ViewInfo
 import com.think.accessibility.utils.AccessibilityUtil
-import com.think.accessibility.utils.AppUtils
 import com.think.accessibility.utils.ThreadManager
-import java.lang.reflect.Method
 
 class MyAccessibilityService : AccessibilityService() {
 
@@ -40,24 +37,11 @@ class MyAccessibilityService : AccessibilityService() {
                 when (event?.eventType) {
                     AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
                         rootInActiveWindow?.run {
-                            if (AccessibilityUtil.mDrawViewBound) {
-                                // 收集所有view信息
-                                val viewInfoList: MutableList<ViewInfo> = ArrayList()
-                                AccessibilityUtil.collectViewInfo(rootInActiveWindow, viewInfoList)
-                                Log.d(TAG, "收集到的ViewInfo有size = ${viewInfoList.size}")
-
-                                val intent = Intent(this@MyAccessibilityService, TranslucentActivity::class.java)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                intent.putParcelableArrayListExtra("ViewInfoList", viewInfoList as java.util.ArrayList<out Parcelable>)
-                                startActivity(intent)
-                                AccessibilityUtil.mDrawViewBound = false
-                            } else {
-                                // 判断当前包名的app是否处理跳过
-                                if(AccessibilityUtil.pksContains(packageName)){
-                                    ThreadManager.getInstance().runOnSub(Runnable {
-                                        dumpSplash(this, packageName)
-                                    })
-                                }
+                            // 判断当前包名的app是否处理跳过
+                            if(AccessibilityUtil.pksContains(packageName)){
+                                ThreadManager.runOnSub(Runnable {
+                                    dumpSplash(this, packageName)
+                                })
                             }
                         }
                     }
@@ -183,7 +167,7 @@ class MyAccessibilityService : AccessibilityService() {
             startService(Intent(this, GuardService::class.java))
         }
         AccessibilityUtil.mAccessibilityService = this
-        ThreadManager.getInstance().runOnSub(Runnable {
+        ThreadManager.runOnSub(Runnable {
             AccessibilityUtil.init(this)
         })
     }

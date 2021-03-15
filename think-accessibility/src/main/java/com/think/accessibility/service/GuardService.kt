@@ -14,7 +14,6 @@ import com.think.accessibility.AppHelper
 import com.think.accessibility.R
 import com.think.accessibility.utils.AccessibilityUtil
 import com.think.accessibility.utils.AppUtils
-import com.think.accessibility.utils.ThreadManager
 
 
 class GuardService : Service() {

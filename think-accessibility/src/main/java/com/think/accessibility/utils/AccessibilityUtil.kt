@@ -47,6 +47,11 @@ object AccessibilityUtil {
      */
     val mDumpViewInfo: MutableList<ViewInfo> = ArrayList()
 
+    /**
+     * 无障碍服务手机的view信息
+     */
+    var mCollectViewInfoList: MutableList<ViewInfo>? = null
+
     val isMainThread:Boolean get() = Looper.getMainLooper() != Looper.myLooper()
 
     fun init(context: Context){
@@ -119,6 +124,20 @@ object AccessibilityUtil {
                 .filter { (it.packageName == packageName) and !TextUtils.isEmpty(it.viewId) }
                 .map { it.viewId!! }.distinct()
 
+    }
+
+    fun packageViewInfoList(packageName:String) : List<ViewInfo>{
+        if(TextUtils.isEmpty(packageName)){
+            return emptyList()
+        }
+        val dao = DBHelper.getViewInfoDao()
+        try {
+            val a =  dao.queryByPackageName(packageName)
+            return a
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+        return emptyList()
     }
 
     /**
