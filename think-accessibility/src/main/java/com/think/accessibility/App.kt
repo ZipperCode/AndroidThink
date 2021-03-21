@@ -8,7 +8,6 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
-
+        Log.d("MyAccessibility", "App onCreate")
     }
 }

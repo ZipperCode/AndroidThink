@@ -4,18 +4,21 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.*
+import android.text.TextUtils
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
 import com.think.accessibility.bean.ViewInfo
 import com.think.accessibility.room.DBHelper
+import com.think.accessibility.utils.ThreadManager
 
 @SuppressLint("ViewConstructor")
-class AccessibilityView(context:Context, viewRectList:List<ViewInfo>) :View(context) {
+class AccessibilityView(context: Context, viewRectList: List<ViewInfo>) : View(context) {
 
-    private val mViewRectList:List<ViewInfo> = viewRectList
+    private val mViewRectList: List<ViewInfo> = viewRectList
 
     private var mClickViewViewInfo: ViewInfo? = null
 
@@ -31,7 +34,7 @@ class AccessibilityView(context:Context, viewRectList:List<ViewInfo>) :View(cont
     private var mScaledDoubleTapSlop = 0
 
     private val mLongClickRunnable = Runnable {
-        if(!mUp){
+        if (!mUp) {
             mLongClick = true
         }
     }
@@ -48,7 +51,7 @@ class AccessibilityView(context:Context, viewRectList:List<ViewInfo>) :View(cont
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        if(mViewRectList.isNotEmpty()){
+        if (mViewRectList.isNotEmpty()) {
             for (viewInfo in mViewRectList) {
                 canvas?.drawRect(viewInfo.screenRect, mPaint)
             }
@@ -61,27 +64,41 @@ class AccessibilityView(context:Context, viewRectList:List<ViewInfo>) :View(cont
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if(mScaledDoubleTapSlop == 0){
+        if (mScaledDoubleTapSlop == 0) {
             mScaledDoubleTapSlop = ViewConfiguration.get(context).scaledDoubleTapSlop
         }
-        when(event?.action){
-            MotionEvent.ACTION_DOWN ->{
-                Log.d(TAG,"ACTION_DOWN")
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                Log.d(TAG, "ACTION_DOWN")
                 mUp = false
-                val rect = matchRect(Point(event.x.toInt(),event.y.toInt()))
+                val rect = matchRect(Point(event.x.toInt(), event.y.toInt()))
                 rect?.run {
                     mClickViewViewInfo = this
                     postInvalidate()
                 }
                 val time = System.currentTimeMillis() - mLastClickTime
-                if(time < mScaledDoubleTapSlop){
-                    Toast.makeText(context,"选中当前视图id为 = ${mClickViewViewInfo?.viewId}",Toast.LENGTH_LONG).show()
-                    mClickViewViewInfo?.let { DBHelper.getViewInfoDao().insert(it) }
+                if (time < mScaledDoubleTapSlop) {
+                    Toast.makeText(context, "选中当前视图id为 = ${mClickViewViewInfo?.viewId}", Toast.LENGTH_LONG).show()
+                    mClickViewViewInfo?.let {
+                        AlertDialog.Builder(context)
+                                .setMessage("当前选中的视图Id为空，确定保存选中吗")
+                                .setPositiveButton("确定"){ dialog, _ ->
+                                    ThreadManager.runOnSub {
+                                        DBHelper.getViewInfoDao().insert(it)
+                                    }
+                                    Toast.makeText(context, "已保存", Toast.LENGTH_LONG).show()
+                                    dialog.dismiss()
+                                }
+                                .setNegativeButton("取消"){dialog, _ ->
+                                    dialog.dismiss()
+                                }
+                                .show()
+                    }
                 }
                 return true
             }
-            MotionEvent.ACTION_UP ->{
-                Log.d(TAG,"ACTION_UP")
+            MotionEvent.ACTION_UP -> {
+                Log.d(TAG, "ACTION_UP")
                 mUp = true
                 mLastClickTime = System.currentTimeMillis()
                 return true
@@ -91,16 +108,16 @@ class AccessibilityView(context:Context, viewRectList:List<ViewInfo>) :View(cont
     }
 
 
-    private fun matchRect(point: Point):ViewInfo? {
-        val pointRect = Rect(point.x,point.y,point.x,point.y)
+    private fun matchRect(point: Point): ViewInfo? {
+        val pointRect = Rect(point.x, point.y, point.x, point.y)
         var result: ViewInfo? = null
         for (viewInfo in mViewRectList) {
             val rect = viewInfo.screenRect
-            if(rect.contains(pointRect)){
-                if(result == null){
+            if (rect.contains(pointRect)) {
+                if (result == null) {
                     result = viewInfo
-                }else{
-                    if(!rect.contains(result.screenRect)){
+                } else {
+                    if (!rect.contains(result.screenRect)) {
                         result = viewInfo
                     }
                 }
@@ -109,7 +126,7 @@ class AccessibilityView(context:Context, viewRectList:List<ViewInfo>) :View(cont
         return result
     }
 
-    companion object{
+    companion object {
         private val TAG: String = AccessibilityView::class.java.simpleName
     }
 

@@ -12,4 +12,9 @@
 
     <string name="switch_dump_text_on">跳</string>
     <string name="switch_dump_text_off">不跳</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="text_accessibility_status_success">已运行</string>
+    <string name="text_accessibility_status_failure">未打开</string>
 </resources>

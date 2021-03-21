@@ -162,38 +162,6 @@ object AppUtils {
         }
     }
 
-    fun getLaunch(context: Context, map: MutableMap<String, String>){
-        val pks = getPackages(context)
-        pks.forEach {
-            val intent = Intent(Intent.ACTION_MAIN)
-            intent.addCategory(Intent.CATEGORY_LAUNCHER)
-            intent.setPackage(it.packageName)
-            val launchIntent = context.packageManager.getLaunchIntentForPackage(it.packageName)
-            launchIntent?.run {
-                val packageName = component?.packageName?:""
-                val launchActivity = component?.className?:""
-                if (!TextUtils.isEmpty(packageName) and !TextUtils.isEmpty(launchActivity)) {
-                    map[packageName] = launchActivity
-                }
-            }
-        }
-    }
-
-//
-//    fun getLaunchActivity(context: Context): Map<String,String>{
-//        val pks = getPackageNames(context)
-//        val map = HashMap<String,String>(pks.size);
-//        pks.forEach {
-//            val intent = Intent(Intent.ACTION_MAIN)
-//            intent.addCategory(Intent.CATEGORY_LAUNCHER)
-//            intent.setPackage(it)
-//            val resolveInfo = context.packageManager.queryIntentActivities(intent, 0)
-//            if(resolveInfo.size > 0 ){
-//                map[it] = resolveInfo[0]?.activityInfo?.name ?: ""
-//            }
-//        }
-//        return map
-//    }
 
     fun launchActivity(context: Context, map: HashMap<String,String>){
         val pks = getPackageNames(context)

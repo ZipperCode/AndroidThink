@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="70dp">
+    android:layout_height="60dp">
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/sw_dump"
         android:layout_width="100dp"
-        android:layout_height="70dp"
+        android:layout_height="60dp"
         android:layout_gravity="center_vertical|end"
-        android:text="@string/list_app_dump_text"
-        android:textOn="@string/switch_dump_text_on"
-        android:textOff="@string/switch_dump_text_off"/>
+        android:layout_marginEnd="20dp"
+        android:textOff="@string/switch_dump_text_off"
+        android:textOn="@string/switch_dump_text_on" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -37,6 +37,7 @@
                 android:id="@+id/tv_app_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="start|center_vertical"
                 android:text="应用名称"
                 android:textSize="18sp" />
 
@@ -44,6 +45,7 @@
                 android:id="@+id/tv_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="start|top"
                 android:textSize="14sp" />
 
         </LinearLayout>

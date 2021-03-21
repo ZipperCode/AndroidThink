@@ -6,17 +6,12 @@ import android.os.Looper
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
 
-class ThreadManager {
-
+object ThreadManager {
     /**
      * UI 线程handler
      */
     private val mMainHandler: Handler = Handler(Looper.getMainLooper())
 
-    /**
-     * 线程池
-     */
-    private var mExecutorService: ExecutorService
 
     /**
      * 子线程Handler
@@ -28,31 +23,19 @@ class ThreadManager {
      */
     private val mSubThread: HandlerThread = HandlerThread("Sub-Thread")
 
-    private val mThreadFactory: ThreadFactory = object : ThreadFactory {
-        private val threadGroup = ThreadGroup("WorkPool-")
-        private val mAtomicInteger = AtomicInteger(0)
-        override fun newThread(r: Runnable): Thread {
-            return Thread(threadGroup, r, "#" + mAtomicInteger.getAndIncrement())
-        }
-    }
-
     init {
         mSubThread.start()
         mSubHandler = Handler(mSubThread.looper)
-        mExecutorService = ThreadPoolExecutor(CORE_POOL_SIZE,
-                MAXIMUM_POOL_SIZE,
-                KEEP_ALIVE_SECONDS,
-                TimeUnit.SECONDS,
-                LinkedBlockingDeque<Runnable>(256),
-                mThreadFactory
-        )
     }
 
     fun runOnMain(task: Runnable) {
         mMainHandler.post(task)
     }
+    fun runOnMain(task: Runnable, delayMillis: Long) {
+        mMainHandler.postDelayed(task, delayMillis)
+    }
 
-    fun runOnSub(task: Runnable) {
+    fun runOnSub(task: ()-> Unit) {
         mSubHandler.post(task)
     }
 
@@ -62,46 +45,6 @@ class ThreadManager {
 
     fun removeOnSubCallback(task: Runnable){
         mSubHandler.removeCallbacks(task)
-    }
-
-    fun exePool(task: Runnable) {
-        mExecutorService.execute(task)
-    }
-
-    companion object {
-        private var instance: ThreadManager? = null
-
-        /**
-         * 获取CPU核心数
-         */
-        private val CPU_COUNT = Runtime.getRuntime().availableProcessors()
-
-        /**
-         * 默认核心线程数
-         */
-        private val CORE_POOL_SIZE = CPU_COUNT
-
-        /**
-         * 最大线程数
-         */
-        private val MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1
-
-        /**
-         * 线程活跃时间
-         */
-        private const val KEEP_ALIVE_SECONDS = 60L
-
-        @JvmStatic
-        fun getInstance(): ThreadManager {
-            if (instance == null) {
-                synchronized(this) {
-                    if (instance == null) {
-                        instance = ThreadManager()
-                    }
-                }
-            }
-            return instance!!
-        }
     }
 
 }

@@ -26,8 +26,7 @@ data class ViewInfo(
             parcel.readString() ?: "",
             parcel.readString(),
             parcel.readString(),
-            parcel.readParcelable<Rect>(Rect::class.java.classLoader) as Rect) {
-    }
+            parcel.readParcelable<Rect>(Rect::class.java.classLoader) as Rect);
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(id)
@@ -37,15 +36,33 @@ data class ViewInfo(
         parcel.writeParcelable(screenRect, flags)
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
-
-
-
+    override fun describeContents()=0;
     override fun toString(): String {
         return "ViewInfo(id=$id, packageName='$packageName', activityName=$activityName, viewId=$viewId, screenRect=$screenRect)"
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ViewInfo
+
+        if (packageName != other.packageName) return false
+        if (activityName != other.activityName) return false
+        if (viewId != other.viewId) return false
+        if (screenRect != other.screenRect) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = packageName.hashCode()
+        result = 31 * result + (activityName?.hashCode() ?: 0)
+        result = 31 * result + (viewId?.hashCode() ?: 0)
+        result = 31 * result + screenRect.hashCode()
+        return result
+    }
+
 
     companion object CREATOR : Parcelable.Creator<ViewInfo> {
         override fun createFromParcel(parcel: Parcel): ViewInfo {

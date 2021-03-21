@@ -2,6 +2,7 @@ package com.think.accessibility.utils
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Path
 import android.graphics.Point
@@ -14,6 +15,7 @@ import android.util.LruCache
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.IntRange
 import androidx.annotation.RequiresApi
+import com.think.accessibility.bean.AppInfo
 import com.think.accessibility.bean.ViewInfo
 import com.think.accessibility.room.DBHelper
 import java.util.*
@@ -23,11 +25,13 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import kotlin.collections.LinkedHashMap
 
+@SuppressLint("StaticFieldLeak")
 object AccessibilityUtil {
 
     private val TAG: String = AccessibilityUtil::class.java.simpleName
 
     private const val SP_PKS_LIST_KEY = "name_list"
+
 
     var mAccessibilityService: AccessibilityService? = null
 
@@ -52,8 +56,10 @@ object AccessibilityUtil {
      */
     var mCollectViewInfoList: MutableList<ViewInfo>? = null
 
-    val isMainThread:Boolean get() = Looper.getMainLooper() != Looper.myLooper()
+    val mMainAppInfo:MutableList<AppInfo> = ArrayList()
 
+
+    @SuppressLint("StaticFieldLeak")
     fun init(context: Context){
         pksInit(context)
         viewInfoInit(context)
@@ -65,6 +71,7 @@ object AccessibilityUtil {
         mNameList.clear()
         mNameList.addAll(pks)
     }
+
 
     fun addPks(pks: Collection<String>){
         mNameList.addAll(pks)
@@ -81,8 +88,17 @@ object AccessibilityUtil {
         SpHelper.saveStringArray(SP_PKS_LIST_KEY, mNameList)
     }
 
+    fun clearPks(){
+        mNameList.clear()
+        SpHelper.saveStringArray(SP_PKS_LIST_KEY, mNameList)
+    }
+
     fun pksContains(pks: String): Boolean{
         return mNameList.contains(pks)
+    }
+
+    fun pksContainsAll(pks: List<String>): Boolean{
+        return mNameList.containsAll(pks)
     }
 
     /**

@@ -117,7 +117,7 @@ class FloatWindow : RelativeLayout {
         val height = MeasureSpec.makeMeasureSpec(dp2px(context, viewH.toFloat()), MeasureSpec.AT_MOST)
         val result = Math.min(width, height)
         super.onMeasure(result, result)
-        Log.d(TAG, "onMeasure >>> with = " + MeasureSpec.getSize(width) + ",height = " + MeasureSpec.getSize(height))
+//        Log.d(TAG, "onMeasure >>> with = " + MeasureSpec.getSize(width) + ",height = " + MeasureSpec.getSize(height))
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -144,7 +144,7 @@ class FloatWindow : RelativeLayout {
     }
 
     override fun performClick(): Boolean {
-        Log.d(TAG, "performClick")
+//        Log.d(TAG, "performClick")
         return super.performClick()
     }
 
@@ -168,13 +168,13 @@ class FloatWindow : RelativeLayout {
         inScreenX = event.rawX.toInt()
         inScreenY = event.rawY.toInt()
         mMoved = abs(inScreenX - downScreenX) >= touchSlop || abs(inScreenY - downScreenY) >= touchSlop
-        Log.d(TAG, "inScreenX = $inScreenX,inScreenY = $inScreenY, downScreenX = $downScreenX,downScreenY = $downScreenY, touchSlop = $touchSlop");
+//        Log.d(TAG, "inScreenX = $inScreenX,inScreenY = $inScreenY, downScreenX = $downScreenX,downScreenY = $downScreenY, touchSlop = $touchSlop");
         update()
         return true
     }
 
     private fun doUp(event: MotionEvent): Boolean {
-        Log.d(TAG, "pl = $paddingLeft,pr = $paddingRight,pt = $paddingTop,pb = $paddingBottom")
+//        Log.d(TAG, "pl = $paddingLeft,pr = $paddingRight,pt = $paddingTop,pb = $paddingBottom")
         if (!mMoved) {
             performClick()
         }
@@ -185,13 +185,8 @@ class FloatWindow : RelativeLayout {
         return true
     }
 
-    override fun onDraw(canvas: Canvas) {
-        Log.e(TAG, "onDraw")
-        super.onDraw(canvas)
-    }
-
     override fun dispatchDraw(canvas: Canvas) {
-        Log.e(TAG, "dispatchDraw")
+//        Log.e(TAG, "dispatchDraw")
         canvas.save()
         mPath.reset()
         mPath.addRoundRect(mRectF, measuredWidth / 2f, measuredHeight / 2f, Path.Direction.CW)
@@ -201,7 +196,7 @@ class FloatWindow : RelativeLayout {
     }
 
     override fun drawChild(canvas: Canvas, child: View, drawingTime: Long): Boolean {
-        Log.e(TAG, "drawChild  child = $child")
+//        Log.e(TAG, "drawChild  child = $child")
         return super.drawChild(canvas, child, drawingTime)
     }
 
@@ -249,10 +244,10 @@ class FloatWindow : RelativeLayout {
         //        mStartAnim.setInterpolator(new OvershootInterpolator());
         mTranslateAnim?.duration = 500
         //        mStartAnim.setRepeatMode(ValueAnimator.REVERSE);
-        mTranslateAnim?.addUpdateListener(ValueAnimator.AnimatorUpdateListener { valueAnimator ->
+        mTranslateAnim?.addUpdateListener{ valueAnimator ->
             inScreenX = valueAnimator.animatedValue as Int
             update()
-        })
+        }
         mTranslateAnim?.start()
     }
 
@@ -282,7 +277,10 @@ class FloatWindow : RelativeLayout {
 
         @JvmStatic
         fun getInstance(context: Context): FloatWindow {
-            val floatWindow = mFloatWindow?: FloatWindow(context.applicationContext)
+            if(mFloatWindow != null){
+                return mFloatWindow!!
+            }
+            val floatWindow = FloatWindow(context.applicationContext)
             if (!checkPermission(context)) {
                 return floatWindow
             }

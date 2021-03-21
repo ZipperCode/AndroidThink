@@ -1,9 +1,11 @@
 package com.think.accessibility.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import com.think.accessibility.BuildConfig
 
+@SuppressLint("StaticFieldLeak")
 object SpHelper {
 
     private lateinit var mContext: Context
@@ -19,6 +21,18 @@ object SpHelper {
         mContext = context.applicationContext
         mSharedPreferences = mContext.getSharedPreferences(SP_NAME,Context.MODE_PRIVATE)
         isInit = true
+    }
+
+    fun saveString(key:String, value: String){
+        val edit = mSharedPreferences.edit()
+        edit.putString(key, value).apply()
+    }
+
+    fun loadString(key: String):String{
+        if (!isInit) {
+            error("SpHelper must be call init method")
+        }
+        return mSharedPreferences.getString(key, "")!!
     }
 
     fun saveStringArray(key: String, values: Set<String>) {
