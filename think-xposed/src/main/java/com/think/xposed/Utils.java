@@ -14,6 +14,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import de.robv.android.xposed.XposedBridge;
+
 public class Utils {
 
     public static String rename(String srcFileName){
@@ -93,5 +95,9 @@ public class Utils {
 
     public static void writeData(String fileName, byte data[]){
         File file = new File("/data/data/" + AndroidAppHelper.currentPackageName() + "/files",fileName);
+    }
+
+    public static void i(String msg){
+        XposedBridge.log("AHook >>> : "+msg);
     }
 }
