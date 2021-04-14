@@ -4,9 +4,11 @@
 
 #include<jni.h>
 #include <fcntl.h>
-#include <stdio.h>
+#include <cstdio>
 #include"dex_file_art.h"
+#include"art_method.h"
 #include"log.h"
+
 
 extern "C"
 JNIEXPORT void JNICALL
