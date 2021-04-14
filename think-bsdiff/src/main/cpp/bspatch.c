@@ -37,10 +37,11 @@ __FBSDID("$FreeBSD: src/usr.bin/bsdiff/bspatch/bspatch.c,v 1.1 2005/08/06 01:59:
 #include <unistd.h>
 #include <fcntl.h>
 
+
 static off_t offtin(u_char *buf)
 {
 	off_t y;
-
+    // 移除符号位
 	y=buf[7]&0x7F;
 	y=y*256;y+=buf[6];
 	y=y*256;y+=buf[5];
@@ -77,11 +78,13 @@ int p_main(int argc,char * argv[])
 		err(1, "fopen(%s)", argv[3]);
 
 	/*
+	 * |0 - 32| 32 + x | 32 + x + y|
+	 *
 	File format:
-		0	8	"BSDIFF40"
-		8	8	X
-		16	8	Y
-		24	8	sizeof(newfile)
+		0	8	"BSDIFF40"                  文件魔术
+		8	8	X                           控制块的大小
+		16	8	Y                           查分数据的大小
+		24	8	sizeof(newfile)             文件大小
 		32	X	bzip2(control block)
 		32+X	Y	bzip2(diff block)
 		32+X+Y	???	bzip2(extra block)
@@ -90,7 +93,7 @@ int p_main(int argc,char * argv[])
 	extra block; seek forwards in oldfile by z bytes".
 	*/
 
-	/* Read header */
+	/* Read patch header */
 	if (fread(header, 1, 32, f) < 32) {
 		if (feof(f))
 			errx(1, "Corrupt patch\n");
@@ -113,11 +116,15 @@ int p_main(int argc,char * argv[])
 		err(1, "fclose(%s)", argv[3]);
 	if ((cpf = fopen(argv[3], "r")) == NULL)
 		err(1, "fopen(%s)", argv[3]);
+	// 文件指针移动到数据区域
 	if (fseeko(cpf, 32, SEEK_SET))
 		err(1, "fseeko(%s, %lld)", argv[3],
 		    (long long)32);
+	// 使用bzip进行打开
 	if ((cpfbz2 = BZ2_bzReadOpen(&cbz2err, cpf, 0, 0, NULL, 0)) == NULL)
 		errx(1, "BZ2_bzReadOpen, bz2err = %d", cbz2err);
+
+	// 第二次打开
 	if ((dpf = fopen(argv[3], "r")) == NULL)
 		err(1, "fopen(%s)", argv[3]);
 	if (fseeko(dpf, 32 + bzctrllen, SEEK_SET))
@@ -125,6 +132,8 @@ int p_main(int argc,char * argv[])
 		    (long long)(32 + bzctrllen));
 	if ((dpfbz2 = BZ2_bzReadOpen(&dbz2err, dpf, 0, 0, NULL, 0)) == NULL)
 		errx(1, "BZ2_bzReadOpen, bz2err = %d", dbz2err);
+
+	// 第三次打开
 	if ((epf = fopen(argv[3], "r")) == NULL)
 		err(1, "fopen(%s)", argv[3]);
 	if (fseeko(epf, 32 + bzctrllen + bzdatalen, SEEK_SET))
@@ -133,17 +142,20 @@ int p_main(int argc,char * argv[])
 	if ((epfbz2 = BZ2_bzReadOpen(&ebz2err, epf, 0, 0, NULL, 0)) == NULL)
 		errx(1, "BZ2_bzReadOpen, bz2err = %d", ebz2err);
 
+	// 打开源文件，获取源文件大小，分配与文件相同大小的空间，指针移动到0，关闭文件
 	if(((fd=open(argv[1],O_RDONLY,0))<0) ||
 		((oldsize=lseek(fd,0,SEEK_END))==-1) ||
 		((old=malloc(oldsize+1))==NULL) ||
 		(lseek(fd,0,SEEK_SET)!=0) ||
 		(read(fd,old,oldsize)!=oldsize) ||
 		(close(fd)==-1)) err(1,"%s",argv[1]);
+
+	// 分配和补丁包相同带下
 	if((new=malloc(newsize+1))==NULL) err(1,NULL);
 
 	oldpos=0;newpos=0;
 	while(newpos<newsize) {
-		/* Read control data */
+		/* Read control data in zip file */
 		for(i=0;i<=2;i++) {
 			lenread = BZ2_bzRead(&cbz2err, cpfbz2, buf, 8);
 			if ((lenread < 8) || ((cbz2err != BZ_OK) &&
