@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="setting_row_layout_height">56dp</dimen>
+
+    <dimen name="setting_row_layout_height_2">65dp</dimen>
+
+    <dimen name="setting_row_horizontal_padding">28dp</dimen>
+    <dimen name="setting_row_vertical_padding">5dp</dimen>
+
+
+    <dimen name="setting_row_icon_width">18dp</dimen>
+    <dimen name="setting_row_icon_height">18dp</dimen>
+
+    <dimen name="setting_row_title_size">16sp</dimen>
+    <dimen name="setting_row_summary_size">12sp</dimen>
+
+    <dimen name="setting_row_arrow_icon_width">8dp</dimen>
+    <dimen name="setting_row_arrow_icon_height">11dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="fragment_horizontal_margin">16dp</dimen>
+    <dimen name="fragment_vertical_margin">16dp</dimen>
+
+
+</resources>

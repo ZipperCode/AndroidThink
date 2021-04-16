@@ -23,27 +23,17 @@ class SettingsActivity : AppCompatActivity() {
         }
         supportActionBar?.hide()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        DataStore.init(this)
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
+            preferenceManager.preferenceDataStore = DataStore.instance()
         }
     }
 
-    class RowPreference : Preference{
 
-
-
-        constructor(context: Context) : super(context)
-
-        constructor(context: Context, attrs: AttributeSet): super(context,attrs)
-
-        override fun onBindViewHolder(holder: PreferenceViewHolder?) {
-            super.onBindViewHolder(holder)
-        }
-
-    }
 
 
 }

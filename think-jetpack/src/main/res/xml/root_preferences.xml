@@ -1,8 +1,58 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory app:title="@string/messages_header">
 
-        <Preference app:title="@string/app_name"/>
+        <Preference app:title="@string/app_name" app:iconSpaceReserved="false"/>
+
+        <com.think.jetpack.preference.MenuPreference
+            app:icon="@android:drawable/ic_lock_idle_lock"
+            app:title="家长中心"
+            app:showArrow="true"
+            app:showUnderDivider="true"
+            app:layout="@null"
+            />
+
+        <com.think.jetpack.preference.RowPreference
+            app:key="k1"
+            app:icon="@android:drawable/ic_lock_idle_lock"
+            app:title="家长中心"
+            app:summary="你好我是摘要"
+            app:showArrow="true"
+            app:showSummary="false"
+            app:showUnderDivider="true"
+            app:rowType="type_menu"
+            app:fragment="com.think.jetpack.preference.ui.login.LoginFragment"
+            app:layout="@layout/layout_setting_row">
+        </com.think.jetpack.preference.RowPreference>
+
+        <com.think.jetpack.preference.RowPreference
+            app:key="k2"
+            app:icon="@android:drawable/ic_lock_idle_lock"
+            app:title="家长中心"
+            app:summary="你好我是摘要"
+            app:showArrow="true"
+            app:showSummary="false"
+            app:showUnderDivider="true"
+            app:rowType="type_menu"
+            app:layout="@layout/layout_setting_row"
+            />
+
+        <com.think.jetpack.preference.RowPreference
+            app:key="k3"
+            app:icon="@android:drawable/ic_lock_idle_lock"
+            app:title="学习速度"
+            app:summary="限制每次使用时长, 到事件提醒宝宝休息"
+            app:showArrow="false"
+            app:showSummary="true"
+            app:showUnderDivider="true"
+            app:iconSpaceReserved="false"
+            app:layoutHeight="@dimen/setting_row_layout_height_2"
+            app:rowType="type_switch"
+            app:layout="@layout/layout_setting_row"
+            app:switchKey="open_bgm"
+            />
+
 
         <EditTextPreference
             app:key="signature"

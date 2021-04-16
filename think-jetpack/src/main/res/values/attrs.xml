@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="arrow" format="reference" />
+    <attr name="showArrow" format="reference|boolean" />
+
+    <attr name="layoutHeight" format="reference|dimension" />
+    <attr name="showUnderDivider" format="reference|boolean" />
+
+    <declare-styleable name="BasePreference">
+        <attr name="layoutHeight" />
+    </declare-styleable>
+
+    <declare-styleable name="MenuPreference">
+        <attr name="arrow" />
+        <attr name="showArrow" />
+        <attr name="layoutHeight" />
+        <attr name="showUnderDivider" />
+    </declare-styleable>
+
+    <declare-styleable name="RowPreference">
+        <attr name="arrow" />
+        <attr name="showArrow"  />
+        <attr name="showSummary" format="reference|boolean" />
+        <attr name="layoutHeight"  />
+        <attr name="showUnderDivider" />
+        <attr name="rowType" format="enum">
+            <enum name="type_menu" value="1" />
+            <enum name="type_switch" value="2" />
+        </attr>
+        <attr name="switchKey" format="reference|string" />
+        <attr name="selectValueKey" format="reference|string" />
+    </declare-styleable>
+</resources>
