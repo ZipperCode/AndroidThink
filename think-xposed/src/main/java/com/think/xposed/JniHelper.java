@@ -10,7 +10,10 @@ public class JniHelper {
         }catch (Throwable e){
             Log.e("AHook", e.toString());
         }
+
     }
 
     public static native void dexFileByCookie(String packageName, Object[] cookies);
+
+    public static native void test(String name);
 }

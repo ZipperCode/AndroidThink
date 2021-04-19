@@ -6,7 +6,7 @@
     <dimen name="setting_row_layout_height_2">65dp</dimen>
 
     <dimen name="setting_row_horizontal_padding">28dp</dimen>
-    <dimen name="setting_row_vertical_padding">5dp</dimen>
+    <dimen name="setting_row_vertical_padding">0dp</dimen>
 
 
     <dimen name="setting_row_icon_width">18dp</dimen>
@@ -20,6 +20,9 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="fragment_horizontal_margin">16dp</dimen>
     <dimen name="fragment_vertical_margin">16dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
 
 
 </resources>

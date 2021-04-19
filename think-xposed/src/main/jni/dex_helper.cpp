@@ -69,3 +69,10 @@ Java_com_think_xposed_JniHelper_dexFileByCookie(JNIEnv *env, jclass clazz,jstrin
 
 }
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_think_xposed_JniHelper_test(JNIEnv *env, jclass clazz, jstring name) {
+    jmethodID constructorMethod = env->GetMethodID(clazz, "<init>", "()V");
+
+
+}

@@ -4,11 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".demo.SettingActivity">
-
-   <FrameLayout
-       android:id="@+id/settings"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"/>
+    tools:context=".demo.login.LoginActivity">
 
 </androidx.constraintlayout.widget.ConstraintLayout>

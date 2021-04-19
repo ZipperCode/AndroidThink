@@ -11,6 +11,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidThink">
+        <activity android:name=".demo.login.LoginActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:label="@string/title_activity_login" />
         <activity android:name=".demo.SettingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,9 +30,8 @@
         </activity>
         <activity
             android:name=".preference.SettingsActivity"
-            android:label="@string/title_activity_settings">
-        </activity>
-        <activity android:name=".room.RoomActivity"/>
+            android:label="@string/title_activity_settings" />
+        <activity android:name=".room.RoomActivity" />
         <activity android:name=".databind.DataBindingActivity" />
         <activity android:name=".viewmodel.ViewModelActivity" />
         <activity android:name=".MainActivity" />

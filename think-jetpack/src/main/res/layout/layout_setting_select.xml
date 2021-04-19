@@ -8,7 +8,7 @@
         <import type="android.text.TextUtils" />
         <variable
             name="rowData"
-            type="com.think.jetpack.demo.SwitchData" />
+            type="com.think.jetpack.demo.SelectData" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -74,16 +74,26 @@
                 android:visibility="@{rowData.visibleSummary ? View.VISIBLE : View.GONE}" />
         </LinearLayout>
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/sc_value"
-            android:layout_width="50dp"
-            android:layout_height="28dp"
-            android:checked="@={rowData.switchValue}"
-            android:thumb="@drawable/switch_thumb"
+        <TextView
+            android:id="@+id/tv_select_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/iv_arrow"
+            android:text="@{rowData.selectValue}"
+            />
+
+        <ImageView
+            android:id="@+id/iv_arrow"
+            android:layout_width="@dimen/setting_row_arrow_icon_width"
+            android:layout_height="@dimen/setting_row_arrow_icon_height"
+            android:src="@{rowData.arrow}"
+            android:visibility="@{rowData.showArrow ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:track="@drawable/switch_track" />
+            app:layout_constraintTop_toTopOf="parent" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

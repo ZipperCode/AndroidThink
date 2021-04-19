@@ -12,6 +12,8 @@ class DataStore private constructor(context: Context, name: String) : Preference
 
     private val editor: SharedPreferences.Editor = mSharedPreferences.edit()
 
+    val sharedPreferences = mSharedPreferences
+
     override fun putString(key: String?, value: String?) {
         Log.d(TAG, "putString key = $key, value = $value")
         editor.putString(key, value)
@@ -75,7 +77,9 @@ class DataStore private constructor(context: Context, name: String) : Preference
 
     override fun getBoolean(key: String?, defValue: Boolean): Boolean {
         Log.d(TAG, "getBoolean key = $key def = $defValue")
-        return mSharedPreferences.getBoolean(key, defValue)
+        val value =  mSharedPreferences.getBoolean(key, defValue)
+        Log.d(TAG, "getBoolean key = $key value = $value")
+        return value
     }
 
     companion object {

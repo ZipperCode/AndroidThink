@@ -7,7 +7,7 @@
 //include ':think-eventbus'
 //include ':think-bsdiff'
 include ':think-jetpack'
-//include ':think-xposed'
+include ':think-xposed'
 include ':app'
 //include ':think-core'
 //include ':think-study'

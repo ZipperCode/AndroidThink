@@ -1,17 +1,26 @@
 package com.think.jetpack.demo
 
 import android.graphics.drawable.Drawable
+import androidx.annotation.DimenRes
+import androidx.annotation.DrawableRes
+import androidx.annotation.LayoutRes
 
 class MenuData(
-        icon: Drawable,
+        @DrawableRes
+        icon: Int,
+        @DimenRes
+        layoutHeight: Int,
+        @DrawableRes
+        arrow: Int = 0,
         title: String,
-        arrow: Drawable? = null,
         visibleIcon: Boolean = false,
         visibleDivider: Boolean = false,
         visibleArrow: Boolean = false
-) : BaseData(icon,
-        title,
+) : BaseData(
+        icon,
+        layoutHeight,
         arrow,
+        title,
         visibleIcon,
         visibleDivider,
         visibleArrow)

@@ -1,13 +1,11 @@
 package com.think.jetpack.demo
 
-import android.graphics.drawable.Drawable
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes
-import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 
-class SwitchData(
+class SelectData(
         @DrawableRes
         icon: Int,
         @DimenRes
@@ -20,7 +18,7 @@ class SwitchData(
         visibleArrow: Boolean = true,
         var summary: String = "",
         var visibleSummary: Boolean = true,
-        var switchValue: ObservableField<Boolean>
+        var selectValue: ObservableField<String>
 ) : BaseData(
         icon,
         layoutHeight,
