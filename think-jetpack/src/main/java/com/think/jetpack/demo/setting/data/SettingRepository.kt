@@ -1,16 +1,12 @@
-package com.think.jetpack.demo.data
+package com.think.jetpack.demo.setting.data
 
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.collection.arrayMapOf
 import androidx.databinding.Observable
 import androidx.databinding.ObservableField
-import com.think.jetpack.demo.LiveObservableWrapper
-import com.think.jetpack.demo.MapTable
-import com.think.jetpack.preference.DataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -31,7 +27,7 @@ class SettingRepository(val settingSource: SettingSource): SharedPreferences.OnS
         mSwitchData.addOnPropertyChangedCallback(object : Observable.OnPropertyChangedCallback(){
             override fun onPropertyChanged(sender: Observable?, propertyId: Int) {
                 val value = (sender as ObservableField<*>).get() as Boolean
-                Log.d(LiveObservableWrapper.TAG, "onPropertyChanged value = $value")
+                Log.d(TAG, "onPropertyChanged value = $value")
                 settingSource.switchValue("123",value)
                 settingSource.switchValue("456",!value)
                 settingSource.selectValue("time",5)
@@ -40,7 +36,7 @@ class SettingRepository(val settingSource: SettingSource): SharedPreferences.OnS
         mSwitchData1.addOnPropertyChangedCallback(object : Observable.OnPropertyChangedCallback(){
             override fun onPropertyChanged(sender: Observable?, propertyId: Int) {
                 val value = (sender as ObservableField<*>).get() as Boolean
-                Log.d(LiveObservableWrapper.TAG, "onPropertyChanged value = $value")
+                Log.d(TAG, "onPropertyChanged value = $value")
                 settingSource.switchValue("123",!value)
                 settingSource.switchValue("456",value)
                 settingSource.selectValue("time",0)
@@ -50,7 +46,7 @@ class SettingRepository(val settingSource: SettingSource): SharedPreferences.OnS
         mSelectValue.addOnPropertyChangedCallback(object : Observable.OnPropertyChangedCallback(){
             override fun onPropertyChanged(sender: Observable?, propertyId: Int) {
                 val value = (sender as ObservableField<*>).get() as String
-                Log.d(LiveObservableWrapper.TAG, "onPropertyChanged value = $value")
+                Log.d(TAG, "onPropertyChanged value = $value")
                 val time = MapTable.getTime(value)
                 settingSource.selectValue("time",time)
             }

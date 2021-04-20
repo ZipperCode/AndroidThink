@@ -1,25 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <import type="android.view.View" />
+
         <import type="android.text.TextUtils" />
+
         <variable
             name="rowData"
-            type="com.think.jetpack.demo.SelectData" />
+            type="com.think.jetpack.demo.setting.SelectData" />
+
+        <variable
+            name="handler"
+            type="com.think.jetpack.demo.setting.EventHandler" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_container"
         android:layout_width="match_parent"
         android:layout_height="@dimen/setting_row_layout_height"
+        android:background="@drawable/while_ripple"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="@{(v)->handler.action(rowData.actionType)}"
         android:paddingStart="@dimen/setting_row_horizontal_padding"
-        android:paddingEnd="@dimen/setting_row_horizontal_padding"
         android:paddingTop="@dimen/setting_row_vertical_padding"
-        android:paddingBottom="@dimen/setting_row_vertical_padding"
-        >
+        android:paddingEnd="@dimen/setting_row_horizontal_padding"
+        android:paddingBottom="@dimen/setting_row_vertical_padding">
 
         <ImageView
             android:id="@+id/iv_icon"
@@ -38,8 +48,7 @@
             android:background="@color/black"
             android:visibility="@{rowData.visibleDivider ? View.VISIBLE: View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <LinearLayout
             android:id="@+id/linearLayout"
@@ -71,25 +80,25 @@
                 android:maxLines="1"
                 android:text="@{rowData.summary}"
                 android:textSize="12sp"
-                android:visibility="@{rowData.visibleSummary ? View.VISIBLE : View.GONE}" />
+                android:visibility="@{TextUtils.isEmpty(rowData.summary)? View.GONE: rowData.visibleSummary ? View.VISIBLE : View.GONE}" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/tv_select_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
+            android:text="@{rowData.selectValue}"
+            android:layout_marginEnd="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@id/iv_arrow"
-            android:text="@{rowData.selectValue}"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/iv_arrow"
             android:layout_width="@dimen/setting_row_arrow_icon_width"
             android:layout_height="@dimen/setting_row_arrow_icon_height"
             android:src="@{rowData.arrow}"
-            android:visibility="@{rowData.showArrow ? View.VISIBLE : View.GONE}"
+            android:visibility="@{rowData.visibleArrow ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

@@ -8,63 +8,80 @@
         <import type="android.text.TextUtils" />
         <variable
             name="rowData"
-            type="com.think.jetpack.demo.MenuData" />
+            type="com.think.jetpack.demo.setting.MenuData" />
+
+        <variable
+            name="handler"
+            type="com.think.jetpack.demo.setting.EventHandler" />
     </data>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/cl_container"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/setting_row_layout_height"
-        android:paddingStart="@dimen/setting_row_horizontal_padding"
-        android:paddingEnd="@dimen/setting_row_horizontal_padding"
-        android:paddingTop="@dimen/setting_row_vertical_padding"
-        android:paddingBottom="@dimen/setting_row_vertical_padding"
-        >
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/setting_row_layout_height"
+            android:paddingStart="@dimen/setting_row_horizontal_padding"
+            android:paddingEnd="@dimen/setting_row_horizontal_padding"
+            android:paddingTop="@dimen/setting_row_vertical_padding"
+            android:paddingBottom="@dimen/setting_row_vertical_padding"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick='@{(v)->handler.action(rowData.actionType)}'
+            android:background="@drawable/while_ripple"
+            >
 
-        <ImageView
-            android:id="@+id/iv_icon"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@{ rowData.icon}"
-            android:visibility="@{rowData.visibleIcon ? View.VISIBLE : View.GONE}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            <ImageView
+                android:id="@+id/iv_icon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@{ rowData.icon}"
+                android:visibility="@{rowData.visibleIcon ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
+            <View
+                android:id="@+id/v_baseline"
+                android:layout_width="0dp"
+                android:layout_height="1px"
+                android:background="@color/black"
+                android:visibility="@{rowData.visibleDivider ? View.VISIBLE: View.GONE}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="14dp"
+                android:gravity="center_vertical"
+                android:text="@{rowData.title}"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/iv_icon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/iv_arrow"
+                android:layout_width="@dimen/setting_row_arrow_icon_width"
+                android:layout_height="@dimen/setting_row_arrow_icon_height"
+                android:src="@{rowData.arrow}"
+                android:visibility="@{rowData.visibleArrow ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <View
-            android:id="@+id/v_baseline"
-            android:layout_width="0dp"
-            android:layout_height="1px"
-            android:background="@color/black"
-            android:visibility="@{rowData.visibleDivider ? View.VISIBLE: View.GONE}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            />
+            android:layout_width="match_parent"
+            android:background="@android:color/transparent"
+            android:layout_height="10dp"
+            android:visibility="@{rowData.visibleCategorySeparator ? View.VISIBLE: View.GONE}"/>
+    </LinearLayout>
 
-
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="14dp"
-            android:gravity="center_vertical"
-            android:text="@{rowData.title}"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/iv_icon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/iv_arrow"
-            android:layout_width="@dimen/setting_row_arrow_icon_width"
-            android:layout_height="@dimen/setting_row_arrow_icon_height"
-            android:src="@{rowData.arrow}"
-            android:visibility="@{rowData.showArrow ? View.VISIBLE : View.GONE}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -1,24 +1,17 @@
-package com.think.jetpack.demo
+package com.think.jetpack.demo.setting
 
-import android.util.Log
-import androidx.databinding.Observable
-import androidx.databinding.ObservableBoolean
-import androidx.databinding.ObservableField
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import com.think.jetpack.R
-import com.think.jetpack.demo.data.SettingRepository
-import com.think.jetpack.demo.data.SettingSource
+import com.think.jetpack.demo.setting.data.SettingRepository
+import com.think.jetpack.demo.setting.data.SettingSource
+import com.think.jetpack.demo.setting.BaseData
+import com.think.jetpack.demo.setting.MenuData
+import com.think.jetpack.demo.setting.SelectData
+import com.think.jetpack.demo.setting.SwitchData
+import com.think.jetpack.demo.setting.data.Gender
 import com.think.jetpack.preference.DataStore
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
-class SettingViewModel: ViewModel() {
+class SettingViewModel : ViewModel() {
 
     private val repository: SettingRepository = SettingRepository(SettingSource())
 
@@ -27,15 +20,24 @@ class SettingViewModel: ViewModel() {
 
     init {
         mList = arrayListOf(
+                HeaderData(
+                        imageUrl = "",
+                        username = "咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜咕噜",
+                        gender = Gender.MALE,
+                        visibleCategorySeparator = true
+                ),
                 SelectData(
                         icon = android.R.drawable.ic_lock_idle_lock,
                         title = "家长中心",
+                        visibleSummary = false,
                         layoutHeight = R.dimen.setting_row_layout_height,
                         arrow = R.drawable.button_arrow_right_yellow,
                         visibleArrow = true,
                         visibleIcon = true,
                         visibleDivider = true,
-                        selectValue = repository.mSelectValue
+                        selectValue = repository.mSelectValue,
+                        actionType = ActionType.ACTION_1,
+                        visibleCategorySeparator = true
                 ),
                 MenuData(
                         icon = android.R.drawable.ic_lock_idle_lock,
@@ -60,7 +62,8 @@ class SettingViewModel: ViewModel() {
                         layoutHeight = R.dimen.setting_row_layout_height,
                         arrow = R.drawable.button_arrow_right_yellow,
                         visibleDivider = true,
-                        visibleIcon = true
+                        visibleIcon = true,
+                        visibleCategorySeparator = true
                 ),
                 SwitchData(
                         icon = android.R.drawable.ic_lock_idle_lock,
@@ -82,7 +85,7 @@ class SettingViewModel: ViewModel() {
                         arrow = R.drawable.button_arrow_right_yellow,
                         visibleDivider = true,
                         visibleIcon = false,
-                        switchValue =  repository.mSwitchData1
+                        switchValue = repository.mSwitchData1
                 )
         )
 
@@ -90,7 +93,7 @@ class SettingViewModel: ViewModel() {
 
     }
 
-    companion object{
+    companion object {
         const val TAG = "SettingViewModel"
     }
 }

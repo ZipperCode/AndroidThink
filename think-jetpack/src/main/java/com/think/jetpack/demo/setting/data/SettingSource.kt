@@ -1,8 +1,6 @@
-package com.think.jetpack.demo.data
+package com.think.jetpack.demo.setting.data
 
-import android.content.SharedPreferences
 import android.util.Log
-import com.think.jetpack.demo.MapTable
 import com.think.jetpack.preference.DataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

@@ -1,33 +1,38 @@
-package com.think.jetpack.demo
+package com.think.jetpack.demo.setting
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.think.jetpack.R
 import com.think.jetpack.databinding.LayoutSettingMenuBinding
 import com.think.jetpack.databinding.LayoutSettingSelectBinding
 import com.think.jetpack.databinding.LayoutSettingSwitchBinding
+import com.think.jetpack.databinding.LayoutSettingUserHeaderBinding
 
 class SettingAdapter<DATA : BaseData>(private val mContext: Context,
                                       private var mData: MutableList<DATA>
 ) : RecyclerView.Adapter<SettingHolder>() {
 
+    private val mLayoutInflater: LayoutInflater = LayoutInflater.from(mContext)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SettingHolder {
         val binding = when (viewType) {
+            VIEW_TYPE_HEADER -> {
+                DataBindingUtil.inflate<LayoutSettingUserHeaderBinding>(mLayoutInflater,
+                        R.layout.layout_setting_user_header, parent, false)
+            }
             VIEW_TYPE_SWITCH -> {
-                DataBindingUtil.inflate<LayoutSettingSwitchBinding>(LayoutInflater.from(mContext),
+                DataBindingUtil.inflate<LayoutSettingSwitchBinding>(mLayoutInflater,
                         R.layout.layout_setting_switch, parent, false)
             }
             VIEW_TYPE_SELECT -> {
-                DataBindingUtil.inflate<LayoutSettingSelectBinding>(LayoutInflater.from(mContext),
+                DataBindingUtil.inflate<LayoutSettingSelectBinding>(mLayoutInflater,
                         R.layout.layout_setting_select, parent, false)
             }
             else -> {
-                DataBindingUtil.inflate<LayoutSettingMenuBinding>(LayoutInflater.from(mContext),
+                DataBindingUtil.inflate<LayoutSettingMenuBinding>(mLayoutInflater,
                         R.layout.layout_setting_menu, parent, false)
             }
         }
@@ -36,22 +41,36 @@ class SettingAdapter<DATA : BaseData>(private val mContext: Context,
     }
 
     override fun onBindViewHolder(holder: SettingHolder, position: Int) {
-        when(holder.viewType){
+        when (holder.viewType) {
+            VIEW_TYPE_HEADER -> {
+                val binding = holder.binding as LayoutSettingUserHeaderBinding
+                binding.apply {
+                    rowData = mData[position] as HeaderData
+                }
+            }
             VIEW_TYPE_MENU -> {
                 val binding = holder.binding as LayoutSettingMenuBinding
-                binding.rowData = mData[position] as MenuData
+                binding.apply {
+                    rowData = mData[position] as MenuData
+                    handler = EventHandler()
+                }
             }
             VIEW_TYPE_SWITCH -> {
                 val binding = holder.binding as LayoutSettingSwitchBinding
-                val rowData = mData[position] as SwitchData
-                binding.rowData = rowData
+                binding.apply {
+                    rowData = mData[position] as SwitchData
+                    handler = EventHandler()
+                }
             }
             VIEW_TYPE_SELECT -> {
                 val binding = holder.binding as LayoutSettingSelectBinding
-                val rowData = mData[position] as SelectData
-                binding.rowData = rowData
+                binding.apply {
+                    rowData = mData[position] as SelectData
+                    binding.handler = EventHandler()
+                }
             }
         }
+
         val layoutHeight: Int = mData[position].layoutHeight
 //        if(layoutHeight != 0){
 //            holder.itemView.layoutParams.height = mContext.resources.getDimensionPixelSize(mData[position].layoutHeight)
@@ -60,13 +79,19 @@ class SettingAdapter<DATA : BaseData>(private val mContext: Context,
     }
 
     override fun getItemViewType(position: Int): Int {
-        val baseData = mData[position]
-        return if (baseData is SwitchData) {
-            VIEW_TYPE_SWITCH
-        } else if(baseData is SelectData){
-            VIEW_TYPE_SELECT
-        } else {
-            VIEW_TYPE_MENU
+        return when (mData[position]) {
+            is HeaderData -> {
+                VIEW_TYPE_HEADER
+            }
+            is SwitchData -> {
+                VIEW_TYPE_SWITCH
+            }
+            is SelectData -> {
+                VIEW_TYPE_SELECT
+            }
+            else -> {
+                VIEW_TYPE_MENU
+            }
         }
     }
 
@@ -77,6 +102,7 @@ class SettingAdapter<DATA : BaseData>(private val mContext: Context,
     override fun getItemCount(): Int = mData.size
 
     companion object {
+        const val VIEW_TYPE_HEADER = 0
         const val VIEW_TYPE_MENU = 1
         const val VIEW_TYPE_SWITCH = 2
         const val VIEW_TYPE_SELECT = 3

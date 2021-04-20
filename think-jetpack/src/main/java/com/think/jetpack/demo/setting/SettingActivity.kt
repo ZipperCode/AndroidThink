@@ -1,15 +1,10 @@
-package com.think.jetpack.demo
+package com.think.jetpack.demo.setting
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.think.jetpack.R
+import com.think.jetpack.demo.setting.MenuFragment
 import com.think.jetpack.preference.DataStore
-import com.think.jetpack.preference.SettingsActivity
-import com.think.jetpack.preference.ui.login.LoginViewModel
-import com.think.jetpack.preference.ui.login.LoginViewModelFactory
 
 class SettingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

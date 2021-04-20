@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="ripple">#B8B8B8</color>
+    <color name="bg_setting_list">#F8F8F8</color>
+    <color name="bg_setting_list_item">@color/white</color>
 </resources>

@@ -1,9 +1,7 @@
-package com.think.jetpack.demo
+package com.think.jetpack.demo.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.think.jetpack.preference.data.LoginDataSource
-import com.think.jetpack.preference.data.LoginRepository
 
 class SettingViewModelFactory : ViewModelProvider.Factory {
 

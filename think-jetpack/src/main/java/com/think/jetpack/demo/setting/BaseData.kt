@@ -1,4 +1,4 @@
-package com.think.jetpack.demo
+package com.think.jetpack.demo.setting
 
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
@@ -12,7 +12,9 @@ open class BaseData(
         @DrawableRes
         var arrow: Int = 0,
         val title: String = "",
+        val visibleCategorySeparator: Boolean = false,
         var visibleIcon: Boolean = false,
         var visibleDivider: Boolean = false,
-        var showArrow: Boolean = false
+        var visibleArrow: Boolean = false,
+        var actionType: ActionType = ActionType.NONE_ACTION
 )

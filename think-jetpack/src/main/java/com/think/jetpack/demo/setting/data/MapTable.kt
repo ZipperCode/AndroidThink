@@ -1,4 +1,4 @@
-package com.think.jetpack.demo
+package com.think.jetpack.demo.setting.data
 
 import androidx.collection.arrayMapOf
 
@@ -24,5 +24,7 @@ object MapTable {
         }
         return result
     }
+
+
 
 }

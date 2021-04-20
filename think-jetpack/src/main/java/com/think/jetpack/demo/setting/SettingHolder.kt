@@ -1,4 +1,4 @@
-package com.think.jetpack.demo
+package com.think.jetpack.demo.setting
 
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView

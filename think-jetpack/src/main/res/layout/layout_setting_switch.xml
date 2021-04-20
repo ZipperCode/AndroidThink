@@ -5,10 +5,14 @@
 
     <data>
         <import type="android.view.View" />
-        <import type="android.text.TextUtils" />
+
+        <import type="android.text.TextUtils"/>
         <variable
             name="rowData"
-            type="com.think.jetpack.demo.SwitchData" />
+            type="com.think.jetpack.demo.setting.SwitchData" />
+        <variable
+            name="handler"
+            type="com.think.jetpack.demo.setting.EventHandler" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,6 +23,10 @@
         android:paddingEnd="@dimen/setting_row_horizontal_padding"
         android:paddingTop="@dimen/setting_row_vertical_padding"
         android:paddingBottom="@dimen/setting_row_vertical_padding"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="@{(v)->handler.action(rowData.actionType)}"
+        android:background="@drawable/while_ripple"
         >
 
         <ImageView
@@ -71,7 +79,7 @@
                 android:maxLines="1"
                 android:text="@{rowData.summary}"
                 android:textSize="12sp"
-                android:visibility="@{rowData.visibleSummary ? View.VISIBLE : View.GONE}" />
+                android:visibility="@{TextUtils.isEmpty(rowData.summary) ? View.GONE: rowData.visibleSummary ? View.VISIBLE : View.GONE}" />
         </LinearLayout>
 
         <androidx.appcompat.widget.SwitchCompat

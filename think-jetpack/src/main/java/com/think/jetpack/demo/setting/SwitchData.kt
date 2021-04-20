@@ -1,11 +1,9 @@
-package com.think.jetpack.demo
+package com.think.jetpack.demo.setting
 
-import android.graphics.drawable.Drawable
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
-import androidx.annotation.LayoutRes
-import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
+import com.think.jetpack.demo.setting.BaseData
 
 class SwitchData(
         @DrawableRes
@@ -15,17 +13,22 @@ class SwitchData(
         @DrawableRes
         arrow: Int = 0,
         title: String = "",
+        visibleCategorySeparator: Boolean = false,
         visibleIcon: Boolean = false,
         visibleDivider: Boolean = false,
         visibleArrow: Boolean = true,
+        actionType: ActionType = ActionType.NONE_ACTION,
         var summary: String = "",
         var visibleSummary: Boolean = true,
         var switchValue: ObservableField<Boolean>
 ) : BaseData(
-        icon,
-        layoutHeight,
-        arrow,
-        title,
-        visibleIcon,
-        visibleDivider,
-        visibleArrow)
+        icon = icon,
+        layoutHeight = layoutHeight,
+        arrow = arrow,
+        title = title,
+        visibleCategorySeparator = visibleCategorySeparator,
+        visibleIcon = visibleIcon,
+        visibleDivider = visibleDivider,
+        visibleArrow = visibleArrow,
+        actionType = actionType
+)
