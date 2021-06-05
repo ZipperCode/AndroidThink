@@ -125,6 +125,10 @@ public final class ThreadManager {
         mMainHandler.post(runnable);
     }
 
+    public void postDelayed(Runnable runnable, long delayMillis){
+        mMainHandler.postDelayed(runnable, delayMillis);
+    }
+
     public void execPool(Runnable runnable) {
         mExecutorService.execute(runnable);
     }

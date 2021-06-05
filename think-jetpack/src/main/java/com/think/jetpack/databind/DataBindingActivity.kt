@@ -10,6 +10,6 @@ import com.think.jetpack.databinding.ActivityDataBindingBinding
 class DataBindingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        val databind: ActivityDataBindingBinding = DataBindingUtil.setContentView(this as Activity,R.layout.activity_data_binding)
+        val databind: ActivityDataBindingBinding = DataBindingUtil.setContentView(this as Activity,R.layout.activity_data_binding)
     }
 }
