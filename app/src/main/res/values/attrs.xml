@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ScrollPicker">
+        <attr name="displayItemCount" format="integer"/>
+        <attr name="defaultSelectionIndex" format="integer"/>
+        <attr name="displayItemHeight" format="dimension|reference"/>
+    </declare-styleable>
+
+</resources>

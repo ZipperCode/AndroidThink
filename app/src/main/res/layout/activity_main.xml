@@ -18,21 +18,32 @@
         android:layout_width="320dp"
         android:layout_height="50dp"
         android:background="#E91E63"
-        android:text="TextView"/>
+        android:text="TextView" />
 
 
-<!--    <com.think.ui.RadiusFrameLayout-->
-<!--        android:id="@+id/radiusFrameLayout"-->
-<!--        android:layout_width="300dp"-->
-<!--        android:layout_height="200dp"-->
-<!--        app:left_top_radius="50dp"-->
-<!--        android:background="#000"-->
-<!--        app:transparent="0.5">-->
+    <!--    <com.think.ui.RadiusFrameLayout-->
+    <!--        android:id="@+id/radiusFrameLayout"-->
+    <!--        android:layout_width="300dp"-->
+    <!--        android:layout_height="200dp"-->
+    <!--        app:left_top_radius="50dp"-->
+    <!--        android:background="#000"-->
+    <!--        app:transparent="0.5">-->
 
-<!--        <ImageView-->
-<!--            android:id="@+id/imageView"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:src="#F00" />-->
-<!--    </com.think.ui.RadiusFrameLayout>-->
+    <!--        <ImageView-->
+    <!--            android:id="@+id/imageView"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="match_parent"-->
+    <!--            android:src="#F00" />-->
+    <!--    </com.think.ui.RadiusFrameLayout>-->
+    <com.think.demo.ScrollPicker
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="#E3E3E3"
+        app:displayItemCount="5"
+        app:displayItemHeight="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </LinearLayout>

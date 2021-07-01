@@ -20,18 +20,14 @@ import java.lang.ref.WeakReference;
  **/
 public abstract class BaseDialog extends Dialog implements IDialog{
 
-    private WeakReference<Activity> mActivityRef;
-
     private String mTagName;
 
     public BaseDialog(@NonNull Context context) {
         super(context);
-        this.mActivityRef = new WeakReference<>(AppUtils.getActivity(context));
     }
 
     public BaseDialog(@NonNull Context context, int themeResId) {
         super(context, themeResId);
-        this.mActivityRef = new WeakReference<>(AppUtils.getActivity(context));
     }
 
     @Override
@@ -41,7 +37,6 @@ public abstract class BaseDialog extends Dialog implements IDialog{
         View layoutView = inflateView();
         setContentView(layoutView);
         initView();
-
     }
 
     @Override

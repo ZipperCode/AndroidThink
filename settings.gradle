@@ -1,4 +1,4 @@
-//include ':think-util'
+include ':think-coroutine'//include ':think-util'
 //include ':think-hook'
 //include ':think-audioplayer'
 //include ':think-accessibility'
@@ -7,9 +7,9 @@
 //include ':think-eventbus'
 //include ':think-bsdiff'
 include ':think-jetpack'
-include ':think-xposed'
+//include ':think-xposed'
 include ':app'
-//include ':think-core'
+include ':think-core'
 //include ':think-study'
 //include ':think-ui'
 //include "think-vpn"

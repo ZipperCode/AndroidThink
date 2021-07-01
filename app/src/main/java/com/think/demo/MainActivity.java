@@ -51,9 +51,9 @@ public class MainActivity extends AppCompatActivity {
 //        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
 //        startService(new Intent(this,MyAccessibilityService.class));
 
-        if(!isAccessibilitySettingsOn(this, getPackageName() + ".CustomAccessibilityService")){
-            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-        }
+//        if(!isAccessibilitySettingsOn(this, getPackageName() + ".CustomAccessibilityService")){
+//            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+//        }
 
 //        String s = MessageUtil.md5Crypt("哈哈，我是原文");
 //
