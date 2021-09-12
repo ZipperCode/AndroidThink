@@ -2,11 +2,10 @@ package com.think.xposed;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -18,16 +17,13 @@ import androidx.core.app.ActivityCompat;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.DexFile;
-import de.robv.android.xposed.XposedHelpers;
 
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
@@ -41,8 +37,6 @@ public class MainActivity extends AppCompatActivity {
             "android.permission.WRITE_EXTERNAL_STORAGE"};
 
     static String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
-
-
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -73,20 +67,32 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFilesDir().mkdirs();
-                Log.d("TAG", " lib = " + getApplication().getApplicationInfo().nativeLibraryDir);
-//                test(getPackageName(), getClassLoader());
-
-                try {
-                    List<ApplicationInfo> list = getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
-                    for (ApplicationInfo info : list) {
-                        if (info.packageName.equals(BuildConfig.APPLICATION_ID)) {
-                            Log.i(TAG, info.nativeLibraryDir);
-                        }
+                Log.d("AHook", "MainActivity TargetService.iLocalToServer = " + TargetService.iLocalToServer);
+                if (TargetService.iLocalToServer != null) {
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("ACTIVITY", 100);
+                    bundle.putString("PKS", "com.kugou.android");
+                    bundle.putString("NAME", "com.kugou.networktest.NetworkTestActivity");
+                    try {
+                        TargetService.iLocalToServer.callback(bundle);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
-                } catch (Throwable throwable) {
-                    Log.e(TAG, "JNILoadHelper load library error:", throwable);
                 }
+//                getFilesDir().mkdirs();
+//                Log.d("TAG", " lib = " + getApplication().getApplicationInfo().nativeLibraryDir);
+////                test(getPackageName(), getClassLoader());
+//
+//                try {
+//                    List<ApplicationInfo> list = getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
+//                    for (ApplicationInfo info : list) {
+//                        if (info.packageName.equals(BuildConfig.APPLICATION_ID)) {
+//                            Log.i(TAG, info.nativeLibraryDir);
+//                        }
+//                    }
+//                } catch (Throwable throwable) {
+//                    Log.e(TAG, "JNILoadHelper load library error:", throwable);
+//                }
             }
         });
     }
@@ -141,13 +147,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static void su(){
+    private static void su() {
         BufferedReader bufferedReader = null;
         try {
             File file = new File(Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS), "__share");
             Process process = Runtime.getRuntime().exec("su cat " + file.getAbsolutePath());
             bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            Log.d("AHook","" + bufferedReader.readLine());
+            Log.d("AHook", "" + bufferedReader.readLine());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
