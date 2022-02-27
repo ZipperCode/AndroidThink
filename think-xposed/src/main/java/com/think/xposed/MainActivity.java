@@ -67,18 +67,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("AHook", "MainActivity TargetService.iLocalToServer = " + TargetService.iLocalToServer);
-                if (TargetService.iLocalToServer != null) {
-                    Bundle bundle = new Bundle();
-                    bundle.putInt("ACTIVITY", 100);
-                    bundle.putString("PKS", "com.kugou.android");
-                    bundle.putString("NAME", "com.kugou.networktest.NetworkTestActivity");
-                    try {
-                        TargetService.iLocalToServer.callback(bundle);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
+
 //                getFilesDir().mkdirs();
 //                Log.d("TAG", " lib = " + getApplication().getApplicationInfo().nativeLibraryDir);
 ////                test(getPackageName(), getClassLoader());

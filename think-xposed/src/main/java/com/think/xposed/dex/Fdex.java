@@ -44,7 +44,7 @@ public class Fdex {
 
                 DexposedBridge.findAndHookMethod(clazz, "loadClass", String.class, Boolean.TYPE, new XC_MethodHook() {
                     @Override
-                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    protected void afterHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
                         super.afterHookedMethod(param);
                         // 程序加载到了类
                         Class<?> cls = (Class<?>) param.getResult();

@@ -5,15 +5,22 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.ArrayMap;
+import android.util.Log;
 
 import com.think.xposed.crypto.CryptoHook;
 import com.think.xposed.http.HttpHook;
 
+import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Map;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
@@ -61,23 +68,178 @@ public class AHook implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 //            log("equals = " + packageName.equals(hookPks));
 //            return;
 //        }
-        hookPks = packageName;
+//        hookPks = packageName;
+//
+//        if(cryptoHook == null){
+//            cryptoHook = new CryptoHook(1000, lpparam.classLoader,false);
+//            cryptoHook.hook();
+//        }
+//
+//        if(httpHook == null){
+//            httpHook = new HttpHook(lpparam.classLoader,true);
+//            httpHook.hook();
+//        }
+//
+//        log("symmetricHook hook ====> " + hookPks + ", symmetricHook = " + cryptoHook);
+//        log("httpHook hook ====> " + hookPks + ", httpHook = " + httpHook);
+//        if(!"com.think.xposed".equals(packageName)){
+//            hookApplication(lpparam);
+//        }
+//        XposedHelpers.findAndHookMethod("android.app.ContextImpl", lpparam.classLoader, "getSharedPreferences", String.class, int.class, new XC_MethodHook(){
+//            @Override
+//            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//                super.afterHookedMethod(param);
+//                String name = (String) param.args[0];
+//                log("ContextImpl >> getSharedPreferences >> name = " + name +", sp = " + param.getResult());
+//                SharedPreferences sharedPreferences = (SharedPreferences) param.getResult();
+//                XposedHelpers.findAndHookMethod(sharedPreferences.getClass(),
+//                        "getString", String.class, String.class, new XC_MethodHook(){
+//                    @Override
+//                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//                        super.afterHookedMethod(param);
+//                        String key = (String) param.args[0];
+//                        log("SharedPreferences >> name = " + key + ", value = " + param.getResult());
+//                        if (key.equals("UBIMiAeUt")){
+//                            log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+//                            log("key = UBIMiAeUt, value = " + param.getResult());
+//                            log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+//                        }
+//                    }
+//                });
+//            }
+//        });
 
-        if(cryptoHook == null){
-            cryptoHook = new CryptoHook(1000, lpparam.classLoader,false);
-            cryptoHook.hook();
-        }
+//        Class<?> classIfExists = XposedHelpers.findClassIfExists("com.UCMobile.model.a.i", lpparam.classLoader);
+//        if (classIfExists == null){
+//            log("com.UCMobile.model.a == null");
+//            return;
+//        }
+//        log("com.UCMobile.model.a >> Class >> " + classIfExists);
+//
+//        XposedHelpers.findAndHookMethod(classIfExists, "i", String.class, String.class, new XC_MethodHook() {
+//            @Override
+//            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//                super.afterHookedMethod(param);
+//                String key = (String) param.args[0];
+//                if (key.equals("UBIMiAeUt")){
+//                    log("com.UCMobile.model.a$i.f3222a >> name = " + key + ", value = " + param.getResult());
+//                }
+//            }
+//        });
 
-        if(httpHook == null){
-            httpHook = new HttpHook(lpparam.classLoader,true);
-            httpHook.hook();
+        Class<?> classIfExists2 = XposedHelpers.findClassIfExists("com.uc.base.secure.j", lpparam.classLoader);
+        if (classIfExists2 == null){
+            log("com.uc.base.secure.j == null");
+            return;
         }
+        log("com.uc.base.secure.j = " + classIfExists2);
+        XposedHelpers.findAndHookMethod(classIfExists2, "a", int.class, String.class, String.class, new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                super.afterHookedMethod(param);
+                log("com.uc.base.secure.j >> a >> " + Log.getStackTraceString(new Exception()));
+                int i = (int) param.args[0];
+                String str = (String) param.args[1];
+                String str2 = (String) param.args[2];
+                if (i == 1){
+                    log("str = " + str +", str2 = " + str2);
+                    Class<?> anonymousClass1 = XposedHelpers.findClassIfExists("com.uc.base.secure.j$AnonymousClass1", param.thisObject.getClass().getClassLoader());
+                    log("anonymousClass1 >> " + anonymousClass1);
+                    if (anonymousClass1 != null){
+                        int[] f34514a = (int[]) XposedHelpers.getStaticObjectField(anonymousClass1, "f34514a");
+                        log("anonymousClass1 >> f34514a = " + Arrays.toString(f34514a));
+                    }
+                };
+            }
+        });
 
-        log("symmetricHook hook ====> " + hookPks + ", symmetricHook = " + cryptoHook);
-        log("httpHook hook ====> " + hookPks + ", httpHook = " + httpHook);
-        if(!"com.think.xposed".equals(packageName)){
-            hookApplication(lpparam);
+        Class<?> classIfExists3 = XposedHelpers.findClassIfExists("com.uc.base.secure.a", lpparam.classLoader);
+        if (classIfExists3 == null){
+            log("com.uc.base.secure.a == null");
+            return;
         }
+        log("com.uc.base.secure.a = " + classIfExists3);
+        XposedHelpers.findAndHookMethod(classIfExists3, "c", String.class, String.class, new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                super.afterHookedMethod(param);
+                log("com.uc.base.secure.a >> c >> "+Log.getStackTraceString(new Exception()));
+                String param1 = (String) param.args[0];
+                String param2 = (String) param.args[1];
+                String result = (String) param.getResult();
+                log("com.uc.base.secure.a >> c >> param1 = "+ param1 + ",param2 = " + param2 +", result = "+result);
+//                Class<?> anonymousClass1 = XposedHelpers.findClassIfExists("com.uc.base.secure.j$AnonymousClass1", param.thisObject.getClass().getClassLoader());
+//                log("anonymousClass1 >> " + anonymousClass1);
+//                if (anonymousClass1 != null){
+//                    int[] f34514a = (int[]) XposedHelpers.getStaticObjectField(anonymousClass1, "f34514a");
+//                    log("anonymousClass1 >> f34514a = " + Arrays.toString(f34514a));
+//                }
+                // 134cecc1a-d5b0-b1ff-b534-4852c36b45aesy5th908xb9bmgiz2ssy0cykzezkq1jf
+                Class<?> securityGuardParamContextCls = XposedHelpers.findClassIfExists("com.alibaba.wireless.security.open.SecurityGuardParamContext", lpparam.classLoader);
+                log("securityGuardParamContextCls = " + securityGuardParamContextCls);
+                XposedHelpers.callStaticMethod()
+                if (securityGuardParamContextCls != null){
+                    XposedHelpers.findAndHookMethod("com.alibaba.wireless.security.open.securesignature.ISecureSignatureComponent",
+                            lpparam.classLoader, "signRequest", securityGuardParamContextCls, String.class, new XC_MethodHook() {
+                                @Override
+                                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                                    super.afterHookedMethod(param);
+                                    Object thisObject = param.thisObject;
+                                    String str = (String) param.args[1];
+                                    log("com.alibaba.wireless.security.open.securesignature.ISecureSignatureComponent >> " + thisObject +", str = " + str);
+                                }
+                            });
+                }
+
+            }
+        });
+
+//        Class<?> contextImplCls = XposedHelpers.findClassIfExists("android.app.ContextImpl", lpparam.classLoader);
+//        if (contextImplCls == null){
+//            log("未找到ContextImpl类");
+//            return;
+//        }
+//        try {
+//            Field sSharedPrefsCache = XposedHelpers.findFieldIfExists(contextImplCls, "sSharedPrefsCache");
+//            if (sSharedPrefsCache == null){
+//                log("未找到ContextImpl#sSharedPrefsCache属性");
+//                return;
+//            }
+//            sSharedPrefsCache.setAccessible(true);
+//            Object sSharedPrefsCache1 = XposedHelpers.getStaticObjectField(contextImplCls, "sSharedPrefsCache");
+//            ArrayMap<String, ArrayMap<File, Object>> obj = (ArrayMap<String, ArrayMap<File, Object>>) sSharedPrefsCache.get(null);
+//            log("sSharedPrefsCache1 >> " + sSharedPrefsCache1);
+//            log("sSharedPrefsCache2 >> " + sSharedPrefsCache1);
+//            log("sSharedPrefsCache >> " + obj);
+//
+//            if (obj == null){
+//                log("未找到ContextImpl#sSharedPrefsCache属性对象");
+//                return;
+//            }
+//            ArrayMap<File, Object> result = null;
+//            for (Map.Entry<String, ArrayMap<File, Object>> stringArrayMapEntry : obj.entrySet()) {
+//                String key = stringArrayMapEntry.getKey();
+//                ArrayMap<File, Object> value = stringArrayMapEntry.getValue();
+//                log("获取到Sp文件名为：" + key);
+//                if ("setting_base".equals(key)){
+//                    result = value;
+//                    break;
+//                }
+//            }
+//            if (result == null){
+//                log("未找到对于的ArrayMap");
+//                return;
+//            }
+//
+//            for (Map.Entry<File, Object> fileObjectEntry : result.entrySet()) {
+//                File file = fileObjectEntry.getKey();
+//                SharedPreferences object = (SharedPreferences) fileObjectEntry.getValue();
+//                log("fileObjectEntry >> file = " + file + ", SharedPreferences = " + object);
+//            }
+//
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
     }
 
     private void hookApplication(XC_LoadPackage.LoadPackageParam lpparam){
@@ -97,51 +259,6 @@ public class AHook implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                     new XC_MethodHook() {
                         @Override
                         protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                            log("afterHookedMethod " + param.thisObject);
-                            try {
-                                Context context = (Context) param.thisObject;
-                                Intent intent = new Intent(context, TargetService.class);
-                                log("context = " + context + ", 开始绑定 TargetService");
-                                context.bindService(intent, new ServiceConnection() {
-                                    @Override
-                                    public void onServiceConnected(ComponentName name, IBinder service) {
-                                        log("ServiceConnection#onServiceConnected component = " + name);
-                                        try{
-                                            IStartInterface iStartInterface = (IStartInterface) service;
-                                            iStartInterface.callback(new ILocalToServer.Stub() {
-                                                @Override
-                                                public void callback(Bundle bundle) throws RemoteException {
-                                                    log("thinkXposed -> 目标进程: " + lpparam.processName);
-                                                    int startCode = bundle.getInt("ACTIVITY",0);
-                                                    if(startCode == 100){
-                                                        try{
-                                                            String packageName = bundle.getString("PKS","");
-                                                            String componentName = bundle.getString("NAME","");
-                                                            log("thinkXposed -> 目标进程: " + lpparam.processName + ", packageName = " +packageName + ", Component = " + componentName);
-                                                            Intent intent1 = new Intent();
-                                                            intent1.setComponent(new ComponentName(packageName, componentName));
-                                                            context.startActivity(intent);
-                                                        }catch (Exception e){
-                                                            e.printStackTrace();
-                                                            log("Error = " + e.getMessage());
-                                                        }
-                                                    }
-                                                }
-                                            });
-                                        }catch (Exception e){
-                                            e.printStackTrace();
-                                            log("Error = " + e.getMessage());
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onServiceDisconnected(ComponentName name) {
-                                        log("ServiceConnection#onServiceDisconnected component = " + name);
-                                    }
-                                }, Context.BIND_AUTO_CREATE);
-                            }catch (Throwable e){
-                                log("Error = " + e.getMessage());
-                            }
 
                         }
                     }

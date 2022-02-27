@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.think.xposed.AHook;
+import com.think.xposed.BuildConfig;
 import com.think.xposed.JniHelper;
 import com.think.xposed.Utils;
 import com.think.xposed.crypto.CryptoHook;
@@ -31,7 +32,6 @@ import dalvik.system.DexFile;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
-import me.weishu.epic.BuildConfig;
 
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
