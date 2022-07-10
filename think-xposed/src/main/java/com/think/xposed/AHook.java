@@ -177,7 +177,6 @@ public class AHook implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                 // 134cecc1a-d5b0-b1ff-b534-4852c36b45aesy5th908xb9bmgiz2ssy0cykzezkq1jf
                 Class<?> securityGuardParamContextCls = XposedHelpers.findClassIfExists("com.alibaba.wireless.security.open.SecurityGuardParamContext", lpparam.classLoader);
                 log("securityGuardParamContextCls = " + securityGuardParamContextCls);
-                XposedHelpers.callStaticMethod()
                 if (securityGuardParamContextCls != null){
                     XposedHelpers.findAndHookMethod("com.alibaba.wireless.security.open.securesignature.ISecureSignatureComponent",
                             lpparam.classLoader, "signRequest", securityGuardParamContextCls, String.class, new XC_MethodHook() {

@@ -1,0 +1,38 @@
+plugins {
+    id 'java-library'
+    id 'java-gradle-plugin'
+    id 'org.jetbrains.kotlin.jvm'
+    id "groovy"
+    id "maven-publish"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+gradlePlugin{
+    plugins{
+        asm_code{
+            id = "com.think.plugin.asm"
+            implementationClass = "com.think.plugin.asm.AsmPlugin"
+        }
+    }
+}
+
+publishing{
+    publications {
+        asm_code(MavenPublication){
+            groupId = "com.think.plugin.asm"
+            artifactId = "gradle-asm-plugin"
+            version = "1.0.0"
+            from components.java
+        }
+    }
+
+    repositories{
+        maven{
+            url = "$rootDir/repo"
+        }
+    }
+}
