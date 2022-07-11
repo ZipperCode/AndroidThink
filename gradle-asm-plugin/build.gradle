@@ -11,6 +11,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+dependencies{
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.3.61"
+}
+
 gradlePlugin{
     plugins{
         asm_code{
@@ -25,14 +31,14 @@ publishing{
         asm_code(MavenPublication){
             groupId = "com.think.plugin.asm"
             artifactId = "gradle-asm-plugin"
-            version = "1.0.0"
+            version = '1.0.0'
             from components.java
         }
     }
 
     repositories{
         maven{
-            url = "$rootDir/repo"
+            url = "../repo"
         }
     }
 }

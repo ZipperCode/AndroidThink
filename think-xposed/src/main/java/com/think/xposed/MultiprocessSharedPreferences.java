@@ -63,7 +63,7 @@ import java.util.WeakHashMap;
  * @since JDK1.6
  */
 public class MultiprocessSharedPreferences extends ContentProvider implements SharedPreferences {
-	private static final String TAG = "MultiprocessSharedPreferences";
+	private static final String TAG = "Multiproces";
 	public static final boolean DEBUG = BuildConfig.DEBUG;
 	private Context mContext;
 	private String mName;
