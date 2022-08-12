@@ -20,7 +20,7 @@ buildscript {
         // in the individual module build.gradle files
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-        classpath "com.think.plugin.asm:gradle-asm-plugin:1.0.0"
+        // classpath "com.think.plugin.asm:gradle-asm-plugin:1.0.0"
     }
 }
 

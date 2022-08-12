@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'com.think.plugin.asm'
+//apply plugin: 'com.think.plugin.asm'
 
 android {
     compileSdkVersion 28
@@ -35,7 +35,7 @@ android {
 }
 
 //catchMethodExtension{
-//    enable true
+//    enable = true
 //}
 
 dependencies {

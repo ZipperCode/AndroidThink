@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'java-gradle-plugin'
     id 'org.jetbrains.kotlin.jvm'
+    id 'kotlin'
     id "groovy"
     id "maven-publish"
 }
@@ -9,6 +10,14 @@ plugins {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+sourceSets {
+    main{
+        java.srcDirs = ['src/main/java']
+        kotlin.srcDirs = ['src/main/kotlin']
+        groovy.srcDirs = ['src/main/groovy']
+    }
 }
 
 dependencies{
@@ -21,7 +30,7 @@ gradlePlugin{
     plugins{
         asm_code{
             id = "com.think.plugin.asm"
-            implementationClass = "com.think.plugin.asm.AsmPlugin"
+            implementationClass = "com.think.plugin.asm.AsmPlugin1"
         }
     }
 }

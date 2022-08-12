@@ -3,6 +3,7 @@ package com.think.xposed;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -11,6 +12,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.AttributeSet;
 import android.util.Log;
 
 import com.think.xposed.crypto.CryptoHook;
@@ -85,113 +87,64 @@ public class AHook implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 //        if(!"com.think.xposed".equals(packageName)){
 //            hookApplication(lpparam);
 //        }
-//        XposedHelpers.findAndHookMethod("android.app.ContextImpl", lpparam.classLoader, "getSharedPreferences", String.class, int.class, new XC_MethodHook(){
-//            @Override
-//            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-//                super.afterHookedMethod(param);
-//                String name = (String) param.args[0];
-//                log("ContextImpl >> getSharedPreferences >> name = " + name +", sp = " + param.getResult());
-//                SharedPreferences sharedPreferences = (SharedPreferences) param.getResult();
-//                XposedHelpers.findAndHookMethod(sharedPreferences.getClass(),
-//                        "getString", String.class, String.class, new XC_MethodHook(){
-//                    @Override
-//                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-//                        super.afterHookedMethod(param);
-//                        String key = (String) param.args[0];
-//                        log("SharedPreferences >> name = " + key + ", value = " + param.getResult());
-//                        if (key.equals("UBIMiAeUt")){
-//                            log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-//                            log("key = UBIMiAeUt, value = " + param.getResult());
-//                            log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-//                        }
-//                    }
-//                });
-//            }
-//        });
 
-//        Class<?> classIfExists = XposedHelpers.findClassIfExists("com.UCMobile.model.a.i", lpparam.classLoader);
+//        Class<?> classIfExists = XposedHelpers.findClassIfExists("com.babybus.plugin.bdad.PluginBdAd", lpparam.classLoader);
+//
 //        if (classIfExists == null){
-//            log("com.UCMobile.model.a == null");
+//            log("不能找到 com.babybus.plugin.bdad.PluginBdAd 类");
 //            return;
 //        }
-//        log("com.UCMobile.model.a >> Class >> " + classIfExists);
-//
-//        XposedHelpers.findAndHookMethod(classIfExists, "i", String.class, String.class, new XC_MethodHook() {
+//        XposedHelpers.findAndHookMethod(classIfExists, "initBdSdk", new XC_MethodHook() {
 //            @Override
 //            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-//                super.afterHookedMethod(param);
-//                String key = (String) param.args[0];
-//                if (key.equals("UBIMiAeUt")){
-//                    log("com.UCMobile.model.a$i.f3222a >> name = " + key + ", value = " + param.getResult());
-//                }
+//
+//
+//
 //            }
 //        });
-
-        Class<?> classIfExists2 = XposedHelpers.findClassIfExists("com.uc.base.secure.j", lpparam.classLoader);
-        if (classIfExists2 == null){
-            log("com.uc.base.secure.j == null");
-            return;
-        }
-        log("com.uc.base.secure.j = " + classIfExists2);
-        XposedHelpers.findAndHookMethod(classIfExists2, "a", int.class, String.class, String.class, new XC_MethodHook() {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                super.afterHookedMethod(param);
-                log("com.uc.base.secure.j >> a >> " + Log.getStackTraceString(new Exception()));
-                int i = (int) param.args[0];
-                String str = (String) param.args[1];
-                String str2 = (String) param.args[2];
-                if (i == 1){
-                    log("str = " + str +", str2 = " + str2);
-                    Class<?> anonymousClass1 = XposedHelpers.findClassIfExists("com.uc.base.secure.j$AnonymousClass1", param.thisObject.getClass().getClassLoader());
-                    log("anonymousClass1 >> " + anonymousClass1);
-                    if (anonymousClass1 != null){
-                        int[] f34514a = (int[]) XposedHelpers.getStaticObjectField(anonymousClass1, "f34514a");
-                        log("anonymousClass1 >> f34514a = " + Arrays.toString(f34514a));
-                    }
-                };
-            }
-        });
-
-        Class<?> classIfExists3 = XposedHelpers.findClassIfExists("com.uc.base.secure.a", lpparam.classLoader);
-        if (classIfExists3 == null){
-            log("com.uc.base.secure.a == null");
-            return;
-        }
-        log("com.uc.base.secure.a = " + classIfExists3);
-        XposedHelpers.findAndHookMethod(classIfExists3, "c", String.class, String.class, new XC_MethodHook() {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                super.afterHookedMethod(param);
-                log("com.uc.base.secure.a >> c >> "+Log.getStackTraceString(new Exception()));
-                String param1 = (String) param.args[0];
-                String param2 = (String) param.args[1];
-                String result = (String) param.getResult();
-                log("com.uc.base.secure.a >> c >> param1 = "+ param1 + ",param2 = " + param2 +", result = "+result);
-//                Class<?> anonymousClass1 = XposedHelpers.findClassIfExists("com.uc.base.secure.j$AnonymousClass1", param.thisObject.getClass().getClassLoader());
-//                log("anonymousClass1 >> " + anonymousClass1);
-//                if (anonymousClass1 != null){
-//                    int[] f34514a = (int[]) XposedHelpers.getStaticObjectField(anonymousClass1, "f34514a");
-//                    log("anonymousClass1 >> f34514a = " + Arrays.toString(f34514a));
+//        Class<?> classIfExists = XposedHelpers.findClassIfExists("android.webkit.WebView", lpparam.classLoader);
+//        if (classIfExists != null){
+//            log("start hook WebView");
+//            XposedHelpers.findAndHookConstructor(classIfExists, Context.class, AttributeSet.class, int.class, new XC_MethodHook() {
+//                @Override
+//                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+//                    log("hook WebView 的构造方法 >>> stackTrace >> \n" + Log.getStackTraceString(new Throwable()));
+//
+//                    Class<?> classIfExists11 = XposedHelpers.findClassIfExists("com.sinyee.babybus.MainApplication", lpparam.classLoader);
+//                    if (classIfExists11 != null){
+//                        Object get = XposedHelpers.callStaticMethod(classIfExists11, "get");
+//                        if (param.args[0] == null){
+//                            param.args[0] = get;
+//                            log("WebView 方法修复");
+//                        }
+//                    }
+//
+//                    log("WebView.方法参数1 >> " + param.args[0]);
+//                    log("WebView.方法参数2 >> " + param.args[1]);
+//                    log("WebView.方法参数3 >> " + param.args[2]);
+//
+//                    Class<?> classIfExists1 = XposedHelpers.findClassIfExists("com.baidu.mobads.container.adrequest.ProdAdRequestInfo", lpparam.classLoader);
+//                    log("是否找到 com.baidu.mobads.container.adrequest.ProdAdRequestInfo 类信息 = " + classIfExists1);
+//                    if (classIfExists1 != null){
+//                        Class<?> classIfExists2 = XposedHelpers.findClassIfExists("com.baidu.mobads.container.adrequest.m", lpparam.classLoader);
+//                        log("是否找到 com.baidu.mobads.container.adrequest.m 类信息 = " + classIfExists2);
+//                        if (classIfExists2 != null){
+//                            XposedHelpers.findAndHookConstructor(classIfExists2, Context.class, classIfExists1, new XC_MethodHook() {
+//                                @Override
+//                                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+//                                    super.beforeHookedMethod(param);
+//                                    log("hook adrequest.m 的构造方法 >>> stackTrace >> \n" + Log.getStackTraceString(new Throwable()));
+//                                    log("adrequest.m.方法参数1 >> " + param.args[0]);
+//                                    log("adrequest.m.方法参数2 >> " + param.args[1]);
+//                                }
+//                            });
+//                        }
+//
+//                    }
 //                }
-                // 134cecc1a-d5b0-b1ff-b534-4852c36b45aesy5th908xb9bmgiz2ssy0cykzezkq1jf
-                Class<?> securityGuardParamContextCls = XposedHelpers.findClassIfExists("com.alibaba.wireless.security.open.SecurityGuardParamContext", lpparam.classLoader);
-                log("securityGuardParamContextCls = " + securityGuardParamContextCls);
-                if (securityGuardParamContextCls != null){
-                    XposedHelpers.findAndHookMethod("com.alibaba.wireless.security.open.securesignature.ISecureSignatureComponent",
-                            lpparam.classLoader, "signRequest", securityGuardParamContextCls, String.class, new XC_MethodHook() {
-                                @Override
-                                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                                    super.afterHookedMethod(param);
-                                    Object thisObject = param.thisObject;
-                                    String str = (String) param.args[1];
-                                    log("com.alibaba.wireless.security.open.securesignature.ISecureSignatureComponent >> " + thisObject +", str = " + str);
-                                }
-                            });
-                }
+//            });
+//        }
 
-            }
-        });
 
 //        Class<?> contextImplCls = XposedHelpers.findClassIfExists("android.app.ContextImpl", lpparam.classLoader);
 //        if (contextImplCls == null){
@@ -239,6 +192,8 @@ public class AHook implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 //        }catch (Exception e){
 //            e.printStackTrace();
 //        }
+
+
     }
 
     private void hookApplication(XC_LoadPackage.LoadPackageParam lpparam){
@@ -251,14 +206,28 @@ public class AHook implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         try{
             Method onCreate = XposedHelpers.findMethodExactIfExists(cls, "onCreate");
-            log("findAndHookMethod onCreate = " + onCreate);
+            log("findAndHookMethod Application#onCreate = " + onCreate);
             XposedHelpers.findAndHookMethod(
                     cls,
                     "onCreate",
                     new XC_MethodHook() {
                         @Override
                         protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-
+                            log("afterHookedMethod >>"+ param.thisObject + ", onCreate");
+                            Class<?> cls = XposedHelpers.findClassIfExists("com.common.busi.CustomView", lpparam.classLoader);
+                            if (cls == null){
+                                log("未找到com.common.busi.CustomView类");
+                                return;
+                            }
+                            log("找到了com.common.busi.CustomView类");
+                            XposedHelpers.findAndHookMethod(cls, "fixit", Object.class, String.class, String.class, int.class, String.class, String.class,
+                                    String.class, int.class, int.class, new XC_MethodHook() {
+                                        @Override
+                                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                                            super.beforeHookedMethod(param);
+                                            log(">> 打印CustomView的堆栈 = " + Log.getStackTraceString(new Throwable()));
+                                        }
+                                    });
                         }
                     }
             );

@@ -10,24 +10,44 @@ import java.lang.reflect.Modifier;
 
 public class Reflection {
 
-    private Method forNameMethod;
+    private static Method forNameMethod;
 
-    private Method getDeclaredConstructor;
+    private static Method getDeclaredConstructor;
 
-    private Method getDeclaredField;
+    private static Method getDeclaredField;
 
-    private Method getDeclaredMethod;
+    private static Method getDeclaredMethod;
 
     private Class<?> internalClass;
 
     private Object internalObj;
 
-    public Reflection(){
+    static {
         try {
             forNameMethod = Class.class.getDeclaredMethod("forName", String.class);
             getDeclaredConstructor = Class.class.getDeclaredMethod("getDeclaredConstructor", Class[].class);
             getDeclaredField = Class.class.getDeclaredMethod("getDeclaredField", String.class);
             getDeclaredMethod = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+    public Reflection(){
+        try {
+            if (forNameMethod == null){
+                forNameMethod = Class.class.getDeclaredMethod("forName", String.class);
+            }
+            if (getDeclaredConstructor == null){
+                getDeclaredConstructor = Class.class.getDeclaredMethod("getDeclaredConstructor", Class[].class);
+            }
+            if (getDeclaredField == null){
+                getDeclaredField = Class.class.getDeclaredMethod("getDeclaredField", String.class);
+            }
+            if (getDeclaredMethod == null){
+                getDeclaredMethod = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
