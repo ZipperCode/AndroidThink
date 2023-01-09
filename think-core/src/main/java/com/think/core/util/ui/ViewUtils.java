@@ -1,4 +1,4 @@
-package com.think.core.util;
+package com.think.core.util.ui;
 
 import android.text.InputFilter;
 import android.text.Spanned;

@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -23,6 +24,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Timer;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
@@ -51,6 +53,25 @@ public class AHook implements IXposedHookLoadPackage, IXposedHookZygoteInit {
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
         String packageName = lpparam.packageName;
         log("handleLoadPackage ====> " + packageName);
+
+        XposedHelpers.findAndHookMethod(SystemClock.class, "uptimeMillis", new XC_MethodHook(){
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                long result = (long) param.getResult();
+                log("uptimeMillis >> result time = " + result + ", result time2 = " + (result * 2));
+                param.setResult(result * 2);
+            }
+        });
+        System.currentTimeMillis();
+        XposedHelpers.findAndHookMethod(System.class, "currentTimeMillis", new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                long result = (long) param.getResult();
+                log("currentTimeMillis >> result time = " + result + ", result time2 = " + (result * 2));
+                param.setResult(result * 2);
+            }
+        });
+
 //        System.out.println("AHook >> handleLoadPackage ====> " + packageName);
 
 //        for (int i = 0; i < pks.length; i++) {

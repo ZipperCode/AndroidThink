@@ -22,8 +22,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.think.core.R;
-import com.think.core.util.ScreenUtils;
-import com.think.core.util.ToastHelper;
+import com.think.core.util.ui.ScreenUtils;
+import com.think.core.util.ui.ToastHelper;
 
 import java.lang.ref.WeakReference;
 

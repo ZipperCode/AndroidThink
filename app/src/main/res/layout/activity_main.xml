@@ -13,7 +13,7 @@
         android:layout_height="50dp"
         android:background="#03A9F4" />
 
-    <TextView
+    <com.think.demo.TestTextView
         android:id="@+id/textView"
         android:layout_width="320dp"
         android:layout_height="50dp"

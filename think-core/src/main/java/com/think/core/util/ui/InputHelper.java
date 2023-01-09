@@ -1,10 +1,12 @@
-package com.think.core.util;
+package com.think.core.util.ui;
 
 import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
+
+import com.think.core.util.ThreadManager;
 
 public class InputHelper {
 

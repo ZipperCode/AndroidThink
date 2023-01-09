@@ -1,4 +1,4 @@
-package com.think.core.util;
+package com.think.core.util.ui;
 
 import android.app.Activity;
 import android.app.Application;

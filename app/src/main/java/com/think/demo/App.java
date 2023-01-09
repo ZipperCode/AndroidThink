@@ -18,10 +18,12 @@ public class App extends Application {
 
     private static final String TAG = App.class.getSimpleName();
 
+    public static Context context;
 
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+        context = this;
     }
 
     @Override

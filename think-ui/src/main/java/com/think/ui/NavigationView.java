@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.think.core.util.LogUtils;
-import com.think.core.util.ScreenUtils;
+import com.think.core.util.ui.ScreenUtils;
 
 /**
  * 组合导航栏View

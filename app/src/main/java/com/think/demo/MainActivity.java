@@ -12,6 +12,9 @@ import android.graphics.Path;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 //        //去除状态栏
 ////        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 ////                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_main);
 //        System.out.println(BarUtils.getNavigationBarHeight(this));
 //        System.out.println(BarUtils.getStatusBarHeight(this));

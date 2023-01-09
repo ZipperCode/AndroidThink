@@ -1,34 +1,34 @@
 package com.think.core.mvp.base;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.OnLifecycleEvent;
+
 import java.lang.ref.WeakReference;
 
-public abstract class BasePresenter<M extends BaseContract.IModel, V extends BaseContract.IView>
-        implements BaseContract.IPresenter<M,V> {
-    private M model;
-    private WeakReference<V> viewReference; //弱引用防止内存泄露
+public class BasePresenter <V extends IView> implements LifecycleObserver {
 
-    @Override
-    public void registerModel(M model) {
-        this.model = model;
+    private WeakReference<V> mViewReference;
+
+    public void attachView(V view) {
+        this.mViewReference = new WeakReference<>(view);
+        view.getLifecycle().addObserver(this);
     }
 
-    @Override
-    public void registerView(V view) {
-        viewReference = new WeakReference<V>(view);
+    public V getView() {
+        return mViewReference == null ? null : mViewReference.get();
     }
 
-    public V getView(){
-        return viewReference.get();
-    }
-
-    public M getModel(){
-        return model;
-    }
-
-    @Override
-    public void onDestroy() {
-        if(viewReference != null){
-            viewReference.clear();
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    protected void onDestroy() {
+        V view = getView();
+        if (view != null) {
+            view.getLifecycle().removeObserver(this);
+        }
+        if (this.mViewReference != null){
+            this.mViewReference.clear();
+            this.mViewReference = null;
         }
     }
 }

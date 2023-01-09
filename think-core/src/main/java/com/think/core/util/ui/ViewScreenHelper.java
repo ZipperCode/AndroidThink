@@ -1,13 +1,12 @@
-package com.think.core.util;
+package com.think.core.util.ui;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+
+import com.think.core.util.BarUtils;
 
 public class ViewScreenHelper extends BroadcastReceiver {
 

@@ -1,4 +1,4 @@
-package com.think.core.util;
+package com.think.core.util.device;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -10,6 +10,8 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import androidx.annotation.RequiresPermission;
+
+import com.think.core.util.ReflectUtils;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;

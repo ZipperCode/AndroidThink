@@ -15,7 +15,7 @@ import android.util.AttributeSet;
 
 import androidx.appcompat.widget.AppCompatImageView;
 
-import com.think.core.util.ScreenUtils;
+import com.think.core.util.ui.ScreenUtils;
 
 /**
  * 圆形的ImageView

@@ -1,10 +1,12 @@
-package com.think.core.util;
+package com.think.core.util.ui;
 
 import android.app.Application;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.think.core.util.ThreadManager;
 
 /**
  * Toast 封装类

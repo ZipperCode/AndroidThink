@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.RelativeLayout;
 
-import com.think.core.util.ScreenUtils;
+import com.think.core.util.ui.ScreenUtils;
 
 public class FloatView extends RelativeLayout {
 

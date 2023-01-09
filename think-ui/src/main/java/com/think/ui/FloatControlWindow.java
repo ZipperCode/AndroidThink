@@ -1,6 +1,5 @@
 package com.think.ui;
 
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -22,10 +21,9 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.RelativeLayout;
 
-import com.think.core.util.ScreenUtils;
+import com.think.core.util.ui.ScreenUtils;
 
 
 public class FloatControlWindow extends RelativeLayout {

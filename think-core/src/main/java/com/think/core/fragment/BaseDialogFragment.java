@@ -22,8 +22,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.think.core.R;
-import com.think.core.util.ScreenUtils;
-import com.think.core.util.ToastHelper;
+import com.think.core.util.ui.ScreenUtils;
+import com.think.core.util.ui.ToastHelper;
 
 import java.lang.ref.WeakReference;
 

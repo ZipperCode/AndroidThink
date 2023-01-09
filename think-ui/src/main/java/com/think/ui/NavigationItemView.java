@@ -21,7 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.think.core.util.LogUtils;
-import com.think.core.util.ScreenUtils;
+import com.think.core.util.ui.ScreenUtils;
 
 public class NavigationItemView extends LinearLayout implements View.OnClickListener {
 

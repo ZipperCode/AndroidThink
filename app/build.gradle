@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 //apply plugin: 'com.think.plugin.asm'
 
 android {
@@ -32,11 +33,20 @@ android {
             jniLibs.srcDirs = ["libs"]
         }
     }
+
+        compileOptions {
+            sourceCompatibility 1.8
+            targetCompatibility 1.8
+        }
+
 }
 
 //catchMethodExtension{
 //    enable = true
 //}
+kapt {
+    correctErrorTypes = true
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -47,8 +57,13 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
+    implementation project(path: ':gradle-plugin:apt-annotation')
+    kapt project(':gradle-plugin:apt-processor')
 //    implementation project(":think-study")
 //    implementation project(":think-vpn")
 //    implementation project(":think-ui")
 //    implementation project(":think-core")
+}
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
 }

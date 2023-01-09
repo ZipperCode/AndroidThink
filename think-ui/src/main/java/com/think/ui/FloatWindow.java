@@ -25,7 +25,7 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.RelativeLayout;
 
-import com.think.core.util.ScreenUtils;
+import com.think.core.util.ui.ScreenUtils;
 
 
 public class FloatWindow extends RelativeLayout {

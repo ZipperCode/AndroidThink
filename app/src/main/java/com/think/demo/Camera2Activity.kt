@@ -69,21 +69,21 @@ class Camera2Activity : AppCompatActivity() {
     private var handler: Handler? = null
 
     private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
-        override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
+        override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
             // Texture 可用时回调
             initCamera()
         }
 
-        override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
+        override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
             // Texture 销毁时回调
             return false
         }
 
-        override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
+        override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
             // Texture 大小改变时回调
         }
 
-        override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
+        override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {
             // Texture 更新时回调
         }
     }
@@ -200,7 +200,7 @@ class Camera2Activity : AppCompatActivity() {
             }
 
             val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-            map.getOutputSizes(SurfaceTexture::class.java)
+            map?.getOutputSizes(SurfaceTexture::class.java)
         }
 
         openCamera()
@@ -279,24 +279,24 @@ class Camera2Activity : AppCompatActivity() {
         cameraCaptureSession = null
     }
 
-    private fun getOptimalSize(sizeMap: Array<Size>, width: Int, height: Int): Size? {
-        val list = ArrayList<Size>();
-        val screenSize = Rect(0, width, 0, height);
-
-        for (size in sizeMap) {
-            val rect = Rect().apply {
-                this.left = 0
-                this.right = size.width
-                this.top = 0
-                this.bottom = size.height
-            }
-            if (screenSize.contains(rect)) {
-                list.add(size);
-            }
-        }
-
-        return if (list.isEmpty()) Size(width, height) else list.maxBy { it.width * it.height }
-    }
+//    private fun getOptimalSize(sizeMap: Array<Size>, width: Int, height: Int): Size? {
+//        val list = ArrayList<Size>();
+//        val screenSize = Rect(0, width, 0, height);
+//
+//        for (size in sizeMap) {
+//            val rect = Rect().apply {
+//                this.left = 0
+//                this.right = size.width
+//                this.top = 0
+//                this.bottom = size.height
+//            }
+//            if (screenSize.contains(rect)) {
+//                list.add(size);
+//            }
+//        }
+//
+//        return if (list.isEmpty()) Size(width, height) else list.maxBy { it.width * it.height }
+//    }
 
     private fun hasCameraPermission(): Boolean {
         return (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
