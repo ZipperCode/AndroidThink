@@ -2,4 +2,8 @@
 <resources>
     <item name="tag_type_view" type="id"/>
     <item name="toast_view_id" type="id"/>
+    <item name="state_layout_content_id" type="id"/>
+    <item name="state_layout_empty_id" type="id"/>
+    <item name="state_layout_loading_id" type="id"/>
+    <item name="state_layout_error_id" type="id"/>
 </resources>

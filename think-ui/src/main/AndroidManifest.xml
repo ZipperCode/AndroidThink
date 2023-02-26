@@ -1,22 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.think.ui">
+    package="com.think.ui" >
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
 
     <application>
-        <activity android:name=".MainActivity">
-
+        <activity
+            android:name=".state.StateLayoutCustomViewActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".draw.SvgActivity">
+        <activity
+            android:name=".state.StateLayoutActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat" >
 
         </activity>
+        <activity android:name=".MainActivity" >
+        </activity>
+        <activity android:name=".draw.SvgActivity" />
     </application>
 
 </manifest>

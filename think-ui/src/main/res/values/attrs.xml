@@ -71,4 +71,11 @@
         <attr name="child_normal_style" format="reference"/>
 
     </declare-styleable>
+
+    <declare-styleable name="StateLayout">
+        <attr name="state_layout_content_ref" format="reference"/>
+        <attr name="state_layout_loading_ref" format="reference"/>
+        <attr name="state_layout_empty_ref" format="reference"/>
+        <attr name="state_layout_error_ref" format="reference"/>
+    </declare-styleable>
 </resources>
